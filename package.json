@@ -1,0 +1,21 @@
+{
+  "name": "Elytro",
+  "version": "0.0.1",
+  "description": "Elytro",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky && husky install",
+    "lint": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "husky": "^8.0.0",
+    "lerna": "^8.1.8",
+    "prettier": "^3.3.3"
+  }
+}
