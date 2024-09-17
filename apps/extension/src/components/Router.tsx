@@ -1,7 +1,7 @@
-import React from "react";
-import { Router as WouterRouter, Route, Switch } from "wouter";
-import { useHashLocation } from "../hooks/useHashLocation";
-import { RouteConfig } from "../types/route";
+import React from 'react';
+import { Router as WouterRouter, Route, Switch } from 'wouter';
+import { useHashLocation } from 'wouter/use-hash-location';
+import { RouteConfig } from '../types/route';
 
 interface RouterProps {
   routes: RouteConfig[];

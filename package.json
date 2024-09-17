@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky && husky install",
-    "lint": "prettier --write ."
+    "prepare": "husky install",
+    "lint-staged": "lint-staged",
+    "format": "prettier --write .",
+    "commitlint": "commitlint --edit"
   },
   "keywords": [],
   "author": "",
@@ -14,8 +16,14 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
-    "husky": "^8.0.0",
     "lerna": "^8.1.8",
-    "prettier": "^3.3.3"
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "husky": "^8.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
   }
 }

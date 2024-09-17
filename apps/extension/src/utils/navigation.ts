@@ -1,19 +1,19 @@
 export const navigateTo = (
-  target: "popup" | "tab" | "options",
-  path: string,
+  target: 'popup' | 'tab' | 'options',
+  path: string
 ) => {
   switch (target) {
-    case "popup":
+    case 'popup':
       chrome.action.setPopup({
         popup: chrome.runtime.getURL(`popup.html#${path}`),
       });
       break;
-    case "tab":
+    case 'tab':
       chrome.tabs.create({
         url: chrome.runtime.getURL(`src/entries/tab/index.html#${path}`),
       });
       break;
-    case "options":
+    case 'options':
       chrome.runtime.openOptionsPage();
       break;
   }
