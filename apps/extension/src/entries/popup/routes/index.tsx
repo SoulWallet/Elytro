@@ -1,11 +1,19 @@
-import { RouteConfig } from "@/types/route";
-import Home from "../pages/Home";
-import Settings from "../pages/Settings";
+import { TRoute } from '@/types/route';
+import Settings from '../pages/Settings';
+import Home from '../pages/Home';
 
-const routes: RouteConfig[] = [
-  { path: "/", component: Home, exact: true },
-  { path: "/home", component: Home },
-  { path: "/settings", component: Settings },
+export const POPUP_ROUTE_PATHS = {
+  Home: '/',
+  Settings: '/settings',
+};
+
+export const routes: TRoute[] = [
+  {
+    path: POPUP_ROUTE_PATHS.Home,
+    component: Home,
+  },
+  {
+    path: POPUP_ROUTE_PATHS.Settings,
+    component: Settings,
+  },
 ];
-
-export default routes;

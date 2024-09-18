@@ -1,14 +1,14 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import Router from "@/components/Router";
-import routes from "./routes";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import HashRouter from '@/components/HashRouter';
+import { routes } from './routes';
 
 const PopupApp: React.FC = () => {
-  return <Router routes={routes} />;
+  return <HashRouter routes={routes} />;
 };
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <PopupApp />
-  </React.StrictMode>,
+  </React.StrictMode>
 );

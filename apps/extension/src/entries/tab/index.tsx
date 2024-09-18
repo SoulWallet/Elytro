@@ -1,11 +1,14 @@
-import Router from "@/components/Router";
-import React from "react";
-import routes from "./routes";
-import { createRoot } from "react-dom/client";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import routes from './routes';
+import HashRouter from '@/components/HashRouter';
 
 const TabApp: React.FC = () => {
-  return <div>Tab</div>;
+  return <HashRouter routes={routes} />;
 };
 
-const root = createRoot(document.getElementById("root") as HTMLElement);
-root.render(<TabApp />);
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <TabApp />
+  </React.StrictMode>
+);

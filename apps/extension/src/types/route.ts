@@ -1,7 +1,13 @@
-import { ReactElement } from "react";
+import { ComponentType } from 'react';
+import { PathPattern, RegexRouteParams, RouteComponentProps } from 'wouter';
 
-export interface RouteConfig {
-  path: string;
-  component: React.ComponentType<any>;
-  exact?: boolean;
-}
+export type TRoute = {
+  path?: PathPattern;
+  component?:
+    | ComponentType<
+        RouteComponentProps<
+          RegexRouteParams | { [param: number]: string | undefined }
+        >
+      >
+    | undefined;
+};
