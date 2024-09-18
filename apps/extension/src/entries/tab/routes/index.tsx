@@ -5,7 +5,7 @@ import Create from '../pages/Create';
 export const TAB_ROUTE_PATHS = {
   Launch: '/launch',
   Create: '/create',
-};
+} as const;
 
 export const routes: TRoute[] = [
   { path: TAB_ROUTE_PATHS.Launch, component: Launch },

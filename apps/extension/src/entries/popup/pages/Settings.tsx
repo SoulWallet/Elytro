@@ -1,11 +1,12 @@
-import { navigateTo } from "@/utils/navigation";
-import React from "react";
+import { TAB_ROUTE_PATHS } from '@/entries/tab/routes';
+import { navigateTo } from '@/utils/navigation';
+import React from 'react';
 
 const Settings: React.FC = () => {
   return (
     <div
       onClick={() => {
-        navigateTo("tab", "create");
+        navigateTo('tab', TAB_ROUTE_PATHS.Create);
       }}
     >
       Settings

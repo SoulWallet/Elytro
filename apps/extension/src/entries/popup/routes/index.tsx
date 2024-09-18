@@ -5,7 +5,7 @@ import Home from '../pages/Home';
 export const POPUP_ROUTE_PATHS = {
   Home: '/',
   Settings: '/settings',
-};
+} as const;
 
 export const routes: TRoute[] = [
   {
