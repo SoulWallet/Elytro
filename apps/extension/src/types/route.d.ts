@@ -1,7 +1,7 @@
 import { ComponentType } from 'react';
 import { PathPattern, RegexRouteParams, RouteComponentProps } from 'wouter';
 
-export type TRoute = {
+type TRoute = {
   path?: PathPattern;
   component?:
     | ComponentType<

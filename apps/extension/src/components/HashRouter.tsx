@@ -11,9 +11,9 @@ function HashRouter({ routes }: HashRouterProps) {
   return (
     <Router hook={useHashLocation}>
       <Switch>
-        {routes.map(({ path, component }) => {
-          return <Route path={path} component={component} />;
-        })}
+        {routes.map(({ path, component }) => (
+          <Route key={path as string} path={path} component={component} />
+        ))}
       </Switch>
     </Router>
   );

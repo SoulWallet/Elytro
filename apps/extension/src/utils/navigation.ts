@@ -9,7 +9,7 @@ export function navigateTo(target: 'popup', path: PopupRoutePath): void;
 export function navigateTo(target: 'tab', path: TabRoutePath): void;
 
 export function navigateTo(
-  target: 'popup' | 'tab', //| 'options',
+  target: 'popup' | 'tab', //| 'options' | 'notification',
   path?: PopupRoutePath | TabRoutePath
 ) {
   switch (target) {
@@ -27,6 +27,14 @@ export function navigateTo(
       throw new Error('Invalid target');
     // case 'options':
     //   chrome.runtime.openOptionsPage();
+    //   break;
+    // case 'notification':
+    //   chrome.notifications.create({
+    //     type: 'basic',
+    //     title: 'Elytro',
+    //     message: 'Elytro is running',
+    //     iconUrl: chrome.runtime.getURL('icon.png'),
+    //   });
     //   break;
   }
   // 通知目标页面更新路由

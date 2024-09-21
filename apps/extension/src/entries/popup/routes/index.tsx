@@ -1,6 +1,6 @@
-import { TRoute } from '@/types/route';
 import Settings from '../pages/Settings';
 import Home from '../pages/Home';
+import { TRoute } from '@/types/route';
 
 export const POPUP_ROUTE_PATHS = {
   Home: '/',
