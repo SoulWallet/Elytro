@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@apollo/client': ^3.11.8
-  '@crxjs/vite-plugin': ^1.0.14
+  '@crxjs/vite-plugin': 2.0.0-beta.25
   '@eslint/js': ^9.9.0
   '@radix-ui/react-slot': ^1.1.0
   '@types/chrome': ^0.0.270
@@ -51,7 +51,7 @@ dependencies:
   zustand: 4.5.5_vhfblam3newwcpiwkw3tsgpmum
 
 devDependencies:
-  '@crxjs/vite-plugin': 1.0.14_vite@5.4.5
+  '@crxjs/vite-plugin': 2.0.0-beta.25
   '@eslint/js': 9.10.0
   '@types/chrome': 0.0.270
   '@types/node': 22.5.4
@@ -315,17 +315,15 @@ packages:
       to-fast-properties: 2.0.0
     dev: true
 
-  /@crxjs/vite-plugin/1.0.14_vite@5.4.5:
-    resolution: {integrity: sha512-emOueVCqFRFmpcfT80Xsm4mfuFw9VSp5GY4eh5qeLDeiP81g0hddlobVQCo0pE2ZvNnWbyhLrXEYAaMAXjNL6A==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      vite: ^2.9.0
+  /@crxjs/vite-plugin/2.0.0-beta.25:
+    resolution: {integrity: sha512-g5ytTNiFpFCi+T0trSDJLohVz5PufLBLh6OGljyGTHkQCKiApuEgZ1bAjgPXluMDhMUvbPfZT10LYl5ROefXog==}
     dependencies:
       '@rollup/pluginutils': 4.2.1
       '@webcomponents/custom-elements': 1.6.0
       acorn-walk: 8.3.4
       cheerio: 1.0.0
       connect-injector: 0.4.4
+      convert-source-map: 1.9.0
       debug: 4.3.7
       es-module-lexer: 0.10.5
       fast-glob: 3.3.2
@@ -335,9 +333,7 @@ packages:
       picocolors: 1.1.0
       react-refresh: 0.13.0
       rollup: 2.78.1
-      vite: 5.4.5_@types+node@22.5.4
-    optionalDependencies:
-      '@vitejs/plugin-react': 4.3.1_vite@5.4.5
+      rxjs: 7.5.7
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1417,6 +1413,10 @@ packages:
       uberproto: 1.2.0
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /convert-source-map/1.9.0:
+    resolution: {integrity: sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A==}
     dev: true
 
   /convert-source-map/2.0.0:
@@ -2524,6 +2524,12 @@ packages:
     dependencies:
       queue-microtask: 1.2.3
 
+  /rxjs/7.5.7:
+    resolution: {integrity: sha512-z9MzKh/UcOqB3i20H6rtrlaE/CgjLOvheWK/9ILrbhROGTweAi1BaFsTT9FbwZi5Trr1qNRs+MXkhmR06awzQA==}
+    dependencies:
+      tslib: 2.7.0
+    dev: true
+
   /safer-buffer/2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
     dev: true
@@ -2741,7 +2747,6 @@ packages:
 
   /tslib/2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
-    dev: false
 
   /type-check/0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}

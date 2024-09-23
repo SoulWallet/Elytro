@@ -46,19 +46,26 @@ const syncStorage: StorageOperations = {
     localStorage.get // if sync storage get failed, try local storage
   ),
 
-  remove: withErrorHandling((key: string): void => {
-    chrome.storage.sync.remove(key, () => {
-      if (chrome.runtime.lastError) {
-        throw chrome.runtime.lastError;
-      }
+  remove: withErrorHandling(async (key: string): Promise<void> => {
+    await new Promise((resolve) => {
+      chrome.storage.sync.remove(key, () => {
+        if (chrome.runtime.lastError) {
+          throw chrome.runtime.lastError;
+        }
+        resolve(void 0);
+      });
     });
   }),
 
-  clear: withErrorHandling((): void => {
-    chrome.storage.sync.clear(() => {
-      if (chrome.runtime.lastError) {
-        throw chrome.runtime.lastError;
-      }
+  clear: withErrorHandling(async (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      chrome.storage.sync.clear(() => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve();
+        }
+      });
     });
   }),
 };

@@ -5,13 +5,25 @@ import manifest from './public/manifest.json';
 import { resolve } from 'path';
 
 export default defineConfig({
-  plugins: [react(), crx({ manifest })],
+  plugins: [
+    react(),
+    crx({ manifest }),
+
+    {
+      name: 'check-manifest',
+      writeBundle: () => {
+        console.log('Bundle 已生成，检查 manifest 文件...');
+      },
+    },
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
     },
   },
   build: {
+    manifest: true,
+    outDir: 'dist',
     rollupOptions: {
       input: {
         popup: resolve(__dirname, 'src/entries/popup/index.html'),
