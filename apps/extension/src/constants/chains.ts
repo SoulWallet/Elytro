@@ -1,5 +1,5 @@
 /**
- * Data from https://www.publicnode.com/
+ * Data from https://www.publicnode.com/ | https://github.com/ethereum-lists/chains
  */
 
 // Ethereum Mainnet
