@@ -3,10 +3,10 @@
   "name": "Elytro Wallet Extension",
   "version": "0.0.1",
   "description": "Elytro Wallet Extension",
-  "action": {
-    "default_popup": "src/entries/popup/index.html"
+  "side_panel": {
+    "default_path": "src/entries/popup/index.html"
   },
-  "permissions": ["activeTab", "storage", "tabs"],
+  "permissions": ["storage", "sidePanel"],
   "web_accessible_resources": [
     {
       "matches": ["<all_urls>"],
@@ -18,8 +18,10 @@
   },
   "content_scripts": [
     {
+      "id": "ethereum",
+      "run_at": "document_start",
       "matches": ["<all_urls>"],
-      "js": ["src/content/index.ts"]
+      "js": ["src/content/index.tsx"]
     }
   ]
 }

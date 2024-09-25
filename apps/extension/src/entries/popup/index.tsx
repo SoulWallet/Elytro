@@ -4,7 +4,7 @@ import HashRouter from '@/components/HashRouter';
 import { routes } from './routes';
 import PageContainer from '@/components/PageContainer';
 
-const PopupApp: React.FC = () => (
+export const PopupApp: React.FC = () => (
   <PageContainer>
     <HashRouter routes={routes} />
   </PageContainer>

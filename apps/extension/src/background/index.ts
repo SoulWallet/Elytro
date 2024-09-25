@@ -20,3 +20,8 @@ chrome.runtime.onInstalled.addListener((details) => {
       break;
   }
 });
+
+// click the icon to toggle the side panel
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
