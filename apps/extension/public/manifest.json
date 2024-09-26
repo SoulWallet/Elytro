@@ -6,7 +6,7 @@
   "side_panel": {
     "default_path": "src/entries/popup/index.html"
   },
-  "permissions": ["storage", "sidePanel", "scripting"],
+  "permissions": ["alarms", "notifications", "sidePanel", "storage", "tabs"],
   "web_accessible_resources": [
     {
       "matches": ["<all_urls>"],
@@ -21,7 +21,7 @@
       "id": "ethereum",
       "run_at": "document_start",
       "matches": ["<all_urls>"],
-      "js": ["src/content/index.tsx"]
+      "js": ["src/content/index.ts"]
     }
   ]
 }
