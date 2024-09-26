@@ -1,14 +1,13 @@
 import { mainnet } from '@wagmi/core/chains';
 import { createPublicClient, http } from 'viem';
 
+console.log('content script');
+
 function onPageLoad() {
   const publicClient = createPublicClient({
     chain: mainnet,
     transport: http(),
   });
-  const provider = new Proxy(publicClient, {});
-  console.log(provider);
-  (window as any).ethereum = provider;
   function announceProvider() {
     const info = {
       uuid: '350670db-19fa-4704-a166-e52e178b59d2',
@@ -18,7 +17,7 @@ function onPageLoad() {
     };
     window.dispatchEvent(
       new CustomEvent('eip6963:announceProvider', {
-        detail: Object.freeze({ info, provider }),
+        detail: Object.freeze({ info, provider: new Proxy(publicClient, {}) }),
       })
     );
   }

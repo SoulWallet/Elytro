@@ -1,50 +1,46 @@
 {
-  "name": "extension",
-  "private": true,
-  "version": "0.0.0",
+  "name": "",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "precommit": "lint-staged"
+  "license": "AGPL-version-3.0",
+  "private": false,
+  "engines": {
+    "node": ">= 14.0.0",
+    "npm": ">= 6.0.0"
   },
-  "dependencies": {
-    "@apollo/client": "^3.11.8",
-    "@radix-ui/react-slot": "^1.1.0",
-    "@wagmi/core": "^2.13.7",
-    "@walletconnect/ethereum-provider": "^2.16.2",
-    "autoprefixer": "^10.4.20",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "ethers": "^5.0.0",
-    "graphql": "^16.9.0",
-    "lucide-react": "^0.441.0",
-    "postcss": "^8.4.45",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.5.2",
-    "tailwindcss": "^3.4.11",
-    "tailwindcss-animate": "^1.0.7",
-    "viem": "^2.21.10",
-    "wouter": "^3.3.5",
-    "zustand": "^4.5.5"
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "bugs": "",
+  "keywords": [],
+  "author": {
+    "name": "",
+    "email": "",
+    "url": ""
+  },
+  "contributors": [],
+  "scripts": {
+    "dev": "",
+    "test": "",
+    "build": "webpack --config webpack.config.js"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "2.0.0-beta.25",
-    "@eslint/js": "^9.9.0",
-    "@types/chrome": "^0.0.270",
-    "@types/node": "^22.5.4",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "eslint": "^9.9.0",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.9",
-    "globals": "^15.9.0",
-    "typescript": "^5.5.3",
-    "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
+    "babel-loader": "^9.2.1",
+    "copy-webpack-plugin": "^12.0.2",
+    "html-webpack-plugin": "^5.6.0",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@wagmi/core": "^2.13.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "viem": "^2.21.15"
   }
 }

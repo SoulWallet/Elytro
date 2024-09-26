@@ -1,3 +1,0 @@
-# Elytro Wallet Extension
-
-## Development

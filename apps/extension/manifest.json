@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "React Chrome Extension",
+  "version": "1.0.0",
+  "description": "A simple React app as a Chrome extension",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Click to open panel"
+  },
+  "permissions": ["sidePanel"],
+  "side_panel": {
+    "default_path": "./index.html"
+  },
+  "content_scripts": [
+    {
+      "id": "ethereum",
+      "run_at": "document_start",
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"],
+      "world": "MAIN"
+    }
+  ]
+}
