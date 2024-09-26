@@ -5,17 +5,7 @@ import manifest from './public/manifest.json';
 import { resolve } from 'path';
 
 export default defineConfig({
-  plugins: [
-    react(),
-    crx({ manifest }),
-
-    {
-      name: 'check-manifest',
-      writeBundle: () => {
-        console.log('Bundle 已生成，检查 manifest 文件...');
-      },
-    },
-  ],
+  plugins: [react(), crx({ manifest })],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
