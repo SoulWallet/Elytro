@@ -1,26 +1,30 @@
 console.log('Content script loaded');
 
-import { createPublicClient, http } from 'viem';
-import { mainnet } from 'viem/chains';
+import { mainnet } from '@wagmi/core/chains';
+import { ethers } from 'ethers';
+
+class Provider {
+  request = () => {};
+  sendAsync = () => {};
+  send = () => {};
+}
 
 function announce() {
-  const publicClient = createPublicClient({
-    chain: mainnet,
-    transport: http(),
-  });
-
   const info = {
-    uuid: '350670db-19fa-4704-a166-e52e178b59d2',
-    name: 'soulwallet',
+    uuid: 'uuidddd',
+    name: 'elytro',
     icon: 'asdasd',
     rdns: 'com.example.wallet',
   };
+
+  const provider = new Provider();
+  console.log(provider);
+
   const detail = Object.freeze({
     info,
-    provider: publicClient,
+    provider: provider,
   });
   const event = new CustomEvent('eip6963:announceProvider', { detail });
-  console.log(event);
   window.dispatchEvent(event);
 }
 

@@ -13,10 +13,12 @@
   "dependencies": {
     "@apollo/client": "^3.11.8",
     "@radix-ui/react-slot": "^1.1.0",
+    "@wagmi/core": "^2.13.7",
     "@walletconnect/ethereum-provider": "^2.16.2",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "ethers": "^5.0.0",
     "graphql": "^16.9.0",
     "lucide-react": "^0.441.0",
     "postcss": "^8.4.45",

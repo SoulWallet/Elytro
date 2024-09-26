@@ -6,7 +6,7 @@
   "side_panel": {
     "default_path": "src/entries/popup/index.html"
   },
-  "permissions": ["storage", "sidePanel"],
+  "permissions": ["storage", "sidePanel", "scripting"],
   "web_accessible_resources": [
     {
       "matches": ["<all_urls>"],
