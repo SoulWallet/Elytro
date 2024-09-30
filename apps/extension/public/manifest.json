@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Elytro Wallet Extension",
+  "name": "Elytro",
   "version": "0.0.1",
   "description": "Elytro Wallet Extension",
-  "action": {
-    "default_popup": "src/entries/popup/index.html"
+  "side_panel": {
+    "default_path": "src/entries/side-panel/index.html"
   },
-  "permissions": ["activeTab", "storage", "tabs"],
+  "permissions": ["activeTab", "storage", "tabs", "sidePanel"],
   "web_accessible_resources": [
     {
       "matches": ["<all_urls>"],

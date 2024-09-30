@@ -15,7 +15,7 @@ const localStorage: StorageOperations = {
   get: async <T>(key: string): Promise<T | undefined> => {
     try {
       const result = await chrome.storage.local.get(key);
-      return result[key] as T | undefined;
+      return (result?.[key] || result) as T;
     } catch (error) {
       throw new Error(`Elytro::LocalStorage::get: ${(error as Error).message}`);
     }

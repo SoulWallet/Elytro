@@ -1,21 +1,33 @@
-import { POPUP_ROUTE_PATHS } from '@/entries/popup/routes';
+import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 import { TAB_ROUTE_PATHS } from '@/entries/tab/routes';
 
-type PopupRoutePath =
-  (typeof POPUP_ROUTE_PATHS)[keyof typeof POPUP_ROUTE_PATHS];
+type SidePanelRoutePath =
+  (typeof SIDE_PANEL_ROUTE_PATHS)[keyof typeof SIDE_PANEL_ROUTE_PATHS];
 type TabRoutePath = (typeof TAB_ROUTE_PATHS)[keyof typeof TAB_ROUTE_PATHS];
 
-export function navigateTo(target: 'popup', path: PopupRoutePath): void;
+export function navigateTo(target: 'popup', path: SidePanelRoutePath): void;
 export function navigateTo(target: 'tab', path: TabRoutePath): void;
+export function navigateTo(target: 'sidePanel', path: SidePanelRoutePath): void;
 
 export function navigateTo(
-  target: 'popup' | 'tab', //| 'options' | 'notification',
-  path?: PopupRoutePath | TabRoutePath
+  target: 'popup' | 'tab' | 'sidePanel', //| 'options' | 'notification',
+  path?: SidePanelRoutePath | TabRoutePath
 ) {
   switch (target) {
+    // TODO: remove popup. no need for it.
     case 'popup':
       chrome.action.setPopup({
         popup: chrome.runtime.getURL(`popup.html#${path}`),
+      });
+      break;
+    case 'sidePanel':
+      chrome.tabs.getCurrent().then((tab) => {
+        if (tab?.id || tab?.windowId) {
+          chrome.sidePanel.open({
+            tabId: tab.id,
+            windowId: tab.windowId,
+          });
+        }
       });
       break;
     case 'tab':

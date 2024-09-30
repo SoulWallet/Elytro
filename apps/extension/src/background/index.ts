@@ -1,4 +1,4 @@
-console.log('Elytro: Background script loaded');
+import keyring from '@/services/keyring';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -20,3 +20,10 @@ chrome.runtime.onInstalled.addListener((details) => {
       break;
   }
 });
+
+function init() {
+  // restore keyring state from local storage
+  keyring.restore();
+}
+
+init();

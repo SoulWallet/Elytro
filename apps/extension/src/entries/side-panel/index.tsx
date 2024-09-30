@@ -4,7 +4,7 @@ import HashRouter from '@/components/HashRouter';
 import { routes } from './routes';
 import PageContainer from '@/components/PageContainer';
 
-const PopupApp: React.FC = () => (
+const SidePanelApp: React.FC = () => (
   <PageContainer>
     <HashRouter routes={routes} />
   </PageContainer>
@@ -12,6 +12,6 @@ const PopupApp: React.FC = () => (
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <PopupApp />
+    <SidePanelApp />
   </React.StrictMode>
 );
