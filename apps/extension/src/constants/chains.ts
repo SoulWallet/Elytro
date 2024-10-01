@@ -2,6 +2,10 @@
  * Data from https://www.publicnode.com/ | https://github.com/ethereum-lists/chains
  */
 
+// TODO: use this temporarily. Replace to user config later.
+export const TEMP_RPC_URL =
+  'https://opt-sepolia.g.alchemy.com/v2/7EJnXZWkG9HIhjj0ZLx7vk_lexCq25Pr';
+
 // Ethereum Mainnet
 const ETHEREUM_RPC_URL = 'https://base-rpc.publicnode.com';
 const ETHEREUM_WS_RPC_URL = 'wss://ethereum-rpc.publicnode.com';

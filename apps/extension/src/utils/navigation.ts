@@ -1,5 +1,9 @@
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 import { TAB_ROUTE_PATHS } from '@/entries/tab/routes';
+import { navigate } from 'wouter/use-hash-location';
+
+// for now, we only support tab and side-panel
+const getCurrentType = () => location.pathname.split('/')[3];
 
 type SidePanelRoutePath =
   (typeof SIDE_PANEL_ROUTE_PATHS)[keyof typeof SIDE_PANEL_ROUTE_PATHS];
@@ -7,12 +11,23 @@ type TabRoutePath = (typeof TAB_ROUTE_PATHS)[keyof typeof TAB_ROUTE_PATHS];
 
 export function navigateTo(target: 'popup', path: SidePanelRoutePath): void;
 export function navigateTo(target: 'tab', path: TabRoutePath): void;
-export function navigateTo(target: 'sidePanel', path: SidePanelRoutePath): void;
+export function navigateTo(
+  target: 'side-panel',
+  path: SidePanelRoutePath
+): void;
 
 export function navigateTo(
-  target: 'popup' | 'tab' | 'sidePanel', //| 'options' | 'notification',
-  path?: SidePanelRoutePath | TabRoutePath
+  target: 'popup' | 'tab' | 'side-panel', //| 'options' | 'notification',
+  path: SidePanelRoutePath | TabRoutePath
 ) {
+  const inSameMode = getCurrentType() === target;
+
+  // if in same mode, just navigate in router
+  if (inSameMode) {
+    navigate(path);
+    return;
+  }
+
   switch (target) {
     // TODO: remove popup. no need for it.
     case 'popup':
@@ -20,7 +35,7 @@ export function navigateTo(
         popup: chrome.runtime.getURL(`popup.html#${path}`),
       });
       break;
-    case 'sidePanel':
+    case 'side-panel':
       chrome.tabs.getCurrent().then((tab) => {
         if (tab?.id || tab?.windowId) {
           chrome.sidePanel.open({

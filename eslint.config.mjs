@@ -12,6 +12,9 @@ export default [
       '**/node_modules/',
       '.git/',
       '.vscode/',
+      '**/src/components/ui/',
+      '**/src/hooks/use-toast.ts',
+      '**/src/services/walletClient.ts', // TODO: WIP. remove this ignore later.
     ],
   },
   { languageOptions: { globals: globals.browser } },

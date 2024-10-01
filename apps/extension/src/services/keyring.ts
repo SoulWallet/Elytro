@@ -128,6 +128,14 @@ class KeyringService {
 
     this._password = password;
   }
+
+  public async reset() {
+    this._store?.setState({});
+    this._owner = null;
+    this._password = null;
+    this._locked = true;
+    this._key = null;
+  }
 }
 
 export default new KeyringService();

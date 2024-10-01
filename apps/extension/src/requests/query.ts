@@ -1,4 +1,4 @@
-import { DocumentNode } from '@apollo/client';
+import { DocumentNode, gql } from '@apollo/client';
 import { client } from './client';
 
 // wrapped query function
@@ -17,3 +17,31 @@ export async function query<T>(
     throw error;
   }
 }
+
+export const query_simulated_op = gql`
+  query Simulate($chain: String!, $request: SimulateInput!) {
+    simulate(chain: $chain, request: $request) {
+      success
+      result {
+        status
+        gasUsed
+        cumulativeGasUsed
+        blockNumber
+        type
+        stateChanges {
+          address
+          balance {
+            previousValue
+            newValue
+          }
+          nonce {
+            newValue
+            previousValue
+          }
+        }
+        assetChanges
+        balanceChanges
+      }
+    }
+  }
+`;

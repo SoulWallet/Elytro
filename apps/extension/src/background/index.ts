@@ -24,6 +24,8 @@ chrome.runtime.onInstalled.addListener((details) => {
 function init() {
   // restore keyring state from local storage
   keyring.restore();
+
+  // sdkKeyring.initialize();
 }
 
 init();
