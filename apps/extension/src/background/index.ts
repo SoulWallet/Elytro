@@ -21,6 +21,11 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
+// allow side panel to open when clicking the extension icon
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
+
 function init() {
   // restore keyring state from local storage
   keyring.restore();

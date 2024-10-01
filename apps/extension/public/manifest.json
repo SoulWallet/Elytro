@@ -6,6 +6,9 @@
   "side_panel": {
     "default_path": "src/entries/side-panel/index.html"
   },
+  "action": {
+    "default_title": "Click to open panel"
+  },
   "permissions": ["activeTab", "storage", "tabs", "sidePanel"],
   "web_accessible_resources": [
     {
