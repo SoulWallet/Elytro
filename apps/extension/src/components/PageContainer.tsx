@@ -5,11 +5,12 @@ import { Toaster } from './ui/toaster';
 
 interface IPageContainerProps {
   children: React.ReactNode;
+  className?: string;
 }
 
-function PageContainer({ children }: IPageContainerProps) {
+function PageContainer({ children, className }: IPageContainerProps) {
   return (
-    <div className="w-screen h-screen">
+    <div className={`w-screen h-screen ${className}`}>
       <RequestProvider>{children}</RequestProvider>
       <Toaster />
     </div>

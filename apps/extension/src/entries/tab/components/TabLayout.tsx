@@ -7,7 +7,7 @@ interface TabLayoutProps {
 
 function TabLayout({ children, footer }: TabLayoutProps) {
   return (
-    <div className="w-full h-full bg-[#dcdcdc] flex flex-col items-center justify-center">
+    <div className="w-full h-full bg-elytro-background flex flex-col items-center justify-center">
       <header className="fixed top-4 left-4">Elytro</header>
       <main className="rounded-super p-6 bg-white ">{children}</main>
       {footer && (

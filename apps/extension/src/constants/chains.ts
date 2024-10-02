@@ -3,8 +3,7 @@
  */
 
 // TODO: use this temporarily. Replace to user config later.
-export const TEMP_RPC_URL =
-  'https://opt-sepolia.g.alchemy.com/v2/7EJnXZWkG9HIhjj0ZLx7vk_lexCq25Pr';
+export const TEMP_RPC_URL = 'https://optimism-rpc.publicnode.com'; // not working: 'https://opt-sepolia.g.alchemy.com/v2/7EJnXZWkG9HIhjj0ZLx7vk_lexCq25Pr';
 
 // Ethereum Mainnet
 const ETHEREUM_RPC_URL = 'https://base-rpc.publicnode.com';
@@ -43,4 +42,20 @@ export const ETHEREUM_CHAIN_CONFIG = {
       beacon: ETHEREUM_HOLESKY_BEACON_RPC_URL,
     },
   },
+};
+
+import { Chain, optimism } from 'viem/chains';
+
+export enum SupportedChainTypeEn {
+  OP = 'Optimism',
+}
+
+export const SUPPORTED_CHAIN_MAP: Record<SupportedChainTypeEn, Chain> = {
+  [SupportedChainTypeEn.OP]: optimism,
+};
+
+export const SUPPORTED_CHAIN_ICON_MAP: Record<SupportedChainTypeEn, string> = {
+  // TODO: temp use asset from coingecko, replace with ours assets later
+  [SupportedChainTypeEn.OP]:
+    'https://assets.coingecko.com/coins/images/25244/standard/Optimism.png',
 };

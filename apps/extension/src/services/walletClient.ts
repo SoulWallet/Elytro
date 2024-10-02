@@ -1,5 +1,9 @@
 import { ElytroBundler } from '@/constants/bundler';
-import { TEMP_RPC_URL } from '@/constants/chains';
+import {
+  SUPPORTED_CHAIN_MAP,
+  SupportedChainTypeEn,
+  TEMP_RPC_URL,
+} from '@/constants/chains';
 import {
   SDKFactory,
   SDKFallbackHandler,
@@ -29,25 +33,45 @@ import { mutate, query } from '@/requests';
 import { mutate_sponsor_op } from '@/requests/mutate';
 import { query_simulated_op } from '@/requests/query';
 import keyring from './keyring';
-import { mainnet } from 'viem/chains';
+import { UserOperationStatusEn } from '@/constants/operations';
 
 class WalletClient {
   private _bundler: Nullable<Bundler> = null;
   private _sdk: Nullable<SoulWallet> = null;
   private _address: Nullable<string> = null;
+  private _isActivated: boolean = false;
+  private _chainType: SupportedChainTypeEn = SupportedChainTypeEn.OP;
+
   private _jsonRpcClient = createPublicClient({
-    chain: mainnet,
-    transport: http('https://base-rpc.publicnode.com'),
+    chain: SUPPORTED_CHAIN_MAP[this._chainType],
+    transport: http(TEMP_RPC_URL),
   });
 
   constructor() {
-    this.initSDK();
-    this._bundler = new Bundler(ElytroBundler);
+    // default to OP
+    this.init(SupportedChainTypeEn.OP);
+  }
+
+  get chainType() {
+    return this._chainType;
+  }
+
+  get chain() {
+    return SUPPORTED_CHAIN_MAP[this._chainType];
+  }
+
+  // Elytro Wallet Address, not the eoa address
+  get address() {
+    return this._address;
+  }
+
+  get isActivated() {
+    return this._isActivated;
   }
 
   get sdk() {
     if (!this._sdk) {
-      this.initSDK();
+      this.init(this._chainType);
     }
     return this._sdk!;
   }
@@ -65,14 +89,22 @@ class WalletClient {
     return [paddingZero(initialSigner, 32)];
   }
 
-  initSDK() {
+  init(chainType: SupportedChainTypeEn) {
+    this._chainType = chainType;
+    this._jsonRpcClient = createPublicClient({
+      chain: this.chain,
+      // todo: change transport based on chain
+      transport: http(TEMP_RPC_URL),
+    });
+    // TODO: make it dynamically change with chain
     this._sdk = new SoulWallet(
-      TEMP_RPC_URL,
+      this.chain.rpcUrls.default.http[0], //
       ElytroBundler,
       SDKFactory,
       SDKFallbackHandler,
       SDKSocialRecoverModule
     );
+    this._bundler = new Bundler(ElytroBundler);
   }
 
   public resetSDK() {
@@ -95,6 +127,7 @@ class WalletClient {
       throw new Error('Elytro: No SDK initiated.');
     }
 
+    // what if user update guardians later. will this address need to be updated?
     // todo: make it configurable
     const res = await this._sdk.calcWalletAddress(
       TEMP_INDEX,
@@ -119,25 +152,29 @@ class WalletClient {
       address: address as `0x${string}`, // todo: make sure its ok
     });
 
-    if (code === undefined || code === '0x') {
-      // 'undeployed'
-      // TODO: make it real
-      const _userOp = await this.sdk.createUnsignedDeployWalletUserOp(
-        TEMP_INDEX,
-        this.initialKeys,
-        DEFAULT_GUARDIAN_HASH,
-        TEMP_CALL_DATA,
-        DEFAULT_GUARDIAN_SAFE_PERIOD
-      );
-      if (_userOp.isErr()) {
-        console.error(_userOp.ERR);
-        return;
-      } else {
-        const userOp = _userOp.OK;
-        await this.sendUserOperation(userOp); // todo: check
-      }
+    this._isActivated = code !== undefined && code !== '0x';
+  }
+
+  async activateAddress() {
+    if (this._isActivated) {
+      console.log('Elytro: Wallet is already active.');
+      return Promise.resolve();
+    }
+
+    const _userOp = await this.sdk.createUnsignedDeployWalletUserOp(
+      TEMP_INDEX,
+      this.initialKeys,
+      DEFAULT_GUARDIAN_HASH,
+      TEMP_CALL_DATA,
+      DEFAULT_GUARDIAN_SAFE_PERIOD
+    );
+
+    if (_userOp.isErr()) {
+      throw _userOp.ERR;
     } else {
-      this.setSocialRecoveryGuardian(this._address as string);
+      const userOp = _userOp.OK;
+      await this.sendUserOperation(userOp); // todo: check
+      this._isActivated = true;
     }
   }
 

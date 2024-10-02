@@ -15,6 +15,7 @@ export default [
       '**/src/components/ui/',
       '**/src/hooks/use-toast.ts',
       '**/src/services/walletClient.ts', // TODO: WIP. remove this ignore later.
+      '**/tailwind.config.js',
     ],
   },
   { languageOptions: { globals: globals.browser } },

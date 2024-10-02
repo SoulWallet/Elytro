@@ -1,12 +1,12 @@
 import TabLayout from '../components/TabLayout';
-import logo from '../../../../public/logo.svg';
+import logo from '@/assets/logo.svg';
 import { ENCOURAGE_DAPPS } from '@/constants/dapps';
 import { safeOpen } from '@/utils/safeOpen';
 
 function Success() {
   return (
     <TabLayout>
-      <div className="flex flex-col items-center justify-center gap-y-8">
+      <div className="flex flex-col items-center justify-center gap-y-8 min-w-96">
         <img src={logo} className="w-14 h-14 m-5" />
         <div className="text-4xl font-medium">You are all set!</div>
         <div className="text-sm text-gray-400">

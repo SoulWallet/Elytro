@@ -25,7 +25,7 @@ class KeyringService {
   private _store: Nullable<SubscribableStore<KeyringServiceState>> = null;
 
   constructor() {
-    this.initialize();
+    this.restore();
   }
 
   public initialize = async () => {
@@ -49,17 +49,18 @@ class KeyringService {
     return this._owner;
   }
 
-  public restore() {
+  public async restore() {
     if (!this._initialized) {
       // throw new Error('Keyring not initialized');
       this.initialize();
     }
 
-    localStorage.get(KEYRING_STORAGE_KEY).then((state) => {
-      if (state) {
-        this._store!.setState(state);
-      }
-    });
+    const prevState = await localStorage.get(KEYRING_STORAGE_KEY);
+    if (prevState) {
+      this._store!.setState(prevState);
+    }
+
+    this.unlock(this._password!);
   }
 
   public async setPassword(password: string) {
@@ -85,8 +86,13 @@ class KeyringService {
   }
 
   public async unlock(password: string) {
-    this._verifyPassword(password);
+    if (!password) {
+      throw new Error('Password is required');
+    }
+    await this._verifyPassword(password);
     this._locked = false;
+    // TODO: calc will throw error, need to fix.
+    // await walletClient.calcWalletAddress();
   }
 
   private _updateOwnerByKey(key: Hex) {
@@ -125,7 +131,6 @@ class KeyringService {
     await decrypt(password, encryptedLocked);
     const key = await decrypt(password, encryptedKey);
     this._updateOwnerByKey(key as Hex);
-
     this._password = password;
   }
 
@@ -138,4 +143,6 @@ class KeyringService {
   }
 }
 
-export default new KeyringService();
+const keyring = new KeyringService();
+
+export default keyring;

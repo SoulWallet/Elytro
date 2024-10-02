@@ -3,10 +3,13 @@ import ReactDOM from 'react-dom/client';
 import HashRouter from '@/components/HashRouter';
 import { routes } from './routes';
 import PageContainer from '@/components/PageContainer';
+import { WalletProvider } from './contexts/wallet-context';
 
 const SidePanelApp: React.FC = () => (
-  <PageContainer>
-    <HashRouter routes={routes} />
+  <PageContainer className="min-w-96">
+    <WalletProvider>
+      <HashRouter routes={routes} />
+    </WalletProvider>
   </PageContainer>
 );
 

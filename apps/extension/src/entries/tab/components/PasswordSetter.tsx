@@ -11,9 +11,8 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { EyeOnOff } from '@/assets/icons/EyeOnOff';
 import { useState } from 'react';
+import PasswordInput from '@/components/PasswordInputer';
 
 const passwordForm = z
   .object({
@@ -61,19 +60,12 @@ export function PasswordSetter({ onSubmit, loading }: PasswordSetterProps) {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <div className="relative">
-                  <Input
-                    {...field}
-                    disabled={loading}
-                    type={isPwdVisible ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    className="bg-gray-50 border-none rounded-2xl p-4 h-14"
-                  />
-                  <EyeOnOff
-                    className="absolute top-1/4 right-4"
-                    onChangeVisible={(val) => setIsPwdVisible(val)}
-                  />
-                </div>
+                <PasswordInput
+                  field={field}
+                  disabled={loading}
+                  placeholder="Enter your password"
+                  onPwdVisibleChange={setIsPwdVisible}
+                />
               </FormControl>
 
               {form.formState.errors.password ? (
@@ -97,12 +89,12 @@ export function PasswordSetter({ onSubmit, loading }: PasswordSetterProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
-                    {...field}
+                  <PasswordInput
+                    field={field}
                     disabled={loading}
-                    type={isPwdVisible ? 'text' : 'password'}
                     placeholder="Enter password again"
-                    className="bg-gray-50 border-none rounded-2xl p-4 h-14"
+                    showEye={false}
+                    outerPwdVisible={isPwdVisible}
                   />
                 </FormControl>
 

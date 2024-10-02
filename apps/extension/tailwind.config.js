@@ -11,8 +11,13 @@ module.exports = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      backgroundImage: {
+        'elytro-background': 'var(--elytro-background-image)',
+        'elytro-btn-bg': 'var(--elytro-btn-bg)',
+      },
       colors: {
-        background: 'hsl(var(--background))',
+        // Start of Selection
+        background: 'var(--background)',
         foreground: 'hsl(var(--foreground))',
         card: {
           DEFAULT: 'hsl(var(--card))',

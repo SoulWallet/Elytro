@@ -1,17 +1,24 @@
-import React from 'react';
-import { useLocation } from 'wouter';
+import { useEffect } from 'react';
+import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
+import { navigateTo } from '@/utils/navigation';
+import useKeyringStore from '../stores/keyring';
 
-const Home: React.FC = () => {
-  const [, setLocation] = useLocation();
-  return (
-    <div
-      onClick={() => {
-        setLocation('/settings');
-      }}
-    >
-      Home
-    </div>
-  );
-};
+export default function Home() {
+  const { isLocked, resetFromKeyring } = useKeyringStore();
 
-export default Home;
+  useEffect(() => {
+    resetFromKeyring();
+  }, []);
+
+  useEffect(() => {
+    if (isLocked === null) return;
+
+    if (isLocked) {
+      navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Unlock);
+    } else {
+      navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
+    }
+  }, [isLocked]);
+
+  return null;
+}

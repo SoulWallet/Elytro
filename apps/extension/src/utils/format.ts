@@ -44,3 +44,11 @@ export function paddingBytesToEven(value: string): string {
   }
   return value;
 }
+
+export function formatAddressToShort(address: Nullable<string>) {
+  // 0x12345...123456
+  // todo: check if address is valid
+  return address && address?.length > 12
+    ? `${address?.substring(0, 6)}...${address?.substring(address?.length - 6)}`
+    : '--';
+}

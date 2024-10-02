@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { TAB_ROUTE_PATHS } from '../routes';
 import { navigateTo } from '@/utils/navigation';
+import Slogan from '@/components/Slogan';
 
 const SocialMediaIcon: React.FC<{
   name: string;
@@ -30,9 +31,7 @@ const Launch: React.FC = () => {
       }
     >
       <div className="p-6 text-gray-900">
-        <h1 className="text-6xl whitespace-pre-wrap font-medium">
-          {'Next-gen\nDecentralized\nEthereum wallet'}
-        </h1>
+        <Slogan />
         <p className="mt-6 opacity-60 text-lg">
           Setup up new account to receive 10 USDC
         </p>

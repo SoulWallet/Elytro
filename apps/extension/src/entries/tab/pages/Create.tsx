@@ -5,7 +5,6 @@ import { PasswordSetter } from '../components/PasswordSetter';
 import { navigateTo } from '@/utils/navigation';
 import { TAB_ROUTE_PATHS } from '../routes';
 import { useToast } from '@/hooks/use-toast';
-import walletClient from '@/services/walletClient';
 import keyring from '@/services/keyring';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 
@@ -17,9 +16,12 @@ const Create: React.FC = () => {
   };
 
   const onCreateSuccess = () => {
-    navigateTo('tab', TAB_ROUTE_PATHS.Success);
     // open side panel here, cause sidePanel.open() only can be called in response to a user gesture.
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
+
+    setTimeout(() => {
+      navigateTo('tab', TAB_ROUTE_PATHS.Success);
+    }, 300);
   };
 
   const handleCreatePassword = async (pwd: string) => {
@@ -28,7 +30,7 @@ const Create: React.FC = () => {
       await keyring.createNewOwner(pwd);
 
       // // TODO: create elytro wallet address. Encounter blocking issue, comment out for now
-      await walletClient.createWalletAddress();
+      // await walletClient.createWalletAddress();
 
       onCreateSuccess();
     } catch (error) {

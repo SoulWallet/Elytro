@@ -4,6 +4,18 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
+    --elytro-background-image: linear-gradient(
+      to top right,
+      #fbfbf9 0%,
+      #f7f1f0 24%,
+      #b7cde7 100%
+    );
+    --elytro-btn-bg: linear-gradient(
+      to right,
+      #f0eee6 0%,
+      #f5edeb 36%,
+      #bad5f5 80%
+    );
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -27,7 +39,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -62,5 +74,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    user-select: none;
   }
 }

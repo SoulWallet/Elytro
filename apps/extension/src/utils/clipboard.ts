@@ -1,3 +1,5 @@
+import { toast } from '@/hooks/use-toast';
+
 /**
  * Copy text using modern Clipboard API
  * @param text copied text
@@ -55,9 +57,13 @@ export const safeClipboard = async (text: string): Promise<void> => {
       await copyWithExecCommand(text);
     }
 
-    // success("复制成功");
+    toast({
+      title: 'Copied',
+    });
   } catch (error) {
-    // error("复制失败");
+    toast({
+      title: 'Copy failed',
+    });
     throw error;
   }
 };

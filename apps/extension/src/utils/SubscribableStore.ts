@@ -7,7 +7,7 @@ export class SubscribableStore<T> {
   }
 
   get state(): Readonly<T> {
-    return Object.freeze(this._state);
+    return { ...this._state };
   }
 
   public setState(newState: Partial<T>): void {
