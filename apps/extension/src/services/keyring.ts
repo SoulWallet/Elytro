@@ -60,7 +60,9 @@ class KeyringService {
       this._store!.setState(prevState);
     }
 
-    this.unlock(this._password!);
+    if (this._password) {
+      this.unlock(this._password!);
+    }
   }
 
   public async setPassword(password: string) {

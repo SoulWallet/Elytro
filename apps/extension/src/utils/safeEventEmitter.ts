@@ -1,4 +1,4 @@
-import { EventEmitter } from 'stream';
+import { EventEmitter } from 'events';
 
 export class SafeEventEmitter extends EventEmitter {
   emit(eventName: string | symbol, ...args: unknown[]): boolean {

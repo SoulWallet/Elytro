@@ -1,11 +1,11 @@
-import { EventEmitter } from 'events';
-import walletClient from './walletClient';
+import walletClient from '../walletClient';
 import { toHex } from 'viem';
+import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
  */
-class BuiltinProvider extends EventEmitter {
+class BuiltinProvider extends SafeEventEmitter {
   private _initialized: boolean = false;
   private _connected: boolean = false;
 

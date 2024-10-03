@@ -1,4 +1,6 @@
 import keyring from '@/services/keyring';
+// import builtinProvider from '@/services/providers/builtinProvider';
+// handle request from content script(page provider) and proxy to builtin provider
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -28,9 +30,8 @@ chrome.sidePanel
 
 function init() {
   // restore keyring state from local storage
-  keyring.restore();
 
-  // sdkKeyring.initialize();
+  keyring.restore();
 }
 
 init();

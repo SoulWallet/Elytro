@@ -1,4 +1,4 @@
-import builtinProvider from '@/services/builtinProvider';
+import PageProvider from '@/services/providers/pageProvider';
 
 const generateUUID4 = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -16,15 +16,32 @@ const mainWorld = () => {
     rdns: 'com.elytro',
   };
 
-  const elytroProvider = new Proxy(builtinProvider, {
+  //! todo: remove this when not testing with https://metamask.github.io/test-dapp/
+  // temp workaround for @metamask/post-message-stream - readable-stream when using https://metamask.github.io/test-dapp/
+  window.process.nextTick = (callback, ...args) => {
+    if (typeof callback !== 'function') {
+      throw new TypeError('Callback must be a function');
+    }
+    Promise.resolve().then(() => callback(...args));
+  };
+
+  const injectedProvider = new Proxy(new PageProvider(), {
     deleteProperty: () => {
       return true;
     },
+    // get: (target, prop, receiver) => {
+    //   if (typeof target[prop] === 'function') {
+    //     return (...args) => {
+    //       return target[prop](...args);
+    //     };
+    //   }
+    //   return Reflect.get(target, prop, receiver);
+    // },
   });
 
   const announceEvent: EIP6963AnnounceProviderEvent = new CustomEvent(
     'eip6963:announceProvider',
-    { detail: Object.freeze({ info, provider: elytroProvider }) }
+    { detail: Object.freeze({ info, provider: injectedProvider }) }
   );
 
   const announce = () => {
