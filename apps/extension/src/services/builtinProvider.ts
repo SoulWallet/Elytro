@@ -1,39 +1,57 @@
-import { createClient, http } from 'viem';
-import { mainnet } from 'viem/chains';
+import { EventEmitter } from 'events';
+import walletClient from './walletClient';
+import { toHex } from 'viem';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
  */
-class BuiltinProvider {
+class BuiltinProvider extends EventEmitter {
   private _initialized: boolean = false;
-  private _client: ReturnType<typeof createClient> | null = null;
+  private _connected: boolean = false;
 
   constructor() {
+    super();
     this.initialize();
   }
 
   public initialize = async () => {
     this._initialized = true;
-
-    this._client = createClient({
-      chain: mainnet,
-      transport: http(),
-    });
+    this._connected = true;
   };
 
-  public get client() {
-    if (!this._initialized) {
-      throw new Error('Provider not initialized');
-    }
-
-    return this._client;
+  public get connected() {
+    return this._connected;
   }
 
   public get initialized() {
     return this._initialized;
   }
 
-  // TODO: Implement the rest of the EIP-1193 methods
+  public async request({ method, params }: RequestArguments) {
+    // TODO: try unlock if needed
+
+    console.log('ElytroProvider getting request', method, ':\n', params);
+
+    switch (method) {
+      case 'eth_chainId':
+        return toHex(walletClient.chain.id);
+      case 'eth_accounts':
+      case 'eth_requestAccounts':
+        return walletClient.address ? [walletClient.address] : [];
+
+      // TODO: implement the rest of the methods
+      case 'eth_sendTransaction':
+        return '0x1';
+      case 'eth_signTypedDataV4':
+        return '0x1';
+      case 'personal_sign':
+        return '0x1';
+      default:
+        throw new Error(`Elytro: ${method} is not supported yet.`);
+    }
+  }
 }
 
-export default new BuiltinProvider();
+const provider = new BuiltinProvider();
+
+export default provider;

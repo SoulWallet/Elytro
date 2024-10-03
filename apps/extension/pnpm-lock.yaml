@@ -25,6 +25,7 @@ specifiers:
   eslint: ^9.9.0
   eslint-plugin-react-hooks: ^5.1.0-rc.0
   eslint-plugin-react-refresh: ^0.4.9
+  events: ^3.3.0
   globals: ^15.9.0
   graphql: ^16.9.0
   lucide-react: ^0.441.0
@@ -58,6 +59,7 @@ dependencies:
   buffer: 6.0.3
   class-variance-authority: 0.7.0
   clsx: 2.1.1
+  events: 3.3.0
   graphql: 16.9.0
   lucide-react: 0.441.0_react@18.3.1
   postcss: 8.4.45
@@ -2263,6 +2265,11 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    dev: false
+
+  /events/3.3.0:
+    resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
+    engines: {node: '>=0.8.x'}
     dev: false
 
   /fast-deep-equal/3.1.3:

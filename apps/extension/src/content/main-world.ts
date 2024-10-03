@@ -1,16 +1,30 @@
 import builtinProvider from '@/services/builtinProvider';
 
+const generateUUID4 = () =>
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+
 const mainWorld = () => {
   const info: EIP6963ProviderInfo = {
-    uuid: '806298fa-67fb-457e-ab0d-d6fde72ff1b9',
-    name: 'Elytro Wallet Example',
+    uuid: generateUUID4(),
+    name: 'Elytro Wallet',
+    // TODO: Add Elytro logo
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>",
-    rdns: 'com.wallet.elytro',
+    rdns: 'com.elytro',
   };
+
+  const elytroProvider = new Proxy(builtinProvider, {
+    deleteProperty: () => {
+      return true;
+    },
+  });
 
   const announceEvent: EIP6963AnnounceProviderEvent = new CustomEvent(
     'eip6963:announceProvider',
-    { detail: Object.freeze({ info, provider: builtinProvider.client }) }
+    { detail: Object.freeze({ info, provider: elytroProvider }) }
   );
 
   const announce = () => {
