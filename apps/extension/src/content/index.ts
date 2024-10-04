@@ -1,5 +1,6 @@
-import ElytroMessage from '@/utils/message';
+import ElytroDuplexMessage from '@/utils/message';
 import mainWorldScript from './main-world?script&module';
+import builtInProvider from '@/services/providers/builtinProvider';
 
 if (
   !document.querySelector(
@@ -14,12 +15,21 @@ if (
   document.head.removeChild(script);
 }
 
-const message = new ElytroMessage(
+const contentScriptMessage = new ElytroDuplexMessage(
   'elytro-content-script',
   'elytro-page-provider'
 );
 
-message.send({
-  type: 'test',
-  data: 'test123',
+contentScriptMessage.connect();
+
+contentScriptMessage.listen(async (data) => {
+  const response = await builtInProvider.request(data);
+
+  contentScriptMessage.send({
+    type: 'responseToPageProvider',
+    payload: {
+      method: data.method,
+      response,
+    },
+  });
 });

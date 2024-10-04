@@ -1,31 +1,33 @@
 import { EventEmitter } from 'events';
 import { ethErrors } from 'eth-rpc-errors';
-import ElytroMessage from '@/utils/message';
+import ElytroDuplexMessage from '@/utils/message';
 
 /**
  * Elytro Page Provider: injects Elytro into the page
  */
 class PageProvider extends EventEmitter {
-  private _initialized: boolean = false;
+  static defaultMaxListeners = 100; // original is 10, very easy to exceed
+
   private _isDomVisible: boolean = false;
   private _isDomReady: boolean = false;
-  private _message: ElytroMessage = new ElytroMessage(
+  private _message = new ElytroDuplexMessage(
     'elytro-page-provider',
     'elytro-content-script'
   );
 
   constructor() {
     super();
-    this.setMaxListeners(100); // default is 10, very easy to exceed
     this.initialize();
   }
 
-  get isInitialized() {
-    return this._initialized;
-  }
-
   private _checkReady() {
-    if (document.readyState === 'loading') {
+    if (this._isDomReady && this._isDomVisible) {
+      return true;
+    }
+
+    if (document.readyState === 'complete') {
+      this._isDomReady = true;
+    } else {
       const domContentLoadedHandler = () => {
         this._isDomReady = true;
         document.removeEventListener(
@@ -34,32 +36,36 @@ class PageProvider extends EventEmitter {
         );
       };
       document.addEventListener('DOMContentLoaded', domContentLoadedHandler);
-    } else {
-      this._isDomReady = true;
     }
 
-    return this._isDomVisible && this._isDomReady;
+    this._isDomVisible = document.visibilityState === 'visible';
+
+    const visibilityChangeHandler = () => {
+      this._isDomVisible = document.visibilityState === 'visible';
+
+      if (this._isDomVisible) {
+        document.removeEventListener(
+          'visibilitychange',
+          visibilityChangeHandler
+        );
+      }
+    };
+    document.addEventListener('visibilitychange', visibilityChangeHandler);
+
+    return this._isDomReady && this._isDomVisible;
   }
 
-  private _checkDomVisibility = () => {
-    this._isDomVisible = document.visibilityState === 'visible';
-  };
-
   initialize = async () => {
-    this._message.receive((data) => {
-      console.log('receive', data);
-    });
+    this._message.connect();
+
     try {
       //! todo: init message channel between page and background
-      document.addEventListener('visibilitychange', this._checkDomVisibility);
+      // document.addEventListener('visibilitychange', this._checkDomVisibility);
       // todo: get connect site info?
       // todo: init chain & accounts from builtin provider
       this.emit('connected');
     } catch {
       //
-    } finally {
-      this._initialized = true;
-      // this.emit('_initialized');
     }
   };
 
@@ -86,8 +92,14 @@ class PageProvider extends EventEmitter {
 
     if (this._checkReady()) {
       // post message to background, let the builtin provider handle it
-      this._message.send(data);
+      this._message.send({ type: 'requestFromPageProvider', payload: data });
     }
+
+    return new Promise((resolve) => {
+      this._message.once(data.method, (response) => {
+        resolve(response);
+      });
+    });
   };
 
   on = (event: string | symbol, handler: (...args: unknown[]) => void) => {
