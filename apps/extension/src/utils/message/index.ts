@@ -5,7 +5,7 @@
 import { WindowPostMessageStream } from '@metamask/post-message-stream';
 import { ethErrors } from 'eth-rpc-errors';
 
-enum ElytroMessageTypeEn {
+export enum ElytroMessageTypeEn {
   CONNECT = 'connect',
   DISCONNECT = 'disconnect',
   REQUEST_FROM_PAGE_PROVIDER = 'requestFromPageProvider',

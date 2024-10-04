@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { ethErrors } from 'eth-rpc-errors';
-import ElytroDuplexMessage from '@/utils/message';
+import ElytroDuplexMessage, { ElytroMessageTypeEn } from '@/utils/message';
 
 /**
  * Elytro Page Provider: injects Elytro into the page
@@ -92,11 +92,19 @@ class PageProvider extends EventEmitter {
 
     if (this._checkReady()) {
       // post message to background, let the builtin provider handle it
-      this._message.send({ type: 'requestFromPageProvider', payload: data });
+      this._message.send({
+        type: ElytroMessageTypeEn.REQUEST_FROM_PAGE_PROVIDER,
+        payload: data,
+      });
     }
 
     return new Promise((resolve) => {
       this._message.once(data.method, (response) => {
+        console.log(
+          'Elytro: page provider got response',
+          data.method,
+          response
+        );
         resolve(response);
       });
     });

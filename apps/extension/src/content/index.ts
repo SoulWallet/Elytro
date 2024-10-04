@@ -1,4 +1,4 @@
-import ElytroDuplexMessage from '@/utils/message';
+import ElytroDuplexMessage, { ElytroMessageTypeEn } from '@/utils/message';
 import mainWorldScript from './main-world?script&module';
 import builtInProvider from '@/services/providers/builtinProvider';
 
@@ -25,8 +25,9 @@ contentScriptMessage.connect();
 contentScriptMessage.listen(async (data) => {
   const response = await builtInProvider.request(data);
 
+  console.log('Elytro: content script sending response', data.method, response);
   contentScriptMessage.send({
-    type: 'responseToPageProvider',
+    type: ElytroMessageTypeEn.RESPONSE_TO_PAGE_PROVIDER,
     payload: {
       method: data.method,
       response,
