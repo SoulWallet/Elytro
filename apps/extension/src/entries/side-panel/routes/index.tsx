@@ -1,5 +1,4 @@
 import Settings from '../pages/Settings';
-import Home from '../pages/Home';
 import { TRoute } from '@/types/route';
 import Unlock from '../pages/Unlock';
 import Dashboard from '../pages/Dashboard';
@@ -16,7 +15,11 @@ export const SIDE_PANEL_ROUTE_PATHS = {
 export const routes: TRoute[] = [
   {
     path: SIDE_PANEL_ROUTE_PATHS.Home,
-    component: Home,
+    component: Dashboard,
+  },
+  {
+    path: SIDE_PANEL_ROUTE_PATHS.Dashboard,
+    component: Dashboard,
   },
   {
     path: SIDE_PANEL_ROUTE_PATHS.Settings,
@@ -26,10 +29,7 @@ export const routes: TRoute[] = [
     path: SIDE_PANEL_ROUTE_PATHS.Unlock,
     component: Unlock,
   },
-  {
-    path: SIDE_PANEL_ROUTE_PATHS.Dashboard,
-    component: Dashboard,
-  },
+
   {
     path: SIDE_PANEL_ROUTE_PATHS.Activate,
     component: Activate,

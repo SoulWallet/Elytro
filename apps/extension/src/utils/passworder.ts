@@ -16,34 +16,57 @@ function getBase64Salt(salt: Uint8Array<ArrayBuffer>) {
   return Buffer.from(salt).toString(BUFFER_ENCODING);
 }
 
-async function getCryptoKey(
-  password: string,
+const getCryptoKeyWithBackup = async (
   base64salt: string,
-  extractable = true
-) {
-  const key = await globalThis.crypto.subtle.importKey(
-    'raw',
-    Buffer.from(password, STRING_ENCODING),
-    { name: DEFAULT_ALGORITHM },
-    false,
-    ['deriveBits', 'deriveKey']
-  );
+  password?: string
+) => {
+  if (password) {
+    const key = await globalThis.crypto.subtle.importKey(
+      'raw',
+      Buffer.from(password, STRING_ENCODING),
+      { name: DEFAULT_ALGORITHM },
+      false,
+      ['deriveBits', 'deriveKey']
+    );
 
-  const derivedKey = await crypto.subtle.deriveKey(
-    {
-      name: 'PBKDF2',
-      salt: Buffer.from(base64salt, 'base64'),
-      iterations: ITERATIONS,
-      hash: 'SHA-256',
-    },
-    key,
-    { name: DERIVED_KEY_FORMAT, length: 256 },
-    extractable,
-    ['encrypt', 'decrypt']
-  );
+    const derivedKey = await crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt: Buffer.from(base64salt, 'base64'),
+        iterations: ITERATIONS,
+        hash: 'SHA-256',
+      },
+      key,
+      { name: DERIVED_KEY_FORMAT, length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
 
-  return derivedKey;
-}
+    sessionStorage.save({
+      storedCryptoKey: JSON.stringify(
+        await crypto.subtle.exportKey('jwk', derivedKey)
+      ),
+      storedSaltBase64: base64salt,
+    });
+
+    return derivedKey;
+  } else {
+    const { storedCryptoKey, storedSaltBase64 } = await sessionStorage.get([
+      'storedCryptoKey',
+      'storedSaltBase64',
+    ]);
+    if (!storedCryptoKey || !storedSaltBase64) {
+      throw new Error('locked');
+    }
+    return await crypto.subtle.importKey(
+      'jwk',
+      JSON.parse(storedCryptoKey as string),
+      { name: DERIVED_KEY_FORMAT, length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+};
 
 async function encryptWithKey<T>(key: CryptoKey, data: T) {
   const dataString = JSON.stringify(data);
@@ -66,32 +89,8 @@ async function encryptWithKey<T>(key: CryptoKey, data: T) {
 }
 
 export async function encrypt<T>(data: T, password?: string) {
-  let key, salt;
-
-  if (!password) {
-    const { cryptoKey: storedKey, salt: storedSalt } = await sessionStorage.get(
-      ['cryptoKey', 'salt']
-    );
-
-    if (!storedKey || !storedSalt) {
-      throw new Error('Password is required and not found in sessionStorage');
-    }
-    key = await crypto.subtle.importKey(
-      'jwk',
-      JSON.parse(storedKey as string),
-      { name: DERIVED_KEY_FORMAT, length: 256 },
-      false,
-      ['encrypt', 'decrypt']
-    );
-    salt = storedSalt;
-  } else {
-    salt = getBase64Salt(generateSalt());
-    key = await getCryptoKey(password, salt);
-
-    const exportedKey = await crypto.subtle.exportKey('jwk', key);
-    sessionStorage.save({ cryptoKey: JSON.stringify(exportedKey), salt });
-  }
-
+  const salt = getBase64Salt(generateSalt());
+  const key = await getCryptoKeyWithBackup(salt, password);
   const encryptedData = await encryptWithKey(key, data);
   return JSON.stringify({ ...encryptedData, salt });
 }
@@ -130,25 +129,7 @@ export async function decrypt(
 ): Promise<unknown> {
   const payload = JSON.parse(encryptedText);
   const { salt } = payload;
-  let key;
-
-  if (!password) {
-    const { cryptoKey: storedKey } = await sessionStorage.get(['cryptoKey']);
-    if (!storedKey) {
-      throw new Error('Password is required and not found in sessionStorage');
-    }
-    key = await crypto.subtle.importKey(
-      'jwk',
-      JSON.parse(storedKey as string),
-      { name: DERIVED_KEY_FORMAT, length: 256 },
-      false,
-      ['encrypt', 'decrypt']
-    );
-  } else {
-    // 使用提供的密码生成 key
-    key = await getCryptoKey(password, salt);
-  }
-
+  const key = await getCryptoKeyWithBackup(salt, password);
   const result = await decryptWithKey(key, payload);
   return result;
 }

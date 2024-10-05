@@ -9,19 +9,23 @@ interface KeyringState {
   isLocked: null | boolean;
   lock: () => void;
   unlock: (password: string) => Promise<void>;
-  resetFromKeyring: () => void;
+  tryUnlock: () => void;
   isActivated: boolean;
   createNewOwner: (password: string) => Promise<void>;
 }
 
-console.log('hello!!! store', new Date());
-
 const useKeyringStore = create<KeyringState>((set) => ({
   isLocked: null,
   isActivated: walletClient.isActivated,
-  resetFromKeyring: () => {
+  tryUnlock: () => {
     keyring.tryUnlock(() => {
       set({ isLocked: keyring.locked });
+
+      if (keyring.locked) {
+        navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Unlock);
+      } else {
+        navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
+      }
     });
   },
   createNewOwner: async (password: string) => {
@@ -51,14 +55,10 @@ const useKeyringStore = create<KeyringState>((set) => ({
     }
   },
   unlock: async (password: string) => {
-    // set({ isLocked: false });
-    // navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
-
-    // TODO: temp comment out. only for testing
     try {
       await keyring.unlock(password);
       set({ isLocked: false });
-      navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
+      navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
     } catch (error) {
       toast({
         title: 'Oops!',

@@ -116,13 +116,13 @@ class WalletClient {
       return this._address;
     }
 
-    const newAddr = await this.calcWalletAddress();
+    const newAddr = await this._calcWalletAddress();
     await this.getWalletStatus(newAddr);
     this._address = newAddr;
     return this._address;
   }
 
-  public async calcWalletAddress() {
+  private async _calcWalletAddress() {
     if (!this._sdk) {
       throw new Error('Elytro: No SDK initiated.');
     }
@@ -133,7 +133,8 @@ class WalletClient {
       TEMP_INDEX,
       this.initialKeys, // temp initial keys
       DEFAULT_GUARDIAN_HASH,
-      DEFAULT_GUARDIAN_SAFE_PERIOD
+      DEFAULT_GUARDIAN_SAFE_PERIOD,
+      TEMP_CHAIN_ID
     );
 
     if (res.isErr()) {
@@ -155,7 +156,10 @@ class WalletClient {
     this._isActivated = code !== undefined && code !== '0x';
   }
 
-  async activateAddress() {
+  async activateAddress(
+    onSponsored: (userOp: UserOperation) => void,
+    onNotSponsored: (userOp: UserOperation) => void
+  ) {
     if (this._isActivated) {
       console.log('Elytro: Wallet is already active.');
       return Promise.resolve();
@@ -173,7 +177,7 @@ class WalletClient {
       throw _userOp.ERR;
     } else {
       const userOp = _userOp.OK;
-      await this.sendUserOperation(userOp); // todo: check
+      await this.sendUserOperation(userOp, onSponsored, onNotSponsored); // todo: check
       this._isActivated = true;
     }
   }
@@ -444,48 +448,61 @@ class WalletClient {
     }
   }
 
-  public async sendUserOperation(userOp: UserOperation) {
-    let transferValue = BigInt(0);
-    let res: Nullable<DecodeResult[]> = null;
+  public async sendUserOperation(
+    userOp: UserOperation,
+    onSponsored: (userOp: UserOperation) => void,
+    onNotSponsored: (userOp: UserOperation) => void
+  ) {
+    // todo: temp comment out, gql error
+    // const isValidForSponsor = true; //= await this.checkValidForSponsor(userOp);
 
-    if (userOp.callData.length > 2) {
-      const _decoderResult = await DecodeUserOp(
-        Number(BigInt(TEMP_CHAIN_ID)),
-        TEMP_ENTRY_POINT,
-        userOp
-      );
+    const isValidForSponsor = await this.checkValidForSponsor(userOp);
 
-      if (_decoderResult.isErr()) {
-        console.log('Elytro: Failed to decode user operation.');
-      } else {
-        res = _decoderResult.OK;
-        res.forEach((item) => {
-          transferValue += item.value;
-        });
-      }
+    // TODO: check this call flow
+    if (isValidForSponsor) {
+      onSponsored(userOp);
+    } else {
+      onNotSponsored(userOp);
     }
 
-    await this.estimateGas(userOp);
+    // let transferValue = BigInt(0);
+    // let res: Nullable<DecodeResult[]> = null;
 
-    // todo: temp comment out, gql error
-    const isValidForSponsor = true; //= await this.checkValidForSponsor(userOp);
+    // if (userOp.callData.length > 2) {
+    //   const _decoderResult = await DecodeUserOp(
+    //     Number(BigInt(TEMP_CHAIN_ID)),
+    //     TEMP_ENTRY_POINT,
+    //     userOp
+    //   );
 
-    await this.getPreFund(userOp, transferValue, isValidForSponsor);
+    //   if (_decoderResult.isErr()) {
+    //     console.log('Elytro: Failed to decode user operation.');
+    //   } else {
+    //     res = _decoderResult.OK;
+    //     res.forEach((item) => {
+    //       transferValue += item.value;
+    //     });
+    //   }
+    // }
 
-    // todo: save this hash and query it's receipt constantly till it's confirmed
-    const userOpHash = await this.getUserOpHash(userOp);
+    // await this.estimateGas(userOp);
 
-    // const signedUserOp =
-    await this.signUserOperation(userOp, userOpHash);
+    // await this.getPreFund(userOp, transferValue, isValidForSponsor);
 
-    // todo: temp comment out, gql error
-    //await this.simulateTx(userOp); // TODO: non-blocking? what we do with the result?
+    // // todo: save this hash and query it's receipt constantly till it's confirmed
+    // const userOpHash = await this.getUserOpHash(userOp);
 
-    const sendRes = await this.sdk.sendUserOperation(userOp);
+    // // const signedUserOp =
+    // await this.signUserOperation(userOp, userOpHash);
 
-    if (sendRes.isErr()) {
-      throw new Error('Elytro: Failed to send user operation.');
-    }
+    // // todo: temp comment out, gql error
+    // //await this.simulateTx(userOp); // TODO: non-blocking? what we do with the result?
+
+    // const sendRes = await this.sdk.sendUserOperation(userOp);
+
+    // if (sendRes.isErr()) {
+    //   throw new Error('Elytro: Failed to send user operation.');
+    // }
     // if success, do nth. let the business logic do the rest
   }
 }

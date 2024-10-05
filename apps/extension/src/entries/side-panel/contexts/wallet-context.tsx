@@ -1,5 +1,6 @@
+import useKeyringStore from '@/stores/keyring';
 import SignTxModal from '../components/SignTx';
-import { createContext } from 'react';
+import { createContext, useEffect } from 'react';
 
 type IWalletContext = {
   temp?: unknown; // todo: remove this
@@ -8,6 +9,14 @@ type IWalletContext = {
 export const WalletContext = createContext<IWalletContext>({ temp: 'test' });
 
 export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
+  const { tryUnlock, isLocked } = useKeyringStore();
+
+  useEffect(() => {
+    if (isLocked === null) {
+      tryUnlock();
+    }
+  }, [isLocked]);
+
   return (
     <WalletContext.Provider value={{}}>
       <>{children}</>

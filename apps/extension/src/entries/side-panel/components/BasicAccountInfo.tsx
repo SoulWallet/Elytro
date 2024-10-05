@@ -7,6 +7,7 @@ import { navigateTo } from '@/utils/navigation';
 import ActionButton from './ActionButton';
 import { Button } from '@/components/ui/button';
 import { formatAddressToShort } from '@/utils/format';
+import walletClient from '@/services/walletClient';
 
 export default function BasicAccountInfo() {
   const { currentChainType, address, isActivated } = useAccountStore();
@@ -28,7 +29,15 @@ export default function BasicAccountInfo() {
   };
 
   const onClickActivate = () => {
-    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Activate);
+    // todo: check if valid for sponsor
+    walletClient.activateAddress(
+      (userOp) => {
+        console.log('Sponsored', userOp);
+      },
+      (userOp) => {
+        console.log('Not Sponsored', userOp);
+      }
+    );
   };
 
   return (

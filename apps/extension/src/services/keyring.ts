@@ -141,8 +141,8 @@ class KeyringService {
       this._updateOwnerByKey(key as Hex);
       this._locked = false;
     } catch (error) {
+      console.log('Elytro: Failed to verify password.', error);
       this._locked = true;
-      console.error('Elytro verifyPassword error', error);
     }
   }
 
@@ -155,7 +155,11 @@ class KeyringService {
   }
 
   public tryUnlock(callback: () => void) {
-    this._verifyPassword().then(callback);
+    if (this._locked) {
+      this._verifyPassword().then(callback);
+    } else {
+      callback();
+    }
   }
 }
 
