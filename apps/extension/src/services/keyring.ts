@@ -25,7 +25,6 @@ class KeyringService {
   private _store: Nullable<SubscribableStore<KeyringServiceState>> = null;
 
   constructor() {
-    console.log('!!!keyring constructor', new Date());
     this.restore();
   }
 
@@ -131,13 +130,20 @@ class KeyringService {
     const { encryptedLocked, encryptedKey } = this._store?.state ?? {};
 
     if (!encryptedLocked || !encryptedKey) {
-      throw new Error('Cannot verify password if there is no previous owner');
+      this._locked = true;
+      return;
+      // throw new Error('Cannot verify password if there is no previous owner');
     }
 
-    // await decrypt(encryptedLocked, password);
-    const key = await decrypt(encryptedKey, password);
-    this._updateOwnerByKey(key as Hex);
-    this._locked = false;
+    try {
+      // await decrypt(encryptedLocked, password);
+      const key = await decrypt(encryptedKey, password);
+      this._updateOwnerByKey(key as Hex);
+      this._locked = false;
+    } catch (error) {
+      this._locked = true;
+      console.error('Elytro verifyPassword error', error);
+    }
   }
 
   public async reset() {
@@ -148,8 +154,8 @@ class KeyringService {
     this._key = null;
   }
 
-  public tryUnlock(onSuccess: () => void) {
-    this._verifyPassword().then(onSuccess);
+  public tryUnlock(callback: () => void) {
+    this._verifyPassword().then(callback);
   }
 }
 
