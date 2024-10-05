@@ -16,7 +16,16 @@ import {
   UserOperation,
 } from '@soulwallet/sdk';
 import { getHexString, paddingBytesToEven, paddingZero } from '@/utils/format';
-import { createPublicClient, http, parseEther } from 'viem';
+import {
+  Account,
+  createWalletClient,
+  http,
+  parseEther,
+  PrivateKeyAccount,
+  publicActions,
+  PublicClient,
+  SignableMessage,
+} from 'viem';
 import {
   DEFAULT_GUARDIAN_HASH,
   DEFAULT_GUARDIAN_SAFE_PERIOD,
@@ -27,25 +36,29 @@ import {
   TEMP_INDEX,
   TEMP_VALIDATOR,
 } from '@/constants/temp';
-import { DecodeUserOp, DecodeResult } from '@soulwallet/decoder';
-import { getFeeData } from '@/utils/fee';
+import { getFeeData } from '@/utils/ethRpc/fee';
 import { mutate, query } from '@/requests';
 import { mutate_sponsor_op } from '@/requests/mutate';
 import { query_simulated_op } from '@/requests/query';
 import keyring from './keyring';
 import { UserOperationStatusEn } from '@/constants/operations';
+import { SignMessageParameters, SignTypedDataParameters } from 'viem/accounts';
+import { ethErrors } from 'eth-rpc-errors';
+import { navigateTo } from '@/utils/navigation';
+import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 
-class WalletClient {
+class ElytroWalletClient {
   private _bundler: Nullable<Bundler> = null;
   private _sdk: Nullable<SoulWallet> = null;
   private _address: Nullable<string> = null;
   private _isActivated: boolean = false;
   private _chainType: SupportedChainTypeEn = SupportedChainTypeEn.OP;
 
-  private _jsonRpcClient = createPublicClient({
-    chain: SUPPORTED_CHAIN_MAP[this._chainType],
-    transport: http(TEMP_RPC_URL),
-  });
+  private _client = createWalletClient({
+    account: keyring.owner ?? undefined,
+    chain: SUPPORTED_CHAIN_MAP[this._chainType], // default to OP
+    transport: http(TEMP_RPC_URL), // default http
+  }).extend(publicActions);
 
   constructor() {
     // default to OP
@@ -90,12 +103,15 @@ class WalletClient {
   }
 
   init(chainType: SupportedChainTypeEn) {
-    this._chainType = chainType;
-    this._jsonRpcClient = createPublicClient({
-      chain: this.chain,
-      // todo: change transport based on chain
-      transport: http(TEMP_RPC_URL),
-    });
+    if (chainType !== this._chainType) {
+      this._chainType = chainType;
+
+      this._client = createWalletClient({
+        chain: SUPPORTED_CHAIN_MAP[this._chainType],
+        transport: http(TEMP_RPC_URL),
+      }).extend(publicActions);
+    }
+
     // TODO: make it dynamically change with chain
     this._sdk = new SoulWallet(
       this.chain.rpcUrls.default.http[0], //
@@ -149,7 +165,7 @@ class WalletClient {
       throw new Error('Elytro: No address found.');
     }
 
-    const code = await this._jsonRpcClient.getCode({
+    const code = await this._client.getCode({
       address: address as `0x${string}`, // todo: make sure its ok
     });
 
@@ -189,7 +205,7 @@ class WalletClient {
 
   public async estimateGas(userOp: UserOperation) {
     const { maxFeePerGas, maxPriorityFeePerGas } = await getFeeData(
-      this._jsonRpcClient
+      this._client as PublicClient
     );
 
     // todo: add case for no gas price
@@ -302,7 +318,7 @@ class WalletClient {
       return false;
     } else {
       const preFund = _preFund.OK;
-      const _balance = await this._jsonRpcClient.getBalance({
+      const _balance = await this._client.getBalance({
         address: userOp.sender as `0x${string}`,
       });
 
@@ -505,8 +521,37 @@ class WalletClient {
     // }
     // if success, do nth. let the business logic do the rest
   }
+
+  public async getBlockByNumber() {
+    return await this._client.getBlockNumber();
+  }
+
+  public async signTypedDataV4(params: unknown) {
+    // todo: maybe need format the params
+    return await keyring.owner?.signTypedData(
+      params as unknown as SignTypedDataParameters
+    );
+  }
+
+  public async personalSign(params: unknown) {
+    return new Promise((resolve, reject) => {
+      let signer = keyring.owner;
+
+      if (!signer) {
+        navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Unlock);
+        // keyring.tryUnlock(() => {
+        //   signer = keyring.owner;
+        //   resolve(signer?.signMessage(params as SignMessageParameters));
+        // });
+      } else {
+        resolve(signer?.signMessage(params as SignMessageParameters));
+      }
+
+      reject(ethErrors.rpc.internal());
+    });
+  }
 }
 
-const walletClient = new WalletClient();
+const walletClient = new ElytroWalletClient();
 
 export default walletClient;

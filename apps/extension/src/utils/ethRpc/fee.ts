@@ -1,4 +1,4 @@
-import { type PublicClient } from 'viem';
+import { PublicClient } from 'viem';
 
 export async function getFeeData(client: PublicClient) {
   const gasPrice = await client.getGasPrice();
