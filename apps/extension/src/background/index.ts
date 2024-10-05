@@ -1,15 +1,16 @@
-import keyring from '@/services/keyring';
+// import keyring from '@/services/keyring';
 // import builtinProvider from '@/services/providers/builtinProvider';
 // handle request from content script(page provider) and proxy to builtin provider
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
     case chrome.runtime.OnInstalledReason.INSTALL:
-      // !CANNOT USE navigateTo HERE
-      // navigateTo('tab', TAB_ROUTE_PATHS.Launch);
-      chrome.tabs.create({
-        url: chrome.runtime.getURL(`src/entries/tab/index.html#/create`),
-      });
+      // wait for 200ms to ensure the page is ready
+      setTimeout(() => {
+        chrome.tabs.create({
+          url: chrome.runtime.getURL(`src/entries/tab/index.html#/launch`),
+        });
+      }, 200);
       break;
     case chrome.runtime.OnInstalledReason.UPDATE:
       // TODO: do something
@@ -27,11 +28,3 @@ chrome.runtime.onInstalled.addListener((details) => {
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error(error));
-
-function init() {
-  // restore keyring state from local storage
-
-  keyring.restore();
-}
-
-init();

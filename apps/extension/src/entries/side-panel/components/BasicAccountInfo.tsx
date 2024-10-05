@@ -1,5 +1,5 @@
 import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
-import useAccountStore from '../stores/account';
+import useAccountStore from '@/stores/account';
 import { ArrowDownLeft, ArrowUpRight, Ellipsis } from 'lucide-react';
 import CopyableText from '@/components/CopyableText';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';

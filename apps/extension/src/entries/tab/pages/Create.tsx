@@ -4,19 +4,19 @@ import { BackArrow } from '@/assets/icons/BackArrow';
 import { PasswordSetter } from '../components/PasswordSetter';
 import { navigateTo } from '@/utils/navigation';
 import { TAB_ROUTE_PATHS } from '../routes';
-import { useToast } from '@/hooks/use-toast';
-import keyring from '@/services/keyring';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
+import useKeyringStore from '@/stores/keyring';
 
 const Create: React.FC = () => {
+  const { createNewOwner } = useKeyringStore();
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
   const goBack = () => {
     history.back();
   };
 
   const onCreateSuccess = () => {
     // open side panel here, cause sidePanel.open() only can be called in response to a user gesture.
+    // navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
 
     setTimeout(() => {
@@ -27,18 +27,8 @@ const Create: React.FC = () => {
   const handleCreatePassword = async (pwd: string) => {
     setLoading(true);
     try {
-      await keyring.createNewOwner(pwd);
-
-      // // TODO: create elytro wallet address. Encounter blocking issue, comment out for now
-      // await walletClient.createWalletAddress();
-
+      await createNewOwner(pwd);
       onCreateSuccess();
-    } catch (error) {
-      keyring.reset();
-      toast({
-        title: 'Oops! Something went wrong. Try again later.',
-        description: error?.toString(),
-      });
     } finally {
       setLoading(false);
     }

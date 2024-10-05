@@ -1,6 +1,7 @@
 type StorageOperations = {
-  save: <T>(key: string, value: T) => Promise<void>;
-  get: <T>(key: string) => Promise<T | undefined>;
-  remove: (key: string) => Promise<void>;
+  save: <T>(items: Record<string, T>) => Promise<void>;
+
+  get: <T>(keys: string[]) => Promise<Record<string, T>>;
+  remove: (keys: string[]) => Promise<void>;
   clear: () => Promise<void>;
 };

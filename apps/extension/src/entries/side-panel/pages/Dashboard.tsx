@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import useAccountStore from '../stores/account';
+import useAccountStore from '@/stores/account';
 import BasicAccountInfo from '../components/BasicAccountInfo';
 
 export default function Dashboard() {

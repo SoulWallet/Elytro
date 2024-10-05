@@ -44,6 +44,7 @@ export function navigateTo(
           });
         }
       });
+
       break;
     case 'tab':
       chrome.tabs.create({

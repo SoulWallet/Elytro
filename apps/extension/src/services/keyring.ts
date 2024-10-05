@@ -25,13 +25,14 @@ class KeyringService {
   private _store: Nullable<SubscribableStore<KeyringServiceState>> = null;
 
   constructor() {
+    console.log('!!!keyring constructor', new Date());
     this.restore();
   }
 
   public initialize = async () => {
     this._store = new SubscribableStore({} as KeyringServiceState);
     this._store.subscribe((state) => {
-      localStorage.save(KEYRING_STORAGE_KEY, state);
+      localStorage.save({ [KEYRING_STORAGE_KEY]: state });
     });
 
     this._initialized = true;
@@ -55,26 +56,28 @@ class KeyringService {
       this.initialize();
     }
 
-    const prevState = await localStorage.get(KEYRING_STORAGE_KEY);
+    const { [KEYRING_STORAGE_KEY]: prevState } = await localStorage.get([
+      KEYRING_STORAGE_KEY,
+    ]);
     if (prevState) {
-      this._store!.setState(prevState);
+      this._store!.setState(prevState as KeyringServiceState);
     }
 
-    if (this._password) {
-      this.unlock(this._password!);
-    }
+    await this._verifyPassword();
   }
 
   public async setPassword(password: string) {
     if (this._owner) {
-      const encryptedLocked = await encrypt(password, 'unlock');
+      const encryptedLocked = await encrypt('unlock', password);
       this._store?.setState({
         encryptedLocked,
       });
     } else {
       throw new Error('Cannot set password if owner is already set');
+      // or this.createNewOwner(password);
     }
     this._password = password;
+    this._locked = false;
   }
 
   public async lock() {
@@ -85,21 +88,7 @@ class KeyringService {
     this._password = null;
     this._locked = true;
     this._key = null;
-  }
-
-  public async unlock(password: string) {
-    if (!password) {
-      throw new Error('Password is required');
-    }
-    await this._verifyPassword(password);
-    this._locked = false;
-    // TODO: calc will throw error, need to fix.
-    // await walletClient.calcWalletAddress();
-  }
-
-  private _updateOwnerByKey(key: Hex) {
-    this._key = key;
-    this._owner = privateKeyToAccount(this._key);
+    this._store?.setState({});
   }
 
   public async createNewOwner(password: string) {
@@ -114,26 +103,41 @@ class KeyringService {
     return this._owner;
   }
 
+  public async unlock(password: string) {
+    if (!password) {
+      throw new Error('Password is required');
+    }
+    await this._verifyPassword(password);
+    this._password = password;
+    // TODO: calc will throw error, need to fix.
+    // await walletClient.calcWalletAddress();
+  }
+
+  private _updateOwnerByKey(key: Hex) {
+    this._key = key;
+    this._owner = privateKeyToAccount(this._key);
+  }
+
   private async _persistOwner() {
     if (this._key) {
-      const encryptedKey = await encrypt(this._password!, this._key);
+      const encryptedKey = await encrypt(this._key, this._password!);
       this._store?.setState({
         encryptedKey,
       });
     }
   }
 
-  private async _verifyPassword(password: string) {
+  private async _verifyPassword(password?: string) {
     const { encryptedLocked, encryptedKey } = this._store?.state ?? {};
 
     if (!encryptedLocked || !encryptedKey) {
       throw new Error('Cannot verify password if there is no previous owner');
     }
 
-    await decrypt(password, encryptedLocked);
-    const key = await decrypt(password, encryptedKey);
+    // await decrypt(encryptedLocked, password);
+    const key = await decrypt(encryptedKey, password);
     this._updateOwnerByKey(key as Hex);
-    this._password = password;
+    this._locked = false;
   }
 
   public async reset() {
@@ -143,8 +147,11 @@ class KeyringService {
     this._locked = true;
     this._key = null;
   }
+
+  public tryUnlock(onSuccess: () => void) {
+    this._verifyPassword().then(onSuccess);
+  }
 }
 
 const keyring = new KeyringService();
-
 export default keyring;

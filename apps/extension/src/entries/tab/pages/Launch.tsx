@@ -30,7 +30,7 @@ const Launch: React.FC = () => {
         </>
       }
     >
-      <div className="p-6 text-gray-900">
+      <div className="p-6 text-gray-900 min-w-max">
         <Slogan />
         <p className="mt-6 opacity-60 text-lg">
           Setup up new account to receive 10 USDC

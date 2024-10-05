@@ -1,16 +1,16 @@
-const withErrorHandling = <T extends (...args: any[]) => any>(
+const withErrorHandling = <T extends (...args: unknown[]) => unknown>(
   operation: T,
   fallback?: T
 ): ((...args: Parameters<T>) => ReturnType<T>) => {
-  return (...args: Parameters<T>) => {
+  return (...args: Parameters<T>): ReturnType<T> => {
     try {
-      return operation(...args);
+      return operation(...args) as ReturnType<T>;
     } catch (error) {
       // TODO: add notification
       console.error('Elytro::SyncStorage::save: ', error);
       if (fallback) {
         console.log('Elytro::SyncStorage::save: trying fallback');
-        return fallback(...args);
+        return fallback(...args) as ReturnType<T>;
       }
       throw error;
     }
@@ -22,8 +22,8 @@ const withErrorHandling = <T extends (...args: any[]) => any>(
  */
 const syncStorage: StorageOperations = {
   save: withErrorHandling(
-    (key: string, value: unknown): void => {
-      chrome.storage.sync.set({ [key]: value }, () => {
+    (items: Record<string, unknown>): void => {
+      chrome.storage.sync.set(items, () => {
         if (chrome.runtime.lastError) {
           throw chrome.runtime.lastError;
         }
@@ -33,22 +33,23 @@ const syncStorage: StorageOperations = {
   ),
 
   get: withErrorHandling(
-    <T>(key: string): T | undefined => {
-      let result: T | undefined;
-      chrome.storage.sync.get(key, (items) => {
+    <T>(keys: string[]): Record<string, T> => {
+      let result: Record<string, T> = {};
+      chrome.storage.sync.get(keys, (items) => {
         if (chrome.runtime.lastError) {
           throw chrome.runtime.lastError;
         }
-        result = items[key] as T;
+        result = items;
       });
       return result;
     },
     localStorage.get // if sync storage get failed, try local storage
   ),
 
-  remove: withErrorHandling(async (key: string): Promise<void> => {
+  // @ts-ignore
+  remove: withErrorHandling(async (keys: string[]): Promise<void> => {
     await new Promise((resolve) => {
-      chrome.storage.sync.remove(key, () => {
+      chrome.storage.sync.remove(keys, () => {
         if (chrome.runtime.lastError) {
           throw chrome.runtime.lastError;
         }

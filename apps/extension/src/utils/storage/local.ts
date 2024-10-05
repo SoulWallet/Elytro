@@ -2,9 +2,9 @@
  * Elytro Local Storage
  */
 const localStorage: StorageOperations = {
-  save: async <T>(key: string, value: T): Promise<void> => {
+  save: async <T>(items: Record<string, T>): Promise<void> => {
     try {
-      await chrome.storage.local.set({ [key]: value });
+      await chrome.storage.local.set(items);
     } catch (error) {
       throw new Error(
         `Elytro::LocalStorage::save: ${(error as Error).message}`
@@ -12,18 +12,18 @@ const localStorage: StorageOperations = {
     }
   },
 
-  get: async <T>(key: string): Promise<T | undefined> => {
+  get: async <T>(keys: string[]): Promise<Record<string, T>> => {
     try {
-      const result = await chrome.storage.local.get(key);
-      return (result?.[key] || result) as T;
+      const result = await chrome.storage.local.get(keys);
+      return result;
     } catch (error) {
       throw new Error(`Elytro::LocalStorage::get: ${(error as Error).message}`);
     }
   },
 
-  remove: async (key: string): Promise<void> => {
+  remove: async (keys: string[]): Promise<void> => {
     try {
-      await chrome.storage.local.remove(key);
+      await chrome.storage.local.remove(keys);
     } catch (error) {
       throw new Error(
         `Elytro::LocalStorage::remove: ${(error as Error).message}`

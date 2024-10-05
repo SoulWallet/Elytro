@@ -1,4 +1,4 @@
-import useDialogStore from '../stores/dialog';
+import useDialogStore from '@/stores/dialog';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { formatAddressToShort } from '@/utils/format';
 

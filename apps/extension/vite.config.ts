@@ -21,12 +21,13 @@ export default defineConfig({
     crx({ manifest }),
     // a workaround for @metamask/post-message-stream - readable-stream
     nodePolyfills({
-      include: ['process'],
+      include: ['process', 'util'],
     }),
   ],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      // 'util': 'node_modules'
     },
   },
   build: {

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { navigateTo } from '@/utils/navigation';
 import { TAB_ROUTE_PATHS } from '@/entries/tab/routes';
-import useKeyringStore from '../stores/keyring';
+import useKeyringStore from '@/stores/keyring';
 import Slogan from '@/components/Slogan';
 
 export default function Unlock() {

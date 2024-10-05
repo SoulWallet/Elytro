@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+import { sessionStorage } from './storage/session';
 
 const DEFAULT_ALGORITHM = 'PBKDF2';
 const DERIVED_KEY_FORMAT = 'AES-GCM';
@@ -18,7 +19,7 @@ function getBase64Salt(salt: Uint8Array<ArrayBuffer>) {
 async function getCryptoKey(
   password: string,
   base64salt: string,
-  extractable = false
+  extractable = true
 ) {
   const key = await globalThis.crypto.subtle.importKey(
     'raw',
@@ -64,11 +65,34 @@ async function encryptWithKey<T>(key: CryptoKey, data: T) {
   };
 }
 
-export async function encrypt<T>(password: string, data: T) {
-  const salt = getBase64Salt(generateSalt());
-  const key = await getCryptoKey(password, salt);
-  const encryptedData = await encryptWithKey(key, data);
+export async function encrypt<T>(data: T, password?: string) {
+  let key, salt;
 
+  if (!password) {
+    const { cryptoKey: storedKey, salt: storedSalt } = await sessionStorage.get(
+      ['cryptoKey', 'salt']
+    );
+
+    if (!storedKey || !storedSalt) {
+      throw new Error('Password is required and not found in sessionStorage');
+    }
+    key = await crypto.subtle.importKey(
+      'jwk',
+      JSON.parse(storedKey as string),
+      { name: DERIVED_KEY_FORMAT, length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+    salt = storedSalt;
+  } else {
+    salt = getBase64Salt(generateSalt());
+    key = await getCryptoKey(password, salt);
+
+    const exportedKey = await crypto.subtle.exportKey('jwk', key);
+    sessionStorage.save({ cryptoKey: JSON.stringify(exportedKey), salt });
+  }
+
+  const encryptedData = await encryptWithKey(key, data);
   return JSON.stringify({ ...encryptedData, salt });
 }
 
@@ -101,12 +125,29 @@ async function decryptWithKey(
 }
 
 export async function decrypt(
-  password: string,
-  encryptedText: string
+  encryptedText: string,
+  password?: string
 ): Promise<unknown> {
   const payload = JSON.parse(encryptedText);
   const { salt } = payload;
-  const key = await getCryptoKey(password, salt);
+  let key;
+
+  if (!password) {
+    const { cryptoKey: storedKey } = await sessionStorage.get(['cryptoKey']);
+    if (!storedKey) {
+      throw new Error('Password is required and not found in sessionStorage');
+    }
+    key = await crypto.subtle.importKey(
+      'jwk',
+      JSON.parse(storedKey as string),
+      { name: DERIVED_KEY_FORMAT, length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  } else {
+    // 使用提供的密码生成 key
+    key = await getCryptoKey(password, salt);
+  }
 
   const result = await decryptWithKey(key, payload);
   return result;
