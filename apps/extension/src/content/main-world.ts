@@ -10,7 +10,7 @@ const generateUUID4 = () =>
 const mainWorld = () => {
   const info: EIP6963ProviderInfo = {
     uuid: generateUUID4(),
-    name: 'Elytro Wallet',
+    name: 'Elytro',
     // TODO: Add Elytro logo
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>",
     rdns: 'com.elytro',

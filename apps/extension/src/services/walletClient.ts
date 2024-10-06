@@ -17,14 +17,11 @@ import {
 } from '@soulwallet/sdk';
 import { getHexString, paddingBytesToEven, paddingZero } from '@/utils/format';
 import {
-  Account,
   createWalletClient,
   http,
   parseEther,
-  PrivateKeyAccount,
   publicActions,
   PublicClient,
-  SignableMessage,
 } from 'viem';
 import {
   DEFAULT_GUARDIAN_HASH,
@@ -44,8 +41,6 @@ import keyring from './keyring';
 import { UserOperationStatusEn } from '@/constants/operations';
 import { SignMessageParameters, SignTypedDataParameters } from 'viem/accounts';
 import { ethErrors } from 'eth-rpc-errors';
-import { navigateTo } from '@/utils/navigation';
-import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 
 class ElytroWalletClient {
   private _bundler: Nullable<Bundler> = null;
@@ -534,20 +529,27 @@ class ElytroWalletClient {
   }
 
   public async personalSign(params: unknown) {
-    return new Promise((resolve, reject) => {
-      let signer = keyring.owner;
+    let signer = keyring.owner;
 
+    return new Promise(async (resolve, reject) => {
       if (!signer) {
-        navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Unlock);
-        // keyring.tryUnlock(() => {
-        //   signer = keyring.owner;
-        //   resolve(signer?.signMessage(params as SignMessageParameters));
-        // });
+        await keyring.tryUnlock(async () => {
+          signer = keyring.owner;
+          signer
+            ? resolve(
+                await signer?.signMessage({
+                  message: String(params),
+                })
+              )
+            : reject(new Error('Elytro: Unable to unlock signer.'));
+        });
       } else {
-        resolve(signer?.signMessage(params as SignMessageParameters));
+        resolve(
+          await signer?.signMessage({
+            message: String(params),
+          })
+        );
       }
-
-      reject(ethErrors.rpc.internal());
     });
   }
 }
