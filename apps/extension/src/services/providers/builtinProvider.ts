@@ -2,6 +2,7 @@
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 import walletClient from '../walletClient';
 import { toHex } from 'viem';
+import keyring from '../keyring';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
@@ -34,9 +35,8 @@ class BuiltinProvider extends SafeEventEmitter {
   };
 
   public async request({ method, params }: RequestArguments) {
-    // TODO: try unlock if needed
-
-    console.log('method', method);
+    // TODO: try unlock if needed -> call up the unlock page
+    keyring.tryUnlock();
 
     switch (method) {
       case 'eth_chainId':

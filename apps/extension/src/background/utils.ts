@@ -8,11 +8,10 @@ export const sendReadyMessageToTabs = async () => {
       await chrome.tabs.sendMessage(tabId, {
         name: RUNTIME_MESSAGE_TYPE.BG_READY,
       });
-    } catch (e) {
-      console.log('sendMessage error', e);
-      setTimeout(() => {
-        sendMessage(tabId);
-      }, 200);
+    } catch (_e) {
+      // setTimeout(() => {
+      //   sendMessage(tabId);
+      // }, 200);
     }
   };
 

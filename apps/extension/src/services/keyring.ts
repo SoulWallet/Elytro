@@ -154,11 +154,11 @@ class KeyringService {
     this._key = null;
   }
 
-  public tryUnlock(callback: () => void) {
+  public tryUnlock(callback?: () => void) {
     if (this._locked) {
       this._verifyPassword().then(callback);
     } else {
-      callback();
+      callback?.();
     }
   }
 }
