@@ -9,6 +9,7 @@ specifiers:
   '@radix-ui/react-dialog': ^1.1.2
   '@radix-ui/react-label': ^2.1.0
   '@radix-ui/react-slot': ^1.1.0
+  '@radix-ui/react-tabs': ^1.1.1
   '@radix-ui/react-toast': ^1.2.1
   '@soulwallet/abi': ^0.3.4
   '@soulwallet/decoder': ^0.3.4
@@ -55,6 +56,7 @@ dependencies:
   '@radix-ui/react-dialog': 1.1.2_szuh4vtdsit4ubso7uq3ljvnnm
   '@radix-ui/react-label': 2.1.0_szuh4vtdsit4ubso7uq3ljvnnm
   '@radix-ui/react-slot': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+  '@radix-ui/react-tabs': 1.1.1_szuh4vtdsit4ubso7uq3ljvnnm
   '@radix-ui/react-toast': 1.2.1_szuh4vtdsit4ubso7uq3ljvnnm
   '@soulwallet/abi': 0.3.4
   '@soulwallet/decoder': 0.3.4
@@ -925,6 +927,19 @@ packages:
       react-remove-scroll: 2.6.0_vhfblam3newwcpiwkw3tsgpmum
     dev: false
 
+  /@radix-ui/react-direction/1.1.0_vhfblam3newwcpiwkw3tsgpmum:
+    resolution: {integrity: sha512-BUuBvgThEiAXh2DWu93XsT+a3aWrGqolGlqqw5VU1kG7p/ZH2cuDlM1sRLNnY3QcBS69UIz2mcKhMxDsdewhjg==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@types/react': 18.3.5
+      react: 18.3.1
+    dev: false
+
   /@radix-ui/react-dismissable-layer/1.1.0_szuh4vtdsit4ubso7uq3ljvnnm:
     resolution: {integrity: sha512-/UovfmmXGptwGcBQawLzvn2jOfM0t4z3/uKffoBlj724+n3FvBbZ7M0aaBOmkp6pqFYpO4yx8tSVJjx3Fl2jig==}
     peerDependencies:
@@ -1146,6 +1161,34 @@ packages:
       react-dom: 18.3.1_react@18.3.1
     dev: false
 
+  /@radix-ui/react-roving-focus/1.1.0_szuh4vtdsit4ubso7uq3ljvnnm:
+    resolution: {integrity: sha512-EA6AMGeq9AEeQDeSH0aZgG198qkfHSbvWTf1HvoDmOB5bBG/qTxjYMWUKMnYiV6J/iP/J8MEFSuB2zRU2n7ODA==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@radix-ui/primitive': 1.1.0
+      '@radix-ui/react-collection': 1.1.0_szuh4vtdsit4ubso7uq3ljvnnm
+      '@radix-ui/react-compose-refs': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@radix-ui/react-context': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@radix-ui/react-direction': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@radix-ui/react-id': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@radix-ui/react-primitive': 2.0.0_szuh4vtdsit4ubso7uq3ljvnnm
+      '@radix-ui/react-use-callback-ref': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@radix-ui/react-use-controllable-state': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@types/react': 18.3.5
+      '@types/react-dom': 18.3.0
+      react: 18.3.1
+      react-dom: 18.3.1_react@18.3.1
+    dev: false
+
   /@radix-ui/react-slot/1.1.0_vhfblam3newwcpiwkw3tsgpmum:
     resolution: {integrity: sha512-FUCf5XMfmW4dtYl69pdS4DbxKy8nj4M7SafBgPllysxmdachynNflAdp/gCsnYWNDnge6tI9onzMp5ARYc1KNw==}
     peerDependencies:
@@ -1158,6 +1201,33 @@ packages:
       '@radix-ui/react-compose-refs': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
       '@types/react': 18.3.5
       react: 18.3.1
+    dev: false
+
+  /@radix-ui/react-tabs/1.1.1_szuh4vtdsit4ubso7uq3ljvnnm:
+    resolution: {integrity: sha512-3GBUDmP2DvzmtYLMsHmpA1GtR46ZDZ+OreXM/N+kkQJOPIgytFWWTfDQmBQKBvaFS0Vno0FktdbVzN28KGrMdw==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@radix-ui/primitive': 1.1.0
+      '@radix-ui/react-context': 1.1.1_vhfblam3newwcpiwkw3tsgpmum
+      '@radix-ui/react-direction': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@radix-ui/react-id': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@radix-ui/react-presence': 1.1.1_szuh4vtdsit4ubso7uq3ljvnnm
+      '@radix-ui/react-primitive': 2.0.0_szuh4vtdsit4ubso7uq3ljvnnm
+      '@radix-ui/react-roving-focus': 1.1.0_szuh4vtdsit4ubso7uq3ljvnnm
+      '@radix-ui/react-use-controllable-state': 1.1.0_vhfblam3newwcpiwkw3tsgpmum
+      '@types/react': 18.3.5
+      '@types/react-dom': 18.3.0
+      react: 18.3.1
+      react-dom: 18.3.1_react@18.3.1
     dev: false
 
   /@radix-ui/react-toast/1.2.1_szuh4vtdsit4ubso7uq3ljvnnm:
