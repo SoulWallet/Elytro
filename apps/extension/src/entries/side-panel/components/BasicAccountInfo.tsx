@@ -5,14 +5,13 @@ import CopyableText from '@/components/CopyableText';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
 import { navigateTo } from '@/utils/navigation';
 import ActionButton from './ActionButton';
-import { Button } from '@/components/ui/button';
 import { formatAddressToShort } from '@/utils/format';
-import walletClient from '@/services/walletClient';
+import ActivateButton from './ActivateButton';
 
 export default function BasicAccountInfo() {
-  const { currentChainType, address, isActivated } = useAccountStore();
+  const { address, isActivated, chainType } = useAccountStore();
 
-  if (!address || !currentChainType) {
+  if (!address) {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
   }
 
@@ -28,18 +27,6 @@ export default function BasicAccountInfo() {
     console.log('onClickReceive');
   };
 
-  const onClickActivate = () => {
-    // todo: check if valid for sponsor
-    walletClient.activateAddress(
-      (userOp) => {
-        console.log('Sponsored', userOp);
-      },
-      (userOp) => {
-        console.log('Not Sponsored', userOp);
-      }
-    );
-  };
-
   return (
     <div className="flex flex-col p-6">
       {/* Chain & Address */}
@@ -48,11 +35,11 @@ export default function BasicAccountInfo() {
           <div className="flex flex-row gap-2 items-center w-full">
             <img
               className="w-10 h-10"
-              src={SUPPORTED_CHAIN_ICON_MAP[currentChainType]}
+              src={SUPPORTED_CHAIN_ICON_MAP[chainType]}
             ></img>
             <div className="flex flex-col justify-center">
               <div className="text-xl font-medium text-gray-900">
-                {currentChainType}
+                {chainType}
               </div>
               <CopyableText
                 className="text-sm text-gray-500"
@@ -85,12 +72,7 @@ export default function BasicAccountInfo() {
           />
         </div>
       ) : (
-        <Button
-          className="bg-elytro-btn-bg text-gray-900 hover:bg-blue-200 h-12"
-          onClick={onClickActivate}
-        >
-          Activate account
-        </Button>
+        <ActivateButton />
       )}
     </div>
   );

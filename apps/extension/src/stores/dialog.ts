@@ -1,32 +1,66 @@
 import { TSignTxDetail } from '@/constants/operations';
+import { ELYTRO_SESSION_DATA, TSessionData } from '@/constants/session';
 import { toast } from '@/hooks/use-toast';
+import { elytroSDK } from '@/services/sdk';
+import { formatSimulationResultToTxDetail } from '@/utils/format';
 import { create } from 'zustand';
 
 interface DialogState {
   isSignTxDialogOpen: boolean;
   signTxDetail: Nullable<TSignTxDetail>;
-  openSignTxDialog: (detail: TSignTxDetail) => void;
+  openSignTxDialog: (
+    userOp: ElytroUserOperation,
+    actionName?: string,
+    fromSession?: TSessionData,
+    toSession?: TSessionData
+  ) => void;
   closeSignTxDialog: () => void;
+  getTxDetailFromUserOp: () => void;
+  loading: boolean;
 }
 
 const useDialogStore = create<DialogState>((set) => ({
+  loading: false,
   isSignTxDialogOpen: false,
   // todo: remove this
-  signTxDetail: {
-    accountAddress: '0x123',
-    contractAddress: '0x123',
-    fee: '100',
-    txHash: '0x123',
-    action: {
-      dAppLogo:
-        'https://assets.coingecko.com/coins/images/25244/standard/Optimism.png',
-      name: 'Transfer',
-      description: 'Transfer 10 USDC to 0x123',
-    },
-  },
-  openSignTxDialog: (detail) => {
-    if (detail) {
-      set({ isSignTxDialogOpen: true, signTxDetail: detail });
+  signTxDetail: null,
+  openSignTxDialog: async (
+    userOp: ElytroUserOperation,
+    actionName: string = 'Confirm Transaction',
+    // default is elytro internal interaction
+    fromSession: TSessionData = ELYTRO_SESSION_DATA,
+    toSession: TSessionData = ELYTRO_SESSION_DATA
+  ) => {
+    if (userOp) {
+      set({ isSignTxDialogOpen: true, loading: true });
+
+      try {
+        await elytroSDK.signUserOperation(userOp);
+        // const txDetail = formatSimulationResultToTxDetail(
+        //   await elytroSDK.simulateUserOperation(userOp)
+        // );
+        set({
+          signTxDetail: {
+            userOpDetail: {
+              from: '0x0000000000000000000000000000000000000000',
+              to: '0x0000000000000000000000000000000000000000',
+              value: 0,
+              fee: '0',
+              callData: userOp.callData,
+            },
+            fromSession,
+            toSession,
+            actionName,
+          },
+        });
+      } catch (error) {
+        toast({
+          title: 'Oops!',
+          description: 'Failed to get transaction detail',
+        });
+      } finally {
+        set({ loading: false });
+      }
     } else {
       toast({
         title: 'Oops!',
@@ -35,8 +69,9 @@ const useDialogStore = create<DialogState>((set) => ({
     }
   },
   closeSignTxDialog: () => {
-    set({ isSignTxDialogOpen: false, signTxDetail: null });
+    set({ isSignTxDialogOpen: false, signTxDetail: null, loading: false });
   },
+  getTxDetailFromUserOp() {},
 }));
 
 export default useDialogStore;

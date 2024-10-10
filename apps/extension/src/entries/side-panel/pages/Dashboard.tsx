@@ -2,9 +2,16 @@ import EmptyAsset from '@/components/EmptyAsset';
 import BasicAccountInfo from '../components/BasicAccountInfo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TokenList from '@/components/TokenList';
+import useAccountStore from '@/stores/account';
+import { useEffect } from 'react';
 
 export default function Dashboard() {
-  const isEmpty = false; // todo: make this dynamic
+  const { update } = useAccountStore();
+  const isEmpty = false;
+
+  useEffect(() => {
+    update();
+  }, []);
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">

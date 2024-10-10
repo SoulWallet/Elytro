@@ -13,7 +13,12 @@ import {
 import { getHexString, paddingZero } from '@/utils/format';
 import { Bundler, SignkeyType, SoulWallet } from '@soulwallet/sdk';
 import { DecodeUserOp } from '@soulwallet/decoder';
-import { canUserOpGetSponsor } from '@/utils/sponsor';
+import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
+import keyring from './keyring';
+import { simulateSendUserOp } from '@/utils/ethRpc/simulate';
+import { UserOperationStatusEn } from '@/constants/operations';
+import { parseEther, toHex } from 'viem';
+import { createAccount } from '@/utils/ethRpc/create-account';
 
 class ElytroSDK {
   private _sdk!: SoulWallet;
@@ -68,9 +73,11 @@ class ElytroSDK {
     initialGuardianSafePeriod: number = DEFAULT_GUARDIAN_SAFE_PERIOD,
     chainId: number | string = this.chain.id
   ) {
+    const initialKeysStrArr = [paddingZero(eoaAddress, 32)];
+
     const res = await this._sdk?.calcWalletAddress(
       this._index,
-      [paddingZero(eoaAddress, 32)],
+      initialKeysStrArr,
       initialGuardianHash,
       initialGuardianSafePeriod,
       chainId
@@ -79,6 +86,15 @@ class ElytroSDK {
     if (res.isErr()) {
       throw res.ERR;
     } else {
+      debugger;
+      createAccount(
+        res.OK,
+        this.chain.id,
+        this._index,
+        initialKeysStrArr,
+        initialGuardianHash,
+        initialGuardianSafePeriod
+      );
       return res.OK;
     }
   }
@@ -112,7 +128,7 @@ class ElytroSDK {
   }
 
   public async canGetSponsored(userOp: ElytroUserOperation) {
-    return canUserOpGetSponsor(userOp, BigInt(this.chain.id), TEMP_ENTRY_POINT);
+    return canUserOpGetSponsor(userOp, this.chain.id, TEMP_ENTRY_POINT);
   }
 
   public async isSmartAccountDeployed(address: string) {
@@ -131,18 +147,68 @@ class ElytroSDK {
   }
 
   public async sendUserOperation(userOp: ElytroUserOperation) {
-    const opHash = await this._sdk.userOpHash(userOp);
-    console.log(opHash);
-  }
-
-  private async _getPackedUserOpHash(userOp: ElytroUserOperation) {
-    const res = await this._sdk.userOpHash(userOp);
+    const res = await this._sdk.sendUserOperation(userOp);
 
     if (res.isErr()) {
       throw res.ERR;
     } else {
+      return res.OK;
+    }
+  }
+
+  public async signUserOperation(userOp: ElytroUserOperation) {
+    const { validationData, packedHash } =
+      await this._getPackedUserOpHash(userOp);
+
+    const _eoaSignature = await keyring.owner?.signMessage({
+      message: packedHash,
+    });
+
+    if (!_eoaSignature) {
+      throw new Error('Elytro: Failed to sign message.');
+    }
+
+    const res = await this._sdk.packUserOpEOASignature(
+      TEMP_VALIDATOR,
+      _eoaSignature,
+      validationData
+    );
+
+    if (res.isErr()) {
+      throw res.ERR;
+    } else {
+      userOp.signature = res.OK;
+      return userOp;
+    }
+  }
+
+  public async getUserOperationReceipt(userOpHash: string) {
+    try {
+      const res = await this._bundler?.eth_getUserOperationReceipt(userOpHash);
+
+      if (res?.isErr()) {
+        throw res.ERR;
+      } else if (res?.OK) {
+        return res.OK.success
+          ? UserOperationStatusEn.confirmedSuccess
+          : UserOperationStatusEn.confirmedFailed;
+      } else {
+        return UserOperationStatusEn.pending;
+      }
+    } catch (error) {
+      console.error('Elytro: Failed to get user operation receipt.', error);
+      return UserOperationStatusEn.error;
+    }
+  }
+
+  private async _getPackedUserOpHash(userOp: ElytroUserOperation) {
+    const opHash = await this._sdk.userOpHash(userOp);
+
+    if (opHash.isErr()) {
+      throw opHash.ERR;
+    } else {
       const packedHash = await this._sdk.packRawHash(
-        res.OK,
+        opHash.OK,
         0, // start time
         Math.floor(new Date().getTime() / 1000) + 60 * 5 // end time
       );
@@ -150,12 +216,12 @@ class ElytroSDK {
       if (packedHash.isErr()) {
         throw packedHash.ERR;
       } else {
-        return packedHash.OK;
+        return { ...packedHash.OK, userOpHash: opHash.OK };
       }
     }
   }
 
-  private async _decodeUserOperation(userOp: ElytroUserOperation) {
+  public async getDecodedUserOperation(userOp: ElytroUserOperation) {
     if (userOp.callData?.length <= 2) {
       return null;
     }
@@ -170,7 +236,11 @@ class ElytroSDK {
     }
   }
 
-  private async _estimateGas(userOp: ElytroUserOperation) {
+  public async simulateUserOperation(userOp: ElytroUserOperation) {
+    return await simulateSendUserOp(userOp, TEMP_ENTRY_POINT);
+  }
+
+  public async estimateGas(userOp: ElytroUserOperation) {
     const gasPrice = await this._sdk.provider.getFeeData();
 
     // todo: what if it's null? set as 0?
@@ -183,9 +253,10 @@ class ElytroSDK {
       userOp,
       {
         [userOp.sender]: {
-          balance: getHexString(
-            await this._sdk.provider.getBalance(userOp.sender)
-          ),
+          balance: toHex(parseEther('1')),
+          // getHexString(
+          //   await this._sdk.provider.getBalance(userOp.sender)
+          // ),
         },
       },
       SignkeyType.EOA // 目前仅支持EOA
@@ -214,6 +285,41 @@ class ElytroSDK {
         userOp.paymasterVerificationGasLimit = BigInt(
           paymasterVerificationGasLimit
         );
+      }
+    }
+  }
+
+  public async getPreFund(
+    userOp: ElytroUserOperation,
+    transferValue: bigint,
+    isValidForSponsor: boolean
+  ) {
+    const res = await this._sdk.preFund(userOp);
+
+    if (res.isErr()) {
+      throw res.ERR;
+    } else {
+      const preFund = res.OK;
+      const _balance = await this._sdk.provider.getBalance(userOp.sender);
+      const missFund = BigInt(preFund.missfund);
+
+      if (!isValidForSponsor || transferValue > 0) {
+        const maxMissFoundEth = '0.001';
+        const maxMissFund = parseEther(maxMissFoundEth);
+
+        const fundRequest = isValidForSponsor
+          ? transferValue
+          : transferValue + missFund;
+
+        if (fundRequest > maxMissFund) {
+          throw new Error(
+            'Elytro: We may encounter fund issues. Please try again.'
+          );
+        }
+
+        if (fundRequest > _balance) {
+          throw new Error('Elytro: Insufficient balance.');
+        }
       }
     }
   }

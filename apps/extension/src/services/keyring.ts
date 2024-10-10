@@ -7,10 +7,15 @@ import {
   generatePrivateKey,
   privateKeyToAccount,
 } from 'viem/accounts';
+import { elytroSDK } from './sdk';
+
+type EncryptedData = {
+  key: Hex;
+  sa: string;
+};
 
 type KeyringServiceState = {
-  encryptedKey?: string;
-  encryptedLocked?: string;
+  data: string;
 };
 
 const KEYRING_STORAGE_KEY = 'elytroKeyringState';
@@ -20,19 +25,28 @@ class KeyringService {
   private _locked = true;
   private _key: Nullable<Hex> = null;
   private _owner: Nullable<PrivateKeyAccount> = null;
-  private _password: Nullable<string> = null;
+  private _sa: Nullable<string> = null;
 
-  private _store: Nullable<SubscribableStore<KeyringServiceState>> = null;
+  private _store!: SubscribableStore<KeyringServiceState>;
 
   constructor() {
-    this.restore();
+    this._initialize();
   }
 
-  public initialize = async () => {
+  private _initialize = async () => {
     this._store = new SubscribableStore({} as KeyringServiceState);
     this._store.subscribe((state) => {
       localStorage.save({ [KEYRING_STORAGE_KEY]: state });
     });
+
+    const { [KEYRING_STORAGE_KEY]: prevState } = await localStorage.get([
+      KEYRING_STORAGE_KEY,
+    ]);
+    if (prevState) {
+      this._store.setState(prevState as KeyringServiceState);
+    }
+
+    await this._verifyPassword();
 
     this._initialized = true;
   };
@@ -49,42 +63,43 @@ class KeyringService {
     return this._owner;
   }
 
+  public get smartAccountAddress() {
+    return this._sa;
+  }
+
   public async restore() {
     if (!this._initialized) {
-      // throw new Error('Keyring not initialized');
-      this.initialize();
+      this._initialize();
     }
 
     const { [KEYRING_STORAGE_KEY]: prevState } = await localStorage.get([
       KEYRING_STORAGE_KEY,
     ]);
     if (prevState) {
-      this._store!.setState(prevState as KeyringServiceState);
+      this._store.setState(prevState as KeyringServiceState);
     }
 
     await this._verifyPassword();
   }
 
-  public async setPassword(password: string) {
-    if (this._owner) {
-      const encryptedLocked = await encrypt('unlock', password);
-      this._store?.setState({
-        encryptedLocked,
-      });
-    } else {
-      throw new Error('Cannot set password if owner is already set');
-      // or this.createNewOwner(password);
-    }
-    this._password = password;
-    this._locked = false;
-  }
+  // public async setPassword(password: string) {
+  //   if (this._key) {
+  //     const encryptedLocked = await encrypt('unlock', password);
+  //     this._store?.setState({
+  //       encryptedLocked,
+  //     });
+  //   } else {
+  //     throw new Error('Elytro: No need to set password if no owner.');
+  //   }
+  //   this._password = password;
+  //   this._locked = false;
+  // }
 
   public async lock() {
     if (!this._owner) {
       throw new Error('Cannot lock if owner is not set');
     }
     this._owner = null;
-    this._password = null;
     this._locked = true;
     this._key = null;
     this._store?.setState({});
@@ -95,11 +110,26 @@ class KeyringService {
       throw new Error('Cannot create new owner if owner is already set');
     }
 
-    this._updateOwnerByKey(generatePrivateKey());
-    await this.setPassword(password);
-    await this._persistOwner();
+    try {
+      this._key = generatePrivateKey();
+      this._owner = privateKeyToAccount(this._key);
+      this._sa = await elytroSDK.createWalletAddress(this._owner.address);
 
-    return this._owner;
+      const encryptedData = await encrypt(
+        {
+          key: this._key,
+          sa: this._sa,
+        },
+        password
+      );
+      this._store.setState({
+        data: encryptedData,
+      });
+      this._locked = false;
+    } catch {
+      this._locked = true;
+      throw new Error('Elytro: Failed to create new owner');
+    }
   }
 
   public async unlock(password: string) {
@@ -107,38 +137,27 @@ class KeyringService {
       throw new Error('Password is required');
     }
     await this._verifyPassword(password);
-    this._password = password;
-    // TODO: calc will throw error, need to fix.
-    // await walletClient.calcWalletAddress();
   }
 
-  private _updateOwnerByKey(key: Hex) {
+  private async _updateOwnerByKey(key: Hex) {
     this._key = key;
     this._owner = privateKeyToAccount(this._key);
   }
 
-  private async _persistOwner() {
-    if (this._key) {
-      const encryptedKey = await encrypt(this._key, this._password!);
-      this._store?.setState({
-        encryptedKey,
-      });
-    }
-  }
-
   private async _verifyPassword(password?: string) {
-    const { encryptedLocked, encryptedKey } = this._store?.state ?? {};
+    const { data } = this._store.state;
 
-    if (!encryptedLocked || !encryptedKey) {
+    if (!data) {
       this._locked = true;
       return;
       // throw new Error('Cannot verify password if there is no previous owner');
     }
 
     try {
-      // await decrypt(encryptedLocked, password);
-      const key = await decrypt(encryptedKey, password);
+      const { key, sa } = (await decrypt(data, password)) as EncryptedData;
+
       this._updateOwnerByKey(key as Hex);
+      this._sa = sa as string;
       this._locked = false;
     } catch (error) {
       console.log('Elytro: Failed to verify password.', error);
@@ -149,14 +168,19 @@ class KeyringService {
   public async reset() {
     this._store?.setState({});
     this._owner = null;
-    this._password = null;
     this._locked = true;
     this._key = null;
+    this._sa = null;
   }
 
-  public tryUnlock(callback?: () => void) {
+  public async tryUnlock(callback?: () => void) {
+    if (!this._initialized) {
+      await this._initialize();
+    }
+
     if (this._locked) {
-      this._verifyPassword().then(callback);
+      await this._verifyPassword();
+      callback?.();
     } else {
       callback?.();
     }

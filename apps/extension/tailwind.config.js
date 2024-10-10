@@ -11,6 +11,18 @@ module.exports = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      borderWidth: {
+        1: '1px',
+        2: '2px',
+      },
+      fontSize: {
+        xs: '0.75rem',
+        sm: '0.875rem',
+        base: '1rem',
+        lg: '1.125rem',
+        xl: '1.25rem',
+        '2xl': '1.3rem',
+      },
       backgroundImage: {
         'elytro-background': 'var(--elytro-background-image)',
         'elytro-btn-bg': 'var(--elytro-btn-bg)',

@@ -1,3 +1,5 @@
+import { TSessionData } from './session';
+
 export enum UserOperationStatusEn {
   pending = 'pending',
   confirmedSuccess = 'success',
@@ -12,10 +14,16 @@ export type TDAppActionDetail = {
 };
 
 export type TSignTxDetail = {
-  accountAddress: string;
-  contractAddress: string;
+  fromSession: TSessionData;
+  toSession: TSessionData;
+  actionName: string;
+  userOpDetail: TUserOperationDetail;
+};
+
+export type TUserOperationDetail = {
+  from: string;
+  to: string;
+  value: number;
   fee: string;
-  txHash: string;
-  // txStatus: UserOperationStatusEn;
-  action: TDAppActionDetail;
+  callData: string;
 };

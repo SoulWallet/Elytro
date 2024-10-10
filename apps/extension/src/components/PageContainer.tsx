@@ -10,7 +10,7 @@ interface IPageContainerProps {
 
 function PageContainer({ children, className }: IPageContainerProps) {
   return (
-    <div className={`w-screen h-screen ${className}`}>
+    <div className={`w-screen h-screen flex ${className}`}>
       <RequestProvider>{children}</RequestProvider>
       <Toaster />
     </div>

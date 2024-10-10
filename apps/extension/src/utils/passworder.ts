@@ -31,7 +31,7 @@ const getCryptoKeyWithBackup = async (
 
     const derivedKey = await crypto.subtle.deriveKey(
       {
-        name: 'PBKDF2',
+        name: DEFAULT_ALGORITHM,
         salt: Buffer.from(base64salt, 'base64'),
         iterations: ITERATIONS,
         hash: 'SHA-256',

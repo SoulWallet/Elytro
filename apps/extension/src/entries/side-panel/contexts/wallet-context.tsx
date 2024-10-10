@@ -1,5 +1,5 @@
 import useKeyringStore from '@/stores/keyring';
-import SignTxModal from '../components/SignTx';
+import SignTxModal from '../components/SignTxModal';
 import { createContext, useEffect } from 'react';
 
 type IWalletContext = {

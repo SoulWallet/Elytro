@@ -1,3 +1,6 @@
+import { TUserOperationDetail } from '@/constants/operations';
+import { SimulationResult } from './ethRpc/simulate';
+
 export function paddingZero(
   value: string | number | bigint,
   bytesLen?: number
@@ -32,14 +35,14 @@ export function getHexString(value: number | string | bigint) {
 }
 
 // make the hex string length even
-export function paddingBytesToEven(value: string): string {
-  if (value.startsWith('0x')) {
-    value = value.slice(2);
-  }
-  if (value.length % 2 !== 0) {
-    value = '0' + value;
-  }
-  return value;
+export function paddingBytesToEven(value?: string): string | null {
+  if (!value) return null;
+
+  const hexValue = value.startsWith('0x') ? value.slice(2) : value;
+
+  const paddedHex = hexValue.length % 2 === 1 ? '0' + hexValue : hexValue;
+
+  return '0x' + paddedHex;
 }
 
 export function formatAddressToShort(address: Nullable<string>) {
@@ -48,4 +51,15 @@ export function formatAddressToShort(address: Nullable<string>) {
   return address && address?.length > 12
     ? `${address?.substring(0, 6)}...${address?.substring(address?.length - 6)}`
     : '--';
+}
+
+export function formatSimulationResultToTxDetail(
+  simulationResult: SimulationResult
+) {
+  return {
+    from: simulationResult.assetChanges[0].from,
+    to: simulationResult.assetChanges[0].to,
+    value: parseInt(simulationResult.assetChanges[0].rawAmount, 16),
+    fee: simulationResult.gasUsed, // todo: calculate fee
+  } as TUserOperationDetail;
 }

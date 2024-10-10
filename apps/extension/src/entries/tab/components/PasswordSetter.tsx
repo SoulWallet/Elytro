@@ -81,7 +81,7 @@ export function PasswordSetter({ onSubmit, loading }: PasswordSetterProps) {
         />
 
         {(loading ||
-          (form.getValues('password')?.length &&
+          (form.getValues('password')?.length > 0 &&
             form.formState.errors.password === undefined)) && (
           <FormField
             control={form.control}
@@ -108,7 +108,7 @@ export function PasswordSetter({ onSubmit, loading }: PasswordSetterProps) {
           className="w-full rounded-full h-14"
           disabled={loading}
         >
-          {loading ? '加载中...' : '提交'}
+          {loading ? 'Creating...' : 'Submit'}
         </Button>
       </form>
     </Form>

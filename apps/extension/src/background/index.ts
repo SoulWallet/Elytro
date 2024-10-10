@@ -31,6 +31,7 @@ chrome.sidePanel
   .catch((error) => console.error(error));
 
 const initApp = async () => {
+  // await keyring.restore();
   await sendReadyMessageToTabs();
 
   chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
