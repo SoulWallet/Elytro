@@ -237,7 +237,7 @@ class ElytroSDK {
   }
 
   public async simulateUserOperation(userOp: ElytroUserOperation) {
-    return await simulateSendUserOp(userOp, TEMP_ENTRY_POINT);
+    return await simulateSendUserOp(userOp, TEMP_ENTRY_POINT, this.chain.id);
   }
 
   public async estimateGas(userOp: ElytroUserOperation) {

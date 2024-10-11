@@ -8,6 +8,7 @@ import { create } from 'zustand';
 interface DialogState {
   isSignTxDialogOpen: boolean;
   signTxDetail: Nullable<TSignTxDetail>;
+  userOp: Nullable<ElytroUserOperation>;
   openSignTxDialog: (
     userOp: ElytroUserOperation,
     actionName?: string,
@@ -15,13 +16,14 @@ interface DialogState {
     toSession?: TSessionData
   ) => void;
   closeSignTxDialog: () => void;
-  getTxDetailFromUserOp: () => void;
   loading: boolean;
+  confirmTx: () => void;
 }
 
-const useDialogStore = create<DialogState>((set) => ({
+const useDialogStore = create<DialogState>((set, get) => ({
   loading: false,
   isSignTxDialogOpen: false,
+  userOp: null,
   // todo: remove this
   signTxDetail: null,
   openSignTxDialog: async (
@@ -36,24 +38,20 @@ const useDialogStore = create<DialogState>((set) => ({
 
       try {
         await elytroSDK.signUserOperation(userOp);
-        // const txDetail = formatSimulationResultToTxDetail(
-        //   await elytroSDK.simulateUserOperation(userOp)
-        // );
+        const simulationResult = await elytroSDK.simulateUserOperation(userOp);
+        const txDetail = formatSimulationResultToTxDetail(simulationResult);
+
         set({
           signTxDetail: {
-            userOpDetail: {
-              from: '0x0000000000000000000000000000000000000000',
-              to: '0x0000000000000000000000000000000000000000',
-              value: 0,
-              fee: '0',
-              callData: userOp.callData,
-            },
+            txDetail,
             fromSession,
             toSession,
             actionName,
           },
+          userOp,
         });
       } catch (error) {
+        set({ isSignTxDialogOpen: false });
         toast({
           title: 'Oops!',
           description: 'Failed to get transaction detail',
@@ -62,6 +60,7 @@ const useDialogStore = create<DialogState>((set) => ({
         set({ loading: false });
       }
     } else {
+      set({ isSignTxDialogOpen: false });
       toast({
         title: 'Oops!',
         description: 'No sign transaction detail provided',
@@ -69,9 +68,29 @@ const useDialogStore = create<DialogState>((set) => ({
     }
   },
   closeSignTxDialog: () => {
-    set({ isSignTxDialogOpen: false, signTxDetail: null, loading: false });
+    set({
+      isSignTxDialogOpen: false,
+      signTxDetail: null,
+      loading: false,
+      userOp: null,
+    });
   },
-  getTxDetailFromUserOp() {},
+  confirmTx: async () => {
+    try {
+      const { userOp } = get();
+      if (userOp) {
+        await elytroSDK.sendUserOperation(userOp);
+        get().closeSignTxDialog();
+      } else {
+        throw new Error('No user operation to send');
+      }
+    } catch (error) {
+      toast({
+        title: 'Oops!',
+        description: 'Failed to send transaction',
+      });
+    }
+  },
 }));
 
 export default useDialogStore;

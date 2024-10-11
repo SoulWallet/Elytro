@@ -16,21 +16,24 @@ const LabelValue = ({ label, value }: { label: string; value?: string }) => {
 
 export default function SignTxModal() {
   const [showMore, setShowMore] = useState(false);
-  const { isSignTxDialogOpen, closeSignTxDialog, signTxDetail, loading } =
-    useDialogStore();
-
-  const handleClose = () => {
-    // only allow close inside the dialog
-    closeSignTxDialog();
-  };
+  const {
+    isSignTxDialogOpen,
+    closeSignTxDialog,
+    signTxDetail,
+    loading,
+    confirmTx,
+  } = useDialogStore();
 
   const handleConfirm = () => {
-    console.log('confirm');
-    closeSignTxDialog();
+    confirmTx();
   };
 
   return (
-    <Dialog open={isSignTxDialogOpen} modal={false} onOpenChange={handleClose}>
+    <Dialog
+      open={isSignTxDialogOpen}
+      modal={false}
+      onOpenChange={closeSignTxDialog}
+    >
       <DialogContent className="flex flex-col items-center gap-y-6">
         <Spin isLoading={loading} />
 
@@ -53,13 +56,13 @@ export default function SignTxModal() {
         <div className="w-full flex flex-col gap-y-2">
           <LabelValue
             label="Account"
-            value={formatAddressToShort(signTxDetail?.userOpDetail.from)}
+            value={formatAddressToShort(signTxDetail?.txDetail.from)}
           />
           <LabelValue
             label="Contract Address"
-            value={formatAddressToShort(signTxDetail?.userOpDetail.to)}
+            value={formatAddressToShort(signTxDetail?.txDetail.to)}
           />
-          <LabelValue label="Fee" value={signTxDetail?.userOpDetail.fee} />
+          <LabelValue label="Fee" value={signTxDetail?.txDetail.fee} />
 
           {/* TODO: tx detail. implement it later. ux is not ready */}
           <div className="w-full">
@@ -74,7 +77,7 @@ export default function SignTxModal() {
             {showMore && (
               <div className="mt-2 p-2 bg-gray-100 rounded-md ">
                 <pre className="text-xs max-h-24 overflow-y-scroll whitespace-pre-wrap break-words">
-                  {signTxDetail?.userOpDetail?.callData}
+                  {signTxDetail?.txDetail?.callData}
                 </pre>
               </div>
             )}
@@ -91,7 +94,7 @@ export default function SignTxModal() {
             <div className="flex w-full gap-x-2">
               <Button
                 variant="ghost"
-                onClick={handleClose}
+                onClick={closeSignTxDialog}
                 className="flex-1 rounded-md border border-gray-200"
               >
                 Cancel

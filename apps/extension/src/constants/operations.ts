@@ -17,10 +17,10 @@ export type TSignTxDetail = {
   fromSession: TSessionData;
   toSession: TSessionData;
   actionName: string;
-  userOpDetail: TUserOperationDetail;
+  txDetail: TTxDetail;
 };
 
-export type TUserOperationDetail = {
+export type TTxDetail = {
   from: string;
   to: string;
   value: number;

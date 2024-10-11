@@ -48,12 +48,12 @@ type SimulationResponse = {
 
 export const simulateSendUserOp = async (
   userOp: ElytroUserOperation,
-  entryPoint: string
-  // chain: string // chain name
+  entryPoint: string,
+  chainID: number // chain name
 ) => {
   try {
     const res = (await query(query_simulated_op, {
-      chain: 'optimism-sepolia', // todo: change it to chain id when backend is ready
+      chainID: toHex(chainID), // todo: change it to chain id when backend is ready
       request: {
         entryPoint,
         userOps: [
