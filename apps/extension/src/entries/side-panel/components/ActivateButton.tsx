@@ -20,7 +20,6 @@ export default function ActivateButton() {
       );
 
       await elytroSDK.estimateGas(deployUserOp);
-      await elytroSDK.signUserOperation(deployUserOp);
       const getSponsored = await elytroSDK.canGetSponsored(deployUserOp);
 
       if (getSponsored) {

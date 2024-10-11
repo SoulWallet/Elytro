@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { elytroSDK } from '@/services/sdk';
 import { formatSimulationResultToTxDetail } from '@/utils/format';
 import { create } from 'zustand';
+import useAccountStore from './account';
 
 interface DialogState {
   isSignTxDialogOpen: boolean;
@@ -38,6 +39,7 @@ const useDialogStore = create<DialogState>((set, get) => ({
 
       try {
         await elytroSDK.signUserOperation(userOp);
+
         const simulationResult = await elytroSDK.simulateUserOperation(userOp);
         const txDetail = formatSimulationResultToTxDetail(simulationResult);
 
@@ -77,6 +79,7 @@ const useDialogStore = create<DialogState>((set, get) => ({
   },
   confirmTx: async () => {
     try {
+      set({ loading: true });
       const { userOp } = get();
       if (userOp) {
         await elytroSDK.sendUserOperation(userOp);
@@ -84,11 +87,23 @@ const useDialogStore = create<DialogState>((set, get) => ({
       } else {
         throw new Error('No user operation to send');
       }
+
+      toast({
+        title: 'Success!',
+        description: 'Transaction sent successfully',
+      });
+
+      // todo: when activate,  account info have to wait a lot time to update.
+      setTimeout(() => {
+        useAccountStore.getState().update();
+      }, 1000);
     } catch (error) {
       toast({
         title: 'Oops!',
         description: 'Failed to send transaction',
       });
+    } finally {
+      set({ loading: false });
     }
   },
 }));

@@ -6,6 +6,7 @@ interface AccountState {
   address: Nullable<string>;
   isActivated: boolean;
   chainType: SupportedChainTypeEn;
+  loading: boolean;
   update: () => void;
 }
 
@@ -13,14 +14,22 @@ const useAccountStore = create<AccountState>((set) => ({
   address: walletClient.address,
   isActivated: walletClient.isActivated,
   chainType: walletClient.chainType,
+  loading: false,
   async update() {
-    await walletClient.initSmartAccount();
+    set({ loading: true });
 
-    set({
-      address: walletClient.address,
-      isActivated: walletClient.isActivated,
-      chainType: walletClient.chainType,
-    });
+    try {
+      await walletClient.initSmartAccount();
+      set({
+        address: walletClient.address,
+        isActivated: walletClient.isActivated,
+        chainType: walletClient.chainType,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      set({ loading: false });
+    }
   },
 }));
 

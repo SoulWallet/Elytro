@@ -1,7 +1,7 @@
 import { query } from '@/requests';
 import { query_simulated_op } from '@/requests/query';
-import { paddingBytesToEven } from '../format';
-import { Hex, toHex } from 'viem';
+import { getHexString, paddingBytesToEven } from '../format';
+import { Hex } from 'viem';
 
 type StateChangeItem = {
   address: string;
@@ -52,33 +52,35 @@ export const simulateSendUserOp = async (
   chainID: number // chain name
 ) => {
   try {
+    const req = [
+      {
+        callData: paddingBytesToEven(userOp.callData),
+        callGasLimit: getHexString(userOp.callGasLimit),
+        factory: userOp.factory,
+        factoryData: paddingBytesToEven(userOp.factoryData),
+        maxFeePerGas: getHexString(userOp.maxFeePerGas),
+        maxPriorityFeePerGas: getHexString(userOp.maxPriorityFeePerGas),
+        nonce: getHexString(userOp.nonce),
+        paymaster: userOp.paymaster,
+        paymasterData: paddingBytesToEven(userOp.paymasterData),
+        paymasterPostOpGasLimit: userOp.paymasterPostOpGasLimit
+          ? getHexString(userOp.paymasterPostOpGasLimit)
+          : null,
+        paymasterVerificationGasLimit: userOp.paymasterVerificationGasLimit
+          ? getHexString(userOp.paymasterVerificationGasLimit)
+          : null,
+        preVerificationGas: getHexString(userOp.preVerificationGas),
+        sender: userOp.sender,
+        signature: userOp.signature,
+        verificationGasLimit: getHexString(userOp.verificationGasLimit),
+      },
+    ];
+
     const res = (await query(query_simulated_op, {
-      chainID: toHex(chainID), // todo: change it to chain id when backend is ready
+      chainID: getHexString(chainID), // todo: change it to chain id when backend is ready
       request: {
         entryPoint,
-        userOps: [
-          {
-            callData: paddingBytesToEven(userOp.callData),
-            callGasLimit: toHex(userOp.callGasLimit),
-            factory: userOp.factory,
-            factoryData: paddingBytesToEven(userOp.factoryData),
-            maxFeePerGas: toHex(userOp.maxFeePerGas),
-            maxPriorityFeePerGas: toHex(userOp.maxPriorityFeePerGas),
-            nonce: toHex(userOp.nonce),
-            paymaster: userOp.paymaster,
-            paymasterData: paddingBytesToEven(userOp.paymasterData),
-            paymasterPostOpGasLimit: userOp.paymasterPostOpGasLimit
-              ? toHex(userOp.paymasterPostOpGasLimit)
-              : null,
-            paymasterVerificationGasLimit: userOp.paymasterVerificationGasLimit
-              ? toHex(userOp.paymasterVerificationGasLimit)
-              : null,
-            preVerificationGas: toHex(userOp.preVerificationGas),
-            sender: userOp.sender,
-            signature: userOp.signature,
-            verificationGasLimit: toHex(userOp.verificationGasLimit),
-          },
-        ],
+        userOps: req,
       },
     })) as SimulationResponse;
 

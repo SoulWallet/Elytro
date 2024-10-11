@@ -19,28 +19,28 @@ export async function query<T>(
 }
 
 export const query_simulated_op = gql`
-  query Simulate($chain: String!, $request: SimulateInput!) {
-    simulate(chain: $chain, request: $request) {
+  query Simulate($chainID: String!, $request: SimulateInput!) {
+    simulate(chainID: $chainID, request: $request) {
       success
       result {
-        status
-        gasUsed
-        cumulativeGasUsed
+        assetChanges
+        balanceChanges
         blockNumber
-        type
+        cumulativeGasUsed
+        gasUsed
         stateChanges {
           address
           balance {
-            previousValue
             newValue
+            previousValue
           }
           nonce {
-            newValue
             previousValue
+            newValue
           }
         }
-        assetChanges
-        balanceChanges
+        status
+        type
       }
     }
   }

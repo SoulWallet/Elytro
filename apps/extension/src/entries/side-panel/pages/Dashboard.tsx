@@ -4,9 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TokenList from '@/components/TokenList';
 import useAccountStore from '@/stores/account';
 import { useEffect } from 'react';
+import Spin from '@/components/Spin';
 
 export default function Dashboard() {
-  const { update } = useAccountStore();
+  const { update, loading } = useAccountStore();
   const isEmpty = false;
 
   useEffect(() => {
@@ -15,6 +16,8 @@ export default function Dashboard() {
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
+      <Spin isLoading={loading} />
+
       {/* Account Basic Info */}
       <BasicAccountInfo />
 

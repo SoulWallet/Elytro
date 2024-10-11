@@ -1,5 +1,6 @@
-import { TUserOperationDetail } from '@/constants/operations';
+import { TTxDetail } from '@/constants/operations';
 import { SimulationResult } from './ethRpc/simulate';
+import { toHex } from 'viem';
 
 export function paddingZero(
   value: string | number | bigint,
@@ -25,13 +26,11 @@ export function paddingZero(
 
 // 将 number | string | bigint 转换为 16进制字符串
 export function getHexString(value: number | string | bigint) {
-  if (typeof value === 'string') {
-    return '0x' + BigInt(value).toString(16);
-  } else if (typeof value === 'number' || typeof value === 'bigint') {
-    return '0x' + BigInt(value).toString(16);
-  } else {
-    throw new Error(`value ${value} is not number | string | bigint`);
+  if (typeof value === 'string' && value.startsWith('0x')) {
+    return value;
   }
+
+  return toHex(value);
 }
 
 // make the hex string length even
@@ -61,5 +60,5 @@ export function formatSimulationResultToTxDetail(
     to: simulationResult.assetChanges[0].to,
     value: parseInt(simulationResult.assetChanges[0].rawAmount, 16),
     fee: simulationResult.gasUsed, // todo: calculate fee
-  } as TUserOperationDetail;
+  } as TTxDetail;
 }

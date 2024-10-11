@@ -10,14 +10,14 @@ import {
   TEMP_ENTRY_POINT,
   TEMP_VALIDATOR,
 } from '@/constants/temp';
-import { getHexString, paddingZero } from '@/utils/format';
+import { paddingZero } from '@/utils/format';
 import { Bundler, SignkeyType, SoulWallet } from '@soulwallet/sdk';
 import { DecodeUserOp } from '@soulwallet/decoder';
 import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
 import keyring from './keyring';
 import { simulateSendUserOp } from '@/utils/ethRpc/simulate';
 import { UserOperationStatusEn } from '@/constants/operations';
-import { parseEther, toHex } from 'viem';
+import { Hex, parseEther, toHex } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
 
 class ElytroSDK {
@@ -86,7 +86,6 @@ class ElytroSDK {
     if (res.isErr()) {
       throw res.ERR;
     } else {
-      debugger;
       createAccount(
         res.OK,
         this.chain.id,
@@ -161,7 +160,7 @@ class ElytroSDK {
       await this._getPackedUserOpHash(userOp);
 
     const _eoaSignature = await keyring.owner?.signMessage({
-      message: packedHash,
+      message: { raw: packedHash as Hex },
     });
 
     if (!_eoaSignature) {
@@ -248,6 +247,7 @@ class ElytroSDK {
     userOp.maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas ?? 0;
 
     // todo: sdk can be optimized (fetch balance in sdk)
+
     const res = await this._sdk.estimateUserOperationGas(
       TEMP_VALIDATOR,
       userOp,
