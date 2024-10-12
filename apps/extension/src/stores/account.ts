@@ -1,6 +1,6 @@
 import { SupportedChainTypeEn } from '@/constants/chains';
 import keyring from '@/services/keyring';
-import walletClient from '@/services/walletClient';
+import walletClient, { ElytroWalletClient } from '@/services/walletClient';
 import { create } from 'zustand';
 
 interface AccountState {
@@ -8,6 +8,7 @@ interface AccountState {
   currentChainType: SupportedChainTypeEn;
   balance: string;
   isActivated: boolean;
+  walletClient: ElytroWalletClient;
   setCurrentChainId: (chainId: SupportedChainTypeEn) => void;
   setAddress: (address: string | null) => void;
   setBalance: (balance: string) => void;
@@ -17,8 +18,9 @@ interface AccountState {
 const useAccountStore = create<AccountState>((set) => ({
   address: null,
   balance: '0',
-  currentChainType: SupportedChainTypeEn.OP,
+  currentChainType: SupportedChainTypeEn.OP_SEPOLIA,
   isActivated: false,
+  walletClient: walletClient,
   setAddress: (address) => set({ address }),
   setBalance: (balance) => set({ balance }),
   setCurrentChainId: (chainType: SupportedChainTypeEn) => {

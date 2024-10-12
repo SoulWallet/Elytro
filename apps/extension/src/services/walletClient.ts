@@ -17,6 +17,7 @@ import {
 } from '@soulwallet/sdk';
 import { getHexString, paddingBytesToEven, paddingZero } from '@/utils/format';
 import {
+  Address,
   createWalletClient,
   http,
   parseEther,
@@ -43,7 +44,7 @@ import keyring from './keyring';
 import { UserOperationStatusEn } from '@/constants/operations';
 import { SignTypedDataParameters } from 'viem/accounts';
 
-class ElytroWalletClient {
+export class ElytroWalletClient {
   private _bundler: Nullable<Bundler> = null;
   private _sdk: Nullable<SoulWallet> = null;
   private _address: Nullable<string> = null;
@@ -53,7 +54,9 @@ class ElytroWalletClient {
   private _client = createWalletClient({
     account: keyring.owner ?? undefined,
     chain: SUPPORTED_CHAIN_MAP[this._chainType], // default to OP
-    transport: http(TEMP_RPC_URL), // default http
+    transport: http(
+      SUPPORTED_CHAIN_MAP[this._chainType].rpcUrls.default.http[0]
+    ), // default http
   }).extend(publicActions);
 
   constructor() {
@@ -71,6 +74,7 @@ class ElytroWalletClient {
 
   // Elytro Wallet Address, not the eoa address
   get address() {
+    return keyring.owner?.address;
     return this._address;
   }
 
@@ -586,7 +590,7 @@ class ElytroWalletClient {
 
   public async getBalance() {
     return await this._client.getBalance({
-      address: keyring.owner?.address as any,
+      address: keyring.owner?.address as Address,
     });
   }
 }

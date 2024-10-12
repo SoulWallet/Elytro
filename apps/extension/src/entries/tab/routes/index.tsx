@@ -2,12 +2,14 @@ import { TRoute } from '@/types/route';
 import Launch from '../pages/Launch';
 import Create from '../pages/Create';
 import Success from '../pages/Success';
+import SendTransaction from '../pages/SendTransaction';
 
 export const TAB_ROUTE_PATHS = {
   Launch: '/launch',
   Create: '/create',
   Recover: '/recover',
   Success: '/success',
+  SendTransaction: '/send_transaction',
 } as const;
 
 export const routes: TRoute[] = [
@@ -16,6 +18,7 @@ export const routes: TRoute[] = [
   // TODO: Recover
   { path: TAB_ROUTE_PATHS.Recover, component: () => <div>Recover</div> },
   { path: TAB_ROUTE_PATHS.Success, component: Success },
+  { path: TAB_ROUTE_PATHS.SendTransaction, component: SendTransaction },
 ];
 
 export default routes;

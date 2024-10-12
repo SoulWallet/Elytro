@@ -1,7 +1,7 @@
 // import walletClient from '../walletClient';
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 import walletClient from '../walletClient';
-import { SendTransactionParameters, toHex } from 'viem';
+import { toHex } from 'viem';
 import keyring from '../keyring';
 
 /**
@@ -29,19 +29,59 @@ class BuiltinProvider extends SafeEventEmitter {
     return this._initialized;
   }
 
-  private async _sendTransaction(params: unknown) {
-    // prepare tx, should display this tx for user
-    const request = await walletClient.prepareTransactionRequest(
-      (params as unknown[])[0] as SendTransactionParameters
+  public async createDappRequestWindow(request: unknown) {
+    const window = await chrome.windows.getCurrent();
+    const height = 932;
+    const width = 433;
+    const top = Math.round(
+      (window.top ?? 0) + ((window.height ?? height) - height) / 2
     );
-
-    // sign tx, should open a tab then need user to confirm the sign
-    const serializedTransaction = await walletClient.signTransaction(request);
-
-    if (serializedTransaction) {
-      const hash = await walletClient.sendRawTransaction(serializedTransaction);
-      return hash;
+    const left = Math.round(
+      (window.left ?? 0) + ((window.width ?? width) - width) / 2
+    );
+    try {
+      chrome.windows.create(
+        {
+          url: chrome.runtime.getURL(
+            `src/entries/tab/index.html#/send_transaction?id=windowid`
+          ),
+          focused: true,
+          type: 'popup',
+          width,
+          height,
+          top,
+          left,
+        },
+        (window) => {
+          if (window && window.tabs?.length) {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+              if (tabs.length) {
+                const transactionWindowTabId = tabs[0].id;
+                chrome.tabs.onUpdated.addListener((tabId, info) => {
+                  if (
+                    tabId === transactionWindowTabId &&
+                    info.status === 'complete'
+                  ) {
+                    setTimeout(() => {
+                      chrome.tabs.sendMessage(transactionWindowTabId, {
+                        request,
+                      });
+                    }, 500);
+                  }
+                });
+              }
+            });
+          }
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
+  }
+
+  private async _sendTransaction(params: unknown) {
+    await this.createDappRequestWindow(params);
     return null;
   }
 
