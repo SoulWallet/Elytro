@@ -1,29 +1,86 @@
 import { BackArrow } from '@/assets/icons/BackArrow';
-import CardWrapper from '@/components/CardWrapper';
-import { Button } from '@/components/ui/button';
-import useAccountStore from '@/stores/account';
+import { navigateTo } from '@/utils/navigation';
+import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
+import ActivateStep, { ActivateStepStatus } from '../components/ActivateStep';
+import useActivateStore from '@/stores/activate';
+import { useEffect, useState } from 'react';
+import { useInterval } from 'usehooks-ts';
+import useDialogStore from '@/stores/dialog';
 
 export default function Activate() {
-  const { isActivated } = useAccountStore();
+  const { calcResult, calculateDeployUserOp, deployUserOp } =
+    useActivateStore();
+  const { openSignTxDialog } = useDialogStore();
+  const [stepStatus, setStepStatus] = useState({
+    deposit: ActivateStepStatus.Ready,
+    activate: ActivateStepStatus.NonReady,
+  });
+
+  const recalculateStatus = () => {
+    if (stepStatus.deposit === ActivateStepStatus.Ready && deployUserOp) {
+      calculateDeployUserOp(deployUserOp);
+    }
+  };
+
+  useInterval(recalculateStatus, 3000);
+
+  useEffect(() => {
+    if (calcResult) {
+      const { needDeposit } = calcResult;
+      setStepStatus({
+        deposit: needDeposit
+          ? ActivateStepStatus.Ready
+          : ActivateStepStatus.Finished,
+        activate: needDeposit
+          ? ActivateStepStatus.NonReady
+          : ActivateStepStatus.Ready,
+      });
+    }
+  }, [calcResult]);
+
+  const handleDeposit = () => {
+    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Receive, {
+      fromActivate: 1,
+    });
+  };
+
+  const handleActivate = () => {
+    if (deployUserOp) {
+      openSignTxDialog(
+        deployUserOp,
+        () => {
+          // todo: when activated, UI need to be updated (but it seems have seconds latency)
+          navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
+        },
+        'Activate account'
+      );
+    }
+  };
 
   return (
     <div className="bg-gray-50 p-4 flex-grow">
       <BackArrow onClick={() => history.back()} />
       <h1 className="text-2xl font-medium my-10">Activate account</h1>
 
-      <CardWrapper>
-        <div className="flex items-center gap-2 font-medium">
-          <span className="bg-gray-50 rounded-full w-6 h-6 flex items-center justify-center text-black">
-            1
-          </span>
-          <span className="text-gray-900 text-lg">Deposit ETH</span>
-        </div>
-        <div className="text-gray-500 text-sm  my-4">
-          Deposit any amount of ETH. The ETH will be used as gas for account
-          activation.
-        </div>
-        <Button>Deposit</Button>
-      </CardWrapper>
+      <div className="space-y-4">
+        <ActivateStep
+          status={stepStatus.deposit}
+          stepIndex={1}
+          title="Deposit ETH"
+          description="Deposit any amount of ETH. The ETH will be used as gas for account activation."
+          buttonText="Deposit"
+          onClick={handleDeposit}
+        />
+
+        <ActivateStep
+          status={stepStatus.activate}
+          stepIndex={2}
+          title="Make a  transaction"
+          description="Click on Active button to active your account. A transaction will be send on chain."
+          buttonText="Activate"
+          onClick={handleActivate}
+        />
+      </div>
     </div>
   );
 }

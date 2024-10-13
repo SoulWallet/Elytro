@@ -9,7 +9,7 @@ import { formatAddressToShort } from '@/utils/format';
 import ActivateButton from './ActivateButton';
 
 export default function BasicAccountInfo() {
-  const { address, isActivated, chainType } = useAccountStore();
+  const { address, isActivated, chainType, balance } = useAccountStore();
 
   if (!address) {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
@@ -24,7 +24,7 @@ export default function BasicAccountInfo() {
   };
 
   const onClickReceive = () => {
-    console.log('onClickReceive');
+    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Receive);
   };
 
   return (
@@ -53,8 +53,10 @@ export default function BasicAccountInfo() {
       </div>
       {/* Balance: $XX.xx */}
       <div className="mt-6 text-5xl font-medium py-1">
-        <span className=" text-gray-900">$20</span>
-        <span className=" text-gray-200">.00</span>
+        <span className=" text-gray-900">{balance?.split('.')[0]}</span>
+        <span className=" text-gray-200">
+          .{balance?.split('.')[1] || '00'}
+        </span>
       </div>
 
       {/* Actions */}
@@ -62,13 +64,13 @@ export default function BasicAccountInfo() {
         <div className="grid grid-cols-2 gap-2 mt-2 ">
           <ActionButton
             icon={<ArrowDownLeft />}
-            label="Send"
-            onClick={onClickSend}
+            label="Receive"
+            onClick={onClickReceive}
           />
           <ActionButton
             icon={<ArrowUpRight />}
-            label="Receive"
-            onClick={onClickReceive}
+            label="Send"
+            onClick={onClickSend}
           />
         </div>
       ) : (

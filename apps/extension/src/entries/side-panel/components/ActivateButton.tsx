@@ -1,34 +1,18 @@
 import { Button } from '@/components/ui/button';
-import { navigateTo } from '@/utils/navigation';
-
-import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
-import { elytroSDK } from '@/services/sdk';
-import keyring from '@/services/keyring';
 import { useState } from 'react';
-import useDialogStore from '@/stores/dialog';
+import useActivateStore from '@/stores/activate';
 
 export default function ActivateButton() {
   const [loading, setLoading] = useState(false);
-  const { openSignTxDialog } = useDialogStore();
+  const { createDeployUserOp } = useActivateStore();
 
   const onClickActivate = async () => {
     try {
       setLoading(true);
 
-      const deployUserOp = await elytroSDK.createUnsignedDeployWalletUserOp(
-        keyring.owner!.address
-      );
-
-      await elytroSDK.estimateGas(deployUserOp);
-      const getSponsored = await elytroSDK.canGetSponsored(deployUserOp);
-
-      if (getSponsored) {
-        openSignTxDialog(deployUserOp);
-      } else {
-        navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Activate);
-      }
+      await createDeployUserOp();
     } catch (error) {
-      console.log('error', error);
+      console.error(error);
     } finally {
       setLoading(false);
     }

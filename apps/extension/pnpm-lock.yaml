@@ -34,6 +34,7 @@ specifiers:
   graphql: ^16.9.0
   lucide-react: ^0.441.0
   postcss: ^8.4.45
+  qrcode.react: ^4.0.1
   react: ^18.3.1
   react-dom: ^18.3.1
   react-hook-form: ^7.53.0
@@ -42,6 +43,7 @@ specifiers:
   tailwindcss-animate: ^1.0.7
   typescript: ^5.5.3
   typescript-eslint: ^8.0.1
+  usehooks-ts: ^3.1.0
   viem: ^2.21.10
   vite: ^5.4.1
   vite-plugin-node-polyfills: ^0.22.0
@@ -71,12 +73,14 @@ dependencies:
   graphql: 16.9.0
   lucide-react: 0.441.0_react@18.3.1
   postcss: 8.4.45
+  qrcode.react: 4.0.1_react@18.3.1
   react: 18.3.1
   react-dom: 18.3.1_react@18.3.1
   react-hook-form: 7.53.0_react@18.3.1
   tailwind-merge: 2.5.2
   tailwindcss: 3.4.11
   tailwindcss-animate: 1.0.7_tailwindcss@3.4.11
+  usehooks-ts: 3.1.0_react@18.3.1
   viem: 2.21.10_dqq4a2en4nots3dh3xut264en4
   wouter: 3.3.5_react@18.3.1
   zod: 3.23.8
@@ -3259,6 +3263,10 @@ packages:
       p-locate: 5.0.0
     dev: true
 
+  /lodash.debounce/4.0.8:
+    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
+    dev: false
+
   /lodash.merge/4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
@@ -3748,6 +3756,14 @@ packages:
 
       (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
     dev: true
+
+  /qrcode.react/4.0.1_react@18.3.1:
+    resolution: {integrity: sha512-Lpj0tPBn561WiQ3QQWXbkx8xTtB8BZkJeMZWLJIL8iaPBCoWzW1IpCeU3gY5MDqsb0+efCvEGkl9O0naP64crA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.3.1
+    dev: false
 
   /qs/6.13.0:
     resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
@@ -4407,6 +4423,16 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
+      react: 18.3.1
+    dev: false
+
+  /usehooks-ts/3.1.0_react@18.3.1:
+    resolution: {integrity: sha512-bBIa7yUyPhE1BCc0GmR96VU/15l/9gP1Ch5mYdLcFBaFGQsdmXkvjV0TtOqW1yUd6VjIwDunm+flSciCQXujiw==}
+    engines: {node: '>=16.15.0'}
+    peerDependencies:
+      react: ^16.8.0  || ^17 || ^18
+    dependencies:
+      lodash.debounce: 4.0.8
       react: 18.3.1
     dev: false
 

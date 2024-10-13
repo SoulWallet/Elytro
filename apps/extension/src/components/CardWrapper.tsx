@@ -1,9 +1,16 @@
 import React from 'react';
+import { cn } from '@/utils/shadcn/utils';
+
+interface ICardWrapperProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
 export default function CardWrapper({
   children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <div className="bg-white rounded-2xl p-6">{children}</div>;
+  className,
+}: ICardWrapperProps) {
+  return (
+    <div className={cn('bg-white rounded-2xl p-6', className)}>{children}</div>
+  );
 }

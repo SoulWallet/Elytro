@@ -5,7 +5,9 @@ import {
   TEMP_RPC_URL,
 } from '@/constants/chains';
 import {
+  Address,
   createWalletClient,
+  formatEther,
   http,
   publicActions,
   PublicClient,
@@ -17,9 +19,10 @@ import { SignTypedDataParameters } from 'viem/accounts';
 import { elytroSDK } from './sdk';
 
 class ElytroWalletClient {
-  private _address: Nullable<string> = null;
+  private _address: Nullable<Address> = null;
   private _isDeployed: boolean = false;
   private _chainType: SupportedChainTypeEn = DEFAULT_CHAIN_TYPE;
+  private _balance: Nullable<string> = null;
 
   private _client!: WalletClient & PublicClient;
 
@@ -40,12 +43,16 @@ class ElytroWalletClient {
     return this._address;
   }
 
+  get balance() {
+    return this._balance;
+  }
+
   get isActivated() {
     return this._isDeployed;
   }
 
   public async init(chainType: SupportedChainTypeEn) {
-    if (chainType !== this._chainType) {
+    if (!this._client || chainType !== this._chainType) {
       this._chainType = chainType;
 
       this._client = createWalletClient({
@@ -61,6 +68,12 @@ class ElytroWalletClient {
     if (keyring.smartAccountAddress) {
       this._address = keyring.smartAccountAddress;
       this._isDeployed = await elytroSDK.isSmartAccountDeployed(this._address);
+
+      this._balance = formatEther(
+        await this._client.getBalance({
+          address: this._address,
+        })
+      );
     }
   }
 

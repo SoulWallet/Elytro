@@ -3,6 +3,7 @@ import keyring from '@/services/keyring';
 import { navigateTo } from '@/utils/navigation';
 import { create } from 'zustand';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
+import { TAB_ROUTE_PATHS } from '@/entries/tab/routes';
 
 interface KeyringState {
   isLocked: null | boolean;
@@ -28,6 +29,13 @@ const useKeyringStore = create<KeyringState>((set) => ({
   createNewOwner: async (password: string) => {
     try {
       await keyring.createNewOwner(password);
+
+      // open side panel here, cause sidePanel.open() only can be called in response to a user gesture.
+      // navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
+      navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
+      setTimeout(() => {
+        navigateTo('tab', TAB_ROUTE_PATHS.Success);
+      }, 300);
     } catch (error) {
       keyring.reset();
 

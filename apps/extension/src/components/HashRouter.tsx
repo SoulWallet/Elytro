@@ -1,6 +1,5 @@
 import { Router, Route, Switch } from 'wouter';
 import { useHashLocation } from 'wouter/use-hash-location';
-// 使用自定义 hook 的 Router 组件
 import { TRoute } from '@/types/route';
 
 interface HashRouterProps {

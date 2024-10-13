@@ -4,7 +4,6 @@ import { toast } from '@/hooks/use-toast';
 import { elytroSDK } from '@/services/sdk';
 import { formatSimulationResultToTxDetail } from '@/utils/format';
 import { create } from 'zustand';
-import useAccountStore from './account';
 
 interface DialogState {
   isSignTxDialogOpen: boolean;
@@ -12,23 +11,27 @@ interface DialogState {
   userOp: Nullable<ElytroUserOperation>;
   openSignTxDialog: (
     userOp: ElytroUserOperation,
+    onSuccess?: () => void,
     actionName?: string,
     fromSession?: TSessionData,
     toSession?: TSessionData
   ) => void;
   closeSignTxDialog: () => void;
   loading: boolean;
-  confirmTx: () => void;
+  confirmTx: () => Promise<void>;
+  successCallback: Nullable<() => void>;
 }
 
 const useDialogStore = create<DialogState>((set, get) => ({
   loading: false,
   isSignTxDialogOpen: false,
   userOp: null,
+  successCallback: null,
   // todo: remove this
   signTxDetail: null,
   openSignTxDialog: async (
     userOp: ElytroUserOperation,
+    onSuccess?: () => void,
     actionName: string = 'Confirm Transaction',
     // default is elytro internal interaction
     fromSession: TSessionData = ELYTRO_SESSION_DATA,
@@ -51,8 +54,9 @@ const useDialogStore = create<DialogState>((set, get) => ({
             actionName,
           },
           userOp,
+          successCallback: onSuccess,
         });
-      } catch (error) {
+      } catch (_error) {
         set({ isSignTxDialogOpen: false });
         toast({
           title: 'Oops!',
@@ -93,11 +97,8 @@ const useDialogStore = create<DialogState>((set, get) => ({
         description: 'Transaction sent successfully',
       });
 
-      // todo: when activate,  account info have to wait a lot time to update.
-      setTimeout(() => {
-        useAccountStore.getState().update();
-      }, 1000);
-    } catch (error) {
+      get().successCallback?.();
+    } catch (_error) {
       toast({
         title: 'Oops!',
         description: 'Failed to send transaction',

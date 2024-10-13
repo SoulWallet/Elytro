@@ -1,7 +1,7 @@
 import { decrypt, encrypt } from '@/utils/passworder';
 import { localStorage } from '@/utils/storage/local';
 import { SubscribableStore } from '@/utils/SubscribableStore';
-import { Hex } from 'viem';
+import { Address, Hex } from 'viem';
 import {
   PrivateKeyAccount,
   generatePrivateKey,
@@ -25,7 +25,7 @@ class KeyringService {
   private _locked = true;
   private _key: Nullable<Hex> = null;
   private _owner: Nullable<PrivateKeyAccount> = null;
-  private _sa: Nullable<string> = null;
+  private _sa: Nullable<Address> = null;
 
   private _store!: SubscribableStore<KeyringServiceState>;
 
@@ -157,7 +157,7 @@ class KeyringService {
       const { key, sa } = (await decrypt(data, password)) as EncryptedData;
 
       this._updateOwnerByKey(key as Hex);
-      this._sa = sa as string;
+      this._sa = sa as Address;
       this._locked = false;
     } catch (error) {
       console.log('Elytro: Failed to verify password.', error);

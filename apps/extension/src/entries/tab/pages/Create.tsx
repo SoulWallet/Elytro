@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import TabLayout from '../components/TabLayout';
 import { BackArrow } from '@/assets/icons/BackArrow';
 import { PasswordSetter } from '../components/PasswordSetter';
-import { navigateTo } from '@/utils/navigation';
-import { TAB_ROUTE_PATHS } from '../routes';
-import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 import useKeyringStore from '@/stores/keyring';
 
 const Create: React.FC = () => {
@@ -14,21 +11,10 @@ const Create: React.FC = () => {
     history.back();
   };
 
-  const onCreateSuccess = () => {
-    // open side panel here, cause sidePanel.open() only can be called in response to a user gesture.
-    // navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
-    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
-
-    setTimeout(() => {
-      navigateTo('tab', TAB_ROUTE_PATHS.Success);
-    }, 300);
-  };
-
   const handleCreatePassword = async (pwd: string) => {
     setLoading(true);
     try {
       await createNewOwner(pwd);
-      onCreateSuccess();
     } finally {
       setLoading(false);
     }

@@ -17,7 +17,7 @@ import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
 import keyring from './keyring';
 import { simulateSendUserOp } from '@/utils/ethRpc/simulate';
 import { UserOperationStatusEn } from '@/constants/operations';
-import { Hex, parseEther, toHex } from 'viem';
+import { Address, Hex, parseEther, toHex } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
 
 class ElytroSDK {
@@ -94,7 +94,7 @@ class ElytroSDK {
         initialGuardianHash,
         initialGuardianSafePeriod
       );
-      return res.OK;
+      return res.OK as Address;
     }
   }
 
@@ -289,40 +289,70 @@ class ElytroSDK {
     }
   }
 
-  public async getPreFund(
+  public async getRechargeAmountForUserOp(
     userOp: ElytroUserOperation,
-    transferValue: bigint,
-    isValidForSponsor: boolean
+    transferValue: bigint
   ) {
     const res = await this._sdk.preFund(userOp);
+    const hasSponsored = await this.canGetSponsored(userOp);
 
     if (res.isErr()) {
       throw res.ERR;
     } else {
-      const preFund = res.OK;
-      const _balance = await this._sdk.provider.getBalance(userOp.sender);
-      const missFund = BigInt(preFund.missfund);
+      const {
+        missfund,
+        //deposit, prefund
+      } = res.OK;
 
-      if (!isValidForSponsor || transferValue > 0) {
-        const maxMissFoundEth = '0.001';
-        const maxMissFund = parseEther(maxMissFoundEth);
+      const balance = await this._sdk.provider.getBalance(userOp.sender);
+      const missAmount = hasSponsored
+        ? transferValue
+        : BigInt(missfund) + transferValue - balance;
 
-        const fundRequest = isValidForSponsor
-          ? transferValue
-          : transferValue + missFund;
-
-        if (fundRequest > maxMissFund) {
-          throw new Error(
-            'Elytro: We may encounter fund issues. Please try again.'
-          );
-        }
-
-        if (fundRequest > _balance) {
-          throw new Error('Elytro: Insufficient balance.');
-        }
-      }
+      return {
+        balance, // user balance
+        hasSponsored, // for this userOp, can get sponsored or not
+        missAmount, // for this userOp, how much it needs to deposit
+        needDeposit: missAmount > 0n, // need to deposit or not
+        suspiciousOp: missAmount > parseEther('0.001'), // if missAmount is too large, it may considered suspicious
+      } as TUserOperationPreFundResult;
     }
   }
+
+  // public async getPreFund(
+  //   userOp: ElytroUserOperation,
+  //   transferValue: bigint,
+  //   isValidForSponsor: boolean
+  // ) {
+  //   const res = await this._sdk.preFund(userOp);
+
+  //   if (res.isErr()) {
+  //     throw res.ERR;
+  //   } else {
+  //     const preFund = res.OK;
+  //     const _balance = await this._sdk.provider.getBalance(userOp.sender);
+  //     const missFund = BigInt(preFund.missfund);
+
+  //     if (!isValidForSponsor || transferValue > 0) {
+  //       const maxMissFoundEth = '0.001';
+  //       const maxMissFund = parseEther(maxMissFoundEth);
+
+  //       const fundRequest = isValidForSponsor
+  //         ? transferValue
+  //         : transferValue + missFund;
+
+  //       if (fundRequest > maxMissFund) {
+  //         throw new Error(
+  //           'Elytro: We may encounter fund issues. Please try again.'
+  //         );
+  //       }
+
+  //       if (fundRequest > _balance) {
+  //         throw new Error('Elytro: Insufficient balance.');
+  //       }
+  //     }
+  //   }
+  // }
 }
 
 export const elytroSDK = new ElytroSDK();
