@@ -63,7 +63,7 @@ class ElytroWalletClient {
     }
   }
 
-  public async initSmartAccount() {
+  public async initSmartAccount(): Promise<TAccountInfo | undefined> {
     await keyring.tryUnlock();
 
     if (keyring.smartAccountAddress) {
@@ -75,6 +75,13 @@ class ElytroWalletClient {
           address: this._address,
         })
       );
+
+      return {
+        address: this._address,
+        isActivated: this._isDeployed,
+        chainType: this._chainType,
+        balance: this._balance,
+      };
     }
   }
 
@@ -159,3 +166,5 @@ class ElytroWalletClient {
 const walletClient = new ElytroWalletClient();
 
 export default walletClient;
+
+export { ElytroWalletClient };

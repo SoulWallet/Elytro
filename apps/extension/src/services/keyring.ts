@@ -180,10 +180,9 @@ class KeyringService {
 
     if (this._locked) {
       await this._verifyPassword();
-      callback?.();
-    } else {
-      callback?.();
     }
+
+    callback?.();
   }
 }
 

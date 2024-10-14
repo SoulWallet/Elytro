@@ -13,9 +13,6 @@ import { useState } from 'react';
 export default function BasicAccountInfo() {
   const { address, isActivated, chainType, balance } = useAccountStore();
   const [openSendModal, setOpenSendModal] = useState(false);
-  if (!address) {
-    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
-  }
 
   const onClickMore = () => {
     console.log('onClickMore');
@@ -55,9 +52,9 @@ export default function BasicAccountInfo() {
       </div>
       {/* Balance: $XX.xx */}
       <div className="mt-6 text-5xl font-medium py-1">
-        <span className=" text-gray-900">{balance?.split('.')[0]}</span>
+        <span className=" text-gray-900">{balance?.split?.('.')?.[0]}</span>
         <span className=" text-gray-200">
-          .{balance?.split('.')[1] || '00'}
+          .{balance?.split?.('.')?.[1] || '00'}
         </span>
       </div>
 

@@ -5,3 +5,10 @@ type TUserOperationPreFundResult = {
   needDeposit: boolean;
   suspiciousOp: boolean;
 };
+
+type TAccountInfo = {
+  address: Nullable<string>;
+  balance: Nullable<string>;
+  isActivated: boolean;
+  chainType: SupportedChainTypeEn;
+};

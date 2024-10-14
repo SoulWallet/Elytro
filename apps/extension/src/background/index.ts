@@ -1,7 +1,8 @@
-import { ElytroRuntimeMessage } from '@/utils/message';
 import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
 import { sendReadyMessageToTabs } from './utils';
 import builtinProvider from '@/services/providers/builtinProvider';
+import { PortMessageManager } from '@/utils/message/portMessageManager';
+import walletClient, { ElytroWalletClient } from '@/services/walletClient';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -43,27 +44,114 @@ const initApp = async () => {
 
 initApp();
 
-const initRuntimeMessageBetweenContentScriptAndBackground = (
-  port: chrome.runtime.Port
-) => {
-  // have dapp
-  if (!port.sender?.tab) {
-    return;
+/**
+ * Init the message between background and (content script / page provider)
+ * @param port
+ */
+const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
+  const providerPortManager = new PortMessageManager('elytro-bg');
+  providerPortManager.connect(port);
+
+  providerPortManager.onMessage(
+    'CONTENT_SCRIPT_REQUEST',
+    async (data: RequestArguments, port) => {
+      try {
+        const result = await builtinProvider.request(data);
+
+        providerPortManager.sendMessage(
+          'BUILTIN_PROVIDER_RESPONSE',
+          {
+            method: data.method,
+            data: result,
+          },
+          port.sender?.id
+        );
+      } catch (error) {
+        providerPortManager.sendMessage(
+          'BUILTIN_PROVIDER_RESPONSE',
+          {
+            method: data.method,
+            error: (error as Error).message,
+          },
+          port.sender?.id
+        );
+      }
+    }
+  );
+
+  providerPortManager.onMessage(
+    'WALLET_CLIENT_REQUEST',
+    async (message, port) => {
+      const result = await builtinProvider.request(message.data);
+      providerPortManager.sendMessage(
+        'WALLET_CLIENT_RESPONSE',
+        { result },
+        port.sender?.id
+      );
+    }
+  );
+};
+
+const initUIMessage = (port: chrome.runtime.Port) => {
+  const UIPortManager = new PortMessageManager('elytro-ui');
+  UIPortManager.connect(port);
+
+  function handleUIRequest(request: {
+    method: keyof ElytroWalletClient;
+    params: unknown[];
+  }) {
+    const { method, params } = request;
+
+    const descriptor = Object.getOwnPropertyDescriptor(
+      ElytroWalletClient.prototype,
+      method
+    );
+
+    if (descriptor && typeof descriptor.get === 'function') {
+      return walletClient[method];
+    }
+    if (typeof walletClient[method] === 'function') {
+      return (walletClient[method] as (...args: unknown[]) => unknown)(
+        ...params
+      );
+    }
+
+    throw new Error(`Method ${method} not found on ElytroWalletClient`);
   }
 
-  const runtimeMessage = new ElytroRuntimeMessage('elytro-background', port);
-  runtimeMessage.connect();
-
-  runtimeMessage.listen(async ({ type, data }) => {
-    const res = await builtinProvider.request(data);
-
-    runtimeMessage.sendMessage({
-      type,
-      data: res,
-    });
-  });
+  UIPortManager.onMessage(
+    'UI_REQUEST',
+    async (
+      data: {
+        method: keyof ElytroWalletClient;
+        params: unknown[];
+      },
+      port
+    ) => {
+      try {
+        const result = await handleUIRequest(data);
+        UIPortManager.sendMessage('UI_RESPONSE', { result }, port.sender?.id);
+      } catch (error) {
+        UIPortManager.sendMessage(
+          'UI_RESPONSE',
+          { error: (error as Error).message },
+          port.sender?.id
+        );
+      }
+    }
+  );
 };
 
 chrome.runtime.onConnect.addListener((port) => {
-  initRuntimeMessageBetweenContentScriptAndBackground(port);
+  if (port.name === 'elytro-ui') {
+    initUIMessage(port);
+
+    return;
+  }
+
+  if (!port?.sender?.tab) {
+    return;
+  }
+
+  initContentScriptAndPageProviderMessage(port);
 });

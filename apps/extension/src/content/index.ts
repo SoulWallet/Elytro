@@ -1,12 +1,9 @@
-import {
-  ElytroRuntimeMessage,
-  ElytroDuplexMessage,
-  ElytroMessageTypeEn,
-} from '@/utils/message';
+import { ElytroDuplexMessage, ElytroMessageTypeEn } from '@/utils/message';
 import mainWorldScript from './main-world?script&module';
 import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
+import { PortMessageManager } from '@/utils/message/portMessageManager';
 
-let runtimeMessage: ElytroRuntimeMessage;
+let portManager: PortMessageManager;
 
 const dAppMessage = new ElytroDuplexMessage(
   'elytro-content-script',
@@ -17,18 +14,15 @@ const initDuplexMessageBetweenContentScriptAndPageProvider = () => {
   dAppMessage.connect();
 
   dAppMessage.listen(async (data: RequestArguments) => {
-    runtimeMessage?.sendMessage({
-      type: data.method,
-      data,
-    });
+    portManager?.sendMessage('CONTENT_SCRIPT_REQUEST', data);
 
     await new Promise((resolve) =>
-      runtimeMessage?.listen(({ type, data }) => {
+      portManager.onMessage('BUILTIN_PROVIDER_RESPONSE', (response) => {
         dAppMessage.send({
           type: ElytroMessageTypeEn.RESPONSE_TO_PAGE_PROVIDER,
           payload: {
-            method: type as ProviderMethodType,
-            response: data,
+            method: response.method,
+            response: response.data,
           },
         });
         resolve(true);
@@ -40,20 +34,19 @@ const initDuplexMessageBetweenContentScriptAndPageProvider = () => {
 initDuplexMessageBetweenContentScriptAndPageProvider();
 
 const initRuntimeMessage = () => {
-  runtimeMessage = new ElytroRuntimeMessage('elytro-content-script');
-  runtimeMessage.connect();
+  portManager = new PortMessageManager('elytro-bg');
+  portManager.connect();
 };
 
 initRuntimeMessage();
 
 const onBackgroundReady = (msg: { name: string }) => {
-  if (msg.name === RUNTIME_MESSAGE_TYPE.BG_READY && !runtimeMessage) {
+  if (msg.name === RUNTIME_MESSAGE_TYPE.BG_READY && !portManager) {
     initRuntimeMessage();
   }
   return undefined;
 };
 
-console.log('c', new Date());
 chrome.runtime.onMessage.addListener(onBackgroundReady);
 
 const injectMainWorldScript = () => {

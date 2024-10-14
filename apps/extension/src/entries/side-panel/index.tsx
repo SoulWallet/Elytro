@@ -4,10 +4,7 @@ import HashRouter from '@/components/HashRouter';
 import { routes } from './routes';
 import PageContainer from '@/components/PageContainer';
 import { WalletProvider } from './contexts/wallet-context';
-import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
-
-const container = document.getElementById('root')!;
-const root = ReactDOM.createRoot(container);
+import { bootstrap } from '@/utils/bootstrap';
 
 const main = () => {
   const SidePanelApp: React.FC = () => (
@@ -18,26 +15,11 @@ const main = () => {
     </PageContainer>
   );
 
-  root.render(
+  ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <SidePanelApp />
     </React.StrictMode>
   );
 };
 
-const bootstrap = () => {
-  chrome.runtime
-    .sendMessage({ type: RUNTIME_MESSAGE_TYPE.DOM_READY })
-    .then((res) => {
-      if (!res) {
-        setTimeout(() => {
-          bootstrap();
-        }, 100);
-        return;
-      }
-
-      main();
-    });
-};
-
-bootstrap();
+bootstrap(main);

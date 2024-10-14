@@ -3,17 +3,41 @@ import BasicAccountInfo from '../components/BasicAccountInfo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TokenList from '@/components/TokenList';
 import useAccountStore from '@/stores/account';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Spin from '@/components/Spin';
 import Activities from '../containers/Activities';
+import { useWalletClient } from '../contexts/wallet-context';
+import useKeyringStore from '@/stores/keyring';
 
 export default function Dashboard() {
-  const { update, loading } = useAccountStore();
-  const isEmpty = false;
+  const { updateAccount } = useAccountStore();
+  const { walletClient } = useWalletClient();
+  const { isLocked } = useKeyringStore();
+  const [loading, setLoading] = useState(false);
+
+  const isEmpty = false; // todo: make it real
+
+  const update = async () => {
+    setLoading(true);
+
+    try {
+      const res = await walletClient.initSmartAccount();
+
+      if (res) {
+        updateAccount(res);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    update();
-  }, []);
+    if (isLocked === false) {
+      update();
+    }
+  }, [isLocked]);
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
