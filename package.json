@@ -33,8 +33,5 @@
       "prettier --write",
       "eslint --fix"
     ]
-  },
-  "dependencies": {
-    "lodash": "^4.17.21"
   }
 }
