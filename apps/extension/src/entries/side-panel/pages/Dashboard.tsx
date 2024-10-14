@@ -5,6 +5,7 @@ import TokenList from '@/components/TokenList';
 import useAccountStore from '@/stores/account';
 import { useEffect } from 'react';
 import Spin from '@/components/Spin';
+import Activities from '../containers/Activities';
 
 export default function Dashboard() {
   const { update, loading } = useAccountStore();
@@ -52,7 +53,9 @@ export default function Dashboard() {
                     ]}
                   />
                 </TabsContent>
-                <TabsContent value="activities">Activities</TabsContent>
+                <TabsContent value="activities">
+                  <Activities />
+                </TabsContent>
               </div>
             </Tabs>
           )}
