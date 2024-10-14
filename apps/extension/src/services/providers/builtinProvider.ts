@@ -29,15 +29,65 @@ class BuiltinProvider extends SafeEventEmitter {
     return this._initialized;
   }
 
-  private _sendTransaction = async (params: RequestArguments['params']) => {
-    // notify the tab page to show the transaction status
-    console.log('sendTransaction', params);
-  };
+  public async createDappRequestWindow(request: unknown) {
+    const window = await chrome.windows.getCurrent();
+    const height = 932;
+    const width = 433;
+    const top = Math.round(
+      (window.top ?? 0) + ((window.height ?? height) - height) / 2
+    );
+    const left = Math.round(
+      (window.left ?? 0) + ((window.width ?? width) - width) / 2
+    );
+    try {
+      chrome.windows.create(
+        {
+          url: chrome.runtime.getURL(
+            `src/entries/tab/index.html#/send_transaction?id=windowid`
+          ),
+          focused: true,
+          type: 'popup',
+          width,
+          height,
+          top,
+          left,
+        },
+        (window) => {
+          if (window && window.tabs?.length) {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+              if (tabs.length) {
+                const transactionWindowTabId = tabs[0].id;
+                chrome.tabs.onUpdated.addListener((tabId, info) => {
+                  if (
+                    tabId === transactionWindowTabId &&
+                    info.status === 'complete'
+                  ) {
+                    setTimeout(() => {
+                      chrome.tabs.sendMessage(transactionWindowTabId, {
+                        request,
+                      });
+                    }, 500);
+                  }
+                });
+              }
+            });
+          }
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  private async _sendTransaction(params: unknown) {
+    await this.createDappRequestWindow(params);
+    return null;
+  }
 
   public async request({ method, params }: RequestArguments) {
     // TODO: try unlock if needed -> call up the unlock page
     keyring.tryUnlock();
-
     switch (method) {
       case 'eth_chainId':
         // return '0xa';
@@ -50,13 +100,14 @@ class BuiltinProvider extends SafeEventEmitter {
         return walletClient.getBlockByNumber();
       // TODO: implement the rest of the methods
       case 'eth_sendTransaction':
-        this._sendTransaction(params);
-        return '0x1';
+        return this._sendTransaction(params);
       case 'eth_signTypedDataV4':
         return walletClient.signTypedDataV4(params);
       case 'personal_sign':
         // return walletClient.chainType;
         return await walletClient.personalSign(params);
+      case 'eth_getTransactionByHash':
+        return await walletClient.getTransactionByHash(params);
       default:
         throw new Error(`Elytro: ${method} is not supported yet.`);
     }

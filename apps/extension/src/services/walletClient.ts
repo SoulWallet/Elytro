@@ -9,11 +9,12 @@ import {
   createWalletClient,
   formatEther,
   http,
+  PrepareTransactionRequestParameters,
   publicActions,
   PublicClient,
+  SendTransactionParameters,
   WalletClient,
 } from 'viem';
-
 import keyring from './keyring';
 import { SignTypedDataParameters } from 'viem/accounts';
 import { elytroSDK } from './sdk';
@@ -27,7 +28,8 @@ class ElytroWalletClient {
   private _client!: WalletClient & PublicClient;
 
   constructor() {
-    this.init(this._chainType);
+    // default to OP
+    this.init(SupportedChainTypeEn.OP_SEPOLIA);
   }
 
   get chainType() {
@@ -38,7 +40,6 @@ class ElytroWalletClient {
     return SUPPORTED_CHAIN_MAP[this._chainType];
   }
 
-  // Elytro Wallet Address, not the eoa address
   get address() {
     return this._address;
   }
@@ -115,6 +116,42 @@ class ElytroWalletClient {
           })
         );
       }
+    });
+  }
+
+  public async getTransactionByHash(params: unknown) {
+    try {
+      if (Array.isArray(params) && params.length)
+        return await this._client.getTransaction({ hash: params[0] });
+      else {
+        return new Error('Elytro: invalid params');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async sendTransaction(params: SendTransactionParameters) {
+    return await this._client.sendTransaction(params);
+  }
+
+  public async prepareTransactionRequest(
+    args: PrepareTransactionRequestParameters
+  ) {
+    return await this._client.prepareTransactionRequest(args);
+  }
+
+  public async signTransaction(request: any) {
+    return await this._client.signTransaction(request);
+  }
+
+  public async sendRawTransaction(serializedTransaction: `0x${string}`) {
+    return await this._client.sendRawTransaction({ serializedTransaction });
+  }
+
+  public async getBalance() {
+    return await this._client.getBalance({
+      address: keyring.owner?.address as Address,
     });
   }
 }
