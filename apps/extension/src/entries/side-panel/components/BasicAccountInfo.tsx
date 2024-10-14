@@ -7,10 +7,12 @@ import { navigateTo } from '@/utils/navigation';
 import ActionButton from './ActionButton';
 import { formatAddressToShort } from '@/utils/format';
 import ActivateButton from './ActivateButton';
+import SendModal from './SendModal';
+import { useState } from 'react';
 
 export default function BasicAccountInfo() {
   const { address, isActivated, chainType, balance } = useAccountStore();
-
+  const [openSendModal, setOpenSendModal] = useState(false);
   if (!address) {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Home);
   }
@@ -20,7 +22,7 @@ export default function BasicAccountInfo() {
   };
 
   const onClickSend = () => {
-    console.log('onClickSend');
+    setOpenSendModal(true);
   };
 
   const onClickReceive = () => {
@@ -60,7 +62,7 @@ export default function BasicAccountInfo() {
       </div>
 
       {/* Actions */}
-      {isActivated ? (
+      {!isActivated ? (
         <div className="grid grid-cols-2 gap-2 mt-2 ">
           <ActionButton
             icon={<ArrowDownLeft />}
@@ -76,6 +78,10 @@ export default function BasicAccountInfo() {
       ) : (
         <ActivateButton />
       )}
+      <SendModal
+        open={openSendModal}
+        onOpenChange={() => setOpenSendModal(false)}
+      />
     </div>
   );
 }
