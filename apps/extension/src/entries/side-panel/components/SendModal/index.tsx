@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useState } from 'react';
 import SendStep from './SendStep';
+import RecipientStep from './RecipientStep';
 
 interface IProps {
   open: boolean;
@@ -15,7 +16,7 @@ enum SendStepEnum {
 }
 
 export default function SendModal({ open, onOpenChange }: IProps) {
-  const [step, setStep] = useState(SendStepEnum.send);
+  const [step, setStep] = useState(SendStepEnum.recipient);
   const [isVlaid, setIsValid] = useState(false);
   const moveStep = () => {
     if (step === SendStepEnum.review) {
@@ -26,15 +27,22 @@ export default function SendModal({ open, onOpenChange }: IProps) {
   const checkIsValid = (valid: boolean) => {
     setIsValid(valid);
   };
+  const handleOnOpenChange = () => {
+    onOpenChange();
+    setStep(SendStepEnum.send);
+    setIsValid(false);
+  };
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOnOpenChange}>
       <DialogContent className="h-screen">
         <div className="h-full relative">
           <div className="mt-10">
             {step === SendStepEnum.send ? (
               <SendStep checkIsValid={checkIsValid} />
             ) : null}
-            {step === SendStepEnum.recipient ? 'recipient' : null}
+            {step === SendStepEnum.recipient ? (
+              <RecipientStep checkIsValid={checkIsValid} />
+            ) : null}
             {step === SendStepEnum.review ? 'review' : null}
           </div>
           <div className="absolute bottom-0 left-0 right-0">

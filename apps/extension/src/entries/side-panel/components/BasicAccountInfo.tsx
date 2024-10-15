@@ -34,7 +34,11 @@ export default function BasicAccountInfo() {
           <div className="flex flex-row gap-2 items-center w-full">
             <img
               className="w-10 h-10"
-              src={SUPPORTED_CHAIN_ICON_MAP[chainType]}
+              src={
+                SUPPORTED_CHAIN_ICON_MAP[
+                  chainType as keyof typeof SUPPORTED_CHAIN_ICON_MAP
+                ]
+              }
             ></img>
             <div className="flex flex-col justify-center">
               <div className="text-xl font-medium text-gray-900">
@@ -59,7 +63,7 @@ export default function BasicAccountInfo() {
       </div>
 
       {/* Actions */}
-      {!isActivated ? (
+      {isActivated ? (
         <div className="grid grid-cols-2 gap-2 mt-2 ">
           <ActionButton
             icon={<ArrowDownLeft />}
