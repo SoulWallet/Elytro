@@ -104,11 +104,10 @@ class BuiltinProvider extends SafeEventEmitter {
         // return this._sendTransaction(params);
 
         try {
-          // todo: ask sj to change it's required input params
           const mappedParams = (params as TTransactionInfo[]).map((tx) => ({
-            ...tx,
             data: tx?.input,
             gasLimit: tx?.gasPrice,
+            ...tx,
           }));
           return walletClient.sendTransaction(mappedParams);
         } catch {
