@@ -1,6 +1,6 @@
 import { TTxDetail } from '@/constants/operations';
 import { SimulationResult } from './ethRpc/simulate';
-import { toHex } from 'viem';
+import { Hex, toHex, size as getSize, pad } from 'viem';
 
 export function paddingZero(
   value: string | number | bigint,
@@ -24,13 +24,19 @@ export function paddingZero(
   return '0x' + hexString.padStart(targetLength, '0');
 }
 
-// 将 number | string | bigint 转换为 16进制字符串
-export function getHexString(value: number | string | bigint) {
+export function getHexString(
+  value: string | number | bigint | boolean | Uint8Array,
+  size: number = 16
+): Hex {
   if (typeof value === 'string' && value.startsWith('0x')) {
-    return value;
+    if (getSize(value as Hex) === size) {
+      return value as Hex;
+    } else {
+      return pad(value as Hex, { size });
+    }
   }
 
-  return toHex(value);
+  return toHex(value, { size });
 }
 
 // make the hex string length even

@@ -3,14 +3,19 @@ import {
   SUPPORTED_CHAIN_MAP,
   SupportedChainTypeEn,
 } from '@/constants/chains';
-import { SDK_INIT_CONFIG_BY_CHAIN_MAP } from '@/constants/sdk-config';
+import {
+  getDomainSeparator,
+  getEncoded1271MessageHash,
+  getEncodedSHA,
+  SDK_INIT_CONFIG_BY_CHAIN_MAP,
+} from '@/constants/sdk-config';
 import {
   DEFAULT_GUARDIAN_HASH,
   DEFAULT_GUARDIAN_SAFE_PERIOD,
   TEMP_ENTRY_POINT,
   TEMP_VALIDATOR,
 } from '@/constants/temp';
-import { paddingZero } from '@/utils/format';
+import { getHexString, paddingZero } from '@/utils/format';
 import { Bundler, SignkeyType, SoulWallet } from '@soulwallet/sdk';
 import { DecodeUserOp } from '@soulwallet/decoder';
 import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
@@ -156,27 +161,17 @@ class ElytroSDK {
   }
 
   public async signUserOperation(userOp: ElytroUserOperation) {
-    const { validationData, packedHash } =
-      await this._getPackedUserOpHash(userOp);
+    const opHash = await this._sdk.userOpHash(userOp);
 
-    const _eoaSignature = await keyring.owner?.signMessage({
-      message: { raw: packedHash as Hex },
-    });
-
-    if (!_eoaSignature) {
-      throw new Error('Elytro: Failed to sign message.');
-    }
-
-    const res = await this._sdk.packUserOpEOASignature(
-      TEMP_VALIDATOR,
-      _eoaSignature,
-      validationData
-    );
-
-    if (res.isErr()) {
-      throw res.ERR;
+    if (opHash.isErr()) {
+      throw opHash.ERR;
     } else {
-      userOp.signature = res.OK;
+      const signature = await this._getSignature(
+        opHash.OK,
+        0, // 0
+        Math.floor(new Date().getTime() / 1000) + 60 * 5 // 5 mins
+      );
+      userOp.signature = signature;
       return userOp;
     }
   }
@@ -217,6 +212,43 @@ class ElytroSDK {
       } else {
         return { ...packedHash.OK, userOpHash: opHash.OK };
       }
+    }
+  }
+
+  private async _getSignature(
+    messageHash: string,
+    validStartTime?: number,
+    validEndTime?: number
+  ) {
+    const rawHashRes = await this._sdk.packRawHash(
+      messageHash,
+      validStartTime,
+      validEndTime
+    );
+
+    if (rawHashRes.isErr()) {
+      throw rawHashRes.ERR;
+    }
+
+    // raw sign -> personal sign
+    const _eoaSignature = await keyring.owner?.signMessage({
+      message: { raw: rawHashRes.OK.packedHash as Hex },
+    });
+
+    if (!_eoaSignature) {
+      throw new Error('Elytro: Failed to sign message.');
+    }
+
+    const signRes = await this._sdk.packUserOpEOASignature(
+      TEMP_VALIDATOR,
+      _eoaSignature,
+      rawHashRes.OK.validationData
+    );
+
+    if (signRes.isErr()) {
+      throw signRes.ERR;
+    } else {
+      return signRes.OK; // signature
     }
   }
 
@@ -317,6 +349,20 @@ class ElytroSDK {
         suspiciousOp: missAmount > parseEther('0.001'), // if missAmount is too large, it may considered suspicious
       } as TUserOperationPreFundResult;
     }
+  }
+
+  public async signMessage(
+    message: Uint8Array | string | bigint | number | boolean | Hex,
+    saAddress: Hex
+  ) {
+    const rawMessage = getHexString(message, 32);
+
+    const encode1271MessageHash = getEncoded1271MessageHash(rawMessage);
+    const domainSeparator = getDomainSeparator(toHex(this.chain.id), saAddress);
+    const encodedSHA = getEncodedSHA(domainSeparator, encode1271MessageHash);
+
+    const signature = await this._getSignature(encodedSHA);
+    return signature;
   }
 
   // public async getPreFund(

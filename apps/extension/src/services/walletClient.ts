@@ -8,6 +8,7 @@ import {
   Address,
   createWalletClient,
   formatEther,
+  Hex,
   http,
   PrepareTransactionRequestParameters,
   publicActions,
@@ -18,6 +19,7 @@ import {
 import keyring from './keyring';
 import { SignTypedDataParameters } from 'viem/accounts';
 import { elytroSDK } from './sdk';
+import { ethErrors } from 'eth-rpc-errors';
 
 class ElytroWalletClient {
   private _address: Nullable<Address> = null;
@@ -102,28 +104,12 @@ class ElytroWalletClient {
   }
 
   public async personalSign(params: unknown) {
-    let signer = keyring.owner;
+    if (!Array.isArray(params) || params?.length < 2) {
+      throw ethErrors.rpc.invalidParams();
+    }
 
-    return new Promise(async (resolve, reject) => {
-      if (!signer) {
-        await keyring.tryUnlock(async () => {
-          signer = keyring.owner;
-          signer
-            ? resolve(
-                await signer?.signMessage({
-                  message: String(params),
-                })
-              )
-            : reject(new Error('Elytro: Unable to unlock signer.'));
-        });
-      } else {
-        resolve(
-          await signer?.signMessage({
-            message: String(params),
-          })
-        );
-      }
-    });
+    // todo: maybe more params check?
+    return await elytroSDK.signMessage(params[0], params[1] as Hex);
   }
 
   public async getTransactionByHash(params: unknown) {

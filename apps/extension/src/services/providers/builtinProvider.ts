@@ -104,7 +104,6 @@ class BuiltinProvider extends SafeEventEmitter {
       case 'eth_signTypedDataV4':
         return walletClient.signTypedDataV4(params);
       case 'personal_sign':
-        // return walletClient.chainType;
         return await walletClient.personalSign(params);
       case 'eth_getTransactionByHash':
         return await walletClient.getTransactionByHash(params);
