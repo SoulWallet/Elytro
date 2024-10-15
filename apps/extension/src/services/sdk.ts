@@ -24,6 +24,7 @@ import { simulateSendUserOp } from '@/utils/ethRpc/simulate';
 import { UserOperationStatusEn } from '@/constants/operations';
 import { Address, Hex, parseEther, toHex } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
+import { ethErrors } from 'eth-rpc-errors';
 
 class ElytroSDK {
   private _sdk!: SoulWallet;
@@ -195,25 +196,25 @@ class ElytroSDK {
     }
   }
 
-  private async _getPackedUserOpHash(userOp: ElytroUserOperation) {
-    const opHash = await this._sdk.userOpHash(userOp);
+  // private async _getPackedUserOpHash(userOp: ElytroUserOperation) {
+  //   const opHash = await this._sdk.userOpHash(userOp);
 
-    if (opHash.isErr()) {
-      throw opHash.ERR;
-    } else {
-      const packedHash = await this._sdk.packRawHash(
-        opHash.OK,
-        0, // start time
-        Math.floor(new Date().getTime() / 1000) + 60 * 5 // end time
-      );
+  //   if (opHash.isErr()) {
+  //     throw opHash.ERR;
+  //   } else {
+  //     const packedHash = await this._sdk.packRawHash(
+  //       opHash.OK,
+  //       0, // start time
+  //       Math.floor(new Date().getTime() / 1000) + 60 * 5 // end time
+  //     );
 
-      if (packedHash.isErr()) {
-        throw packedHash.ERR;
-      } else {
-        return { ...packedHash.OK, userOpHash: opHash.OK };
-      }
-    }
-  }
+  //     if (packedHash.isErr()) {
+  //       throw packedHash.ERR;
+  //     } else {
+  //       return { ...packedHash.OK, userOpHash: opHash.OK };
+  //     }
+  //   }
+  // }
 
   private async _getSignature(
     messageHash: string,
@@ -271,8 +272,13 @@ class ElytroSDK {
     return await simulateSendUserOp(userOp, TEMP_ENTRY_POINT, this.chain.id);
   }
 
+  private async _getFeeData() {
+    const fee = await this._sdk.provider.getFeeData();
+    return fee;
+  }
+
   public async estimateGas(userOp: ElytroUserOperation) {
-    const gasPrice = await this._sdk.provider.getFeeData();
+    const gasPrice = await this._getFeeData();
 
     // todo: what if it's null? set as 0?
     userOp.maxFeePerGas = gasPrice?.maxFeePerGas ?? 0;
@@ -363,6 +369,41 @@ class ElytroSDK {
 
     const signature = await this._getSignature(encodedSHA);
     return signature;
+  }
+
+  private async _createUserOpFromTxs(tx: TElytroTxInfo) {
+    const _userOp = await this._sdk.fromTransaction(
+      tx.maxFeePerGas,
+      tx.maxPriorityFeePerGas,
+      tx.from,
+      tx.txs
+    );
+
+    if (_userOp.isErr()) {
+      throw _userOp.ERR;
+    } else {
+      return _userOp.OK;
+    }
+  }
+
+  public async sendTransaction(txs: TTransactionInfo[], saAddress: Address) {
+    try {
+      const { maxFeePerGas, maxPriorityFeePerGas } = await this._getFeeData();
+
+      const tx = {
+        maxFeePerGas: getHexString(maxFeePerGas ?? 0),
+        maxPriorityFeePerGas: getHexString(maxPriorityFeePerGas ?? 0),
+        from: saAddress,
+        txs,
+      };
+
+      const userOp = await this._createUserOpFromTxs(tx);
+
+      return await this.sendUserOperation(userOp);
+    } catch (error) {
+      console.error('Elytro:: send_transaction failed:', error);
+      throw ethErrors.rpc.transactionRejected();
+    }
   }
 
   // public async getPreFund(

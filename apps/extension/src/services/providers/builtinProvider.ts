@@ -3,6 +3,7 @@ import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 import walletClient from '../walletClient';
 import { toHex } from 'viem';
 import keyring from '../keyring';
+import { ethErrors } from 'eth-rpc-errors';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
@@ -100,7 +101,21 @@ class BuiltinProvider extends SafeEventEmitter {
         return walletClient.getBlockByNumber();
       // TODO: implement the rest of the methods
       case 'eth_sendTransaction':
-        return this._sendTransaction(params);
+        // return this._sendTransaction(params);
+
+        try {
+          // todo: ask sj to change it's required input params
+          const mappedParams = (params as TTransactionInfo[]).map((tx) => ({
+            ...tx,
+            data: tx?.input,
+            gasLimit: tx?.gasPrice,
+          }));
+          return walletClient.sendTransaction(mappedParams);
+        } catch {
+          return ethErrors.provider.userRejectedRequest();
+        }
+
+      // return walletClient.sendTransaction(params);
       case 'eth_signTypedDataV4':
         return walletClient.signTypedDataV4(params);
       case 'personal_sign':
