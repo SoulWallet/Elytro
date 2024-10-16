@@ -13,7 +13,6 @@ import {
   PrepareTransactionRequestParameters,
   publicActions,
   PublicClient,
-  SendTransactionParameters,
   WalletClient,
 } from 'viem';
 import keyring from './keyring';
@@ -119,8 +118,8 @@ class ElytroWalletClient {
       else {
         return new Error('Elytro: invalid params');
       }
-    } catch (error) {
-      throw error;
+    } catch {
+      // do nth.
     }
   }
 
@@ -134,7 +133,7 @@ class ElytroWalletClient {
     return await this._client.prepareTransactionRequest(args);
   }
 
-  public async signTransaction(request: any) {
+  public async signTransaction(request: SafeAny) {
     return await this._client.signTransaction(request);
   }
 

@@ -1,5 +1,4 @@
-// @ts-nocheck
-type MessageHandler = (message: unknown, port: chrome.runtime.Port) => void;
+type MessageHandler = (message: SafeAny, port: chrome.runtime.Port) => void;
 
 export class PortMessageManager {
   private ports: Map<string, chrome.runtime.Port> = new Map();
@@ -39,7 +38,7 @@ export class PortMessageManager {
   // }
 
   // @ts-ignore
-  public sendMessage(type: string, data: any, portId: string = 'default') {
+  public sendMessage(type: string, data: SafeAny, portId: string = 'default') {
     const port = this.ports.get(portId);
     if (port) {
       port.postMessage({ type, data });

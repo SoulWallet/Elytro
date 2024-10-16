@@ -1,5 +1,5 @@
 import { toast } from '@/hooks/use-toast';
-import keyring from '@/services/keyring';
+import keyring from '@/background/services/keyring';
 import { navigateTo } from '@/utils/navigation';
 import { create } from 'zustand';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';

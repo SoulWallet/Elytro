@@ -1,7 +1,7 @@
 import { TSignTxDetail } from '@/constants/operations';
 import { ELYTRO_SESSION_DATA, TSessionData } from '@/constants/session';
 import { toast } from '@/hooks/use-toast';
-import { elytroSDK } from '@/services/sdk';
+import { elytroSDK } from '@/background/services/sdk';
 import { formatSimulationResultToTxDetail } from '@/utils/format';
 import { create } from 'zustand';
 

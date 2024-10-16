@@ -8,7 +8,7 @@ import {
   SendTransactionParameters,
 } from 'viem';
 import { Button } from '@/components/ui/button';
-import keyring from '@/services/keyring';
+import keyring from '@/background/services/keyring';
 import _omitBy from 'lodash/omitBy';
 import _isEmpty from 'lodash/isEmpty';
 

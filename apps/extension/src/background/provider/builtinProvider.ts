@@ -1,9 +1,9 @@
 // import walletClient from '../walletClient';
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
-import walletClient from '../walletClient';
 import { toHex } from 'viem';
-import keyring from '../keyring';
 import { ethErrors } from 'eth-rpc-errors';
+import walletClient from '../services/walletClient';
+import keyring from '../services/keyring';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193

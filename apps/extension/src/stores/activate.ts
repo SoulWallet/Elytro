@@ -1,5 +1,5 @@
-import keyring from '@/services/keyring';
-import { elytroSDK } from '@/services/sdk';
+import keyring from '@/background/services/keyring';
+import { elytroSDK } from '@/background/services/sdk';
 import { create } from 'zustand';
 import useDialogStore from './dialog';
 import { navigateTo } from '@/utils/navigation';

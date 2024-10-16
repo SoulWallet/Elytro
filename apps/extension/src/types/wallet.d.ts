@@ -32,3 +32,9 @@ type TElytroTxInfo = {
   from: string;
   txs: TTransactionInfo[];
 };
+
+type TDAppInfo = {
+  name: string;
+  origin?: string;
+  icon: string;
+};

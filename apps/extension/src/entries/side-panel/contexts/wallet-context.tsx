@@ -1,7 +1,7 @@
 import SignTxModal from '../components/SignTxModal';
 import { createContext, useContext, useEffect } from 'react';
 import { PortMessageManager } from '@/utils/message/portMessageManager';
-import { ElytroWalletClient } from '@/services/walletClient';
+import { ElytroWalletClient } from '@/background/services/walletClient';
 import useKeyringStore from '@/stores/keyring';
 
 const portMessageManager = new PortMessageManager('elytro-ui');
