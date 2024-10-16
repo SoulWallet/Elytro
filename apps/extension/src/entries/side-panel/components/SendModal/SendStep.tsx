@@ -2,9 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectContent } from '@/components/ui/select';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import ETHIcon from '@/assets/icons/ether.svg';
-interface TokenProps {
+import { TxData } from '.';
+export interface TokenProps {
   name: string;
   balance: string | number;
   icon: string;
@@ -26,8 +27,10 @@ function SelectedToken({ token }: { token?: TokenProps }) {
 
 export default function SendStep({
   checkIsValid,
+  updateTxData,
 }: {
   checkIsValid?: (valid: boolean) => void;
+  updateTxData: Dispatch<SetStateAction<TxData | undefined>>;
 }) {
   const [token, setToken] = useState<TokenProps | undefined>();
   const [amount, setAmount] = useState('');
@@ -62,7 +65,16 @@ export default function SendStep({
     const tokenValid = Boolean(token);
     const amountValid = Boolean(amount);
     const valid = tokenValid && amountValid;
-    if (checkIsValid) checkIsValid(valid);
+    if (checkIsValid) {
+      checkIsValid(valid);
+      updateTxData((prev: TxData | undefined) => {
+        if (prev) {
+          return { ...prev, token, amount };
+        } else {
+          return prev;
+        }
+      });
+    }
   }, [token, amount]);
   return (
     <div className="space-y-4">

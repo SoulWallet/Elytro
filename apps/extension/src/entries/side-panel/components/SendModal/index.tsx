@@ -1,12 +1,19 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useState } from 'react';
-import SendStep from './SendStep';
+import SendStep, { TokenProps } from './SendStep';
 import RecipientStep from './RecipientStep';
+import ReviewStep from './ReviewStep';
 
 interface IProps {
   open: boolean;
   onOpenChange: () => void;
+}
+
+export interface TxData {
+  token?: TokenProps;
+  amount?: string;
+  to?: string;
 }
 
 enum SendStepEnum {
@@ -16,11 +23,12 @@ enum SendStepEnum {
 }
 
 export default function SendModal({ open, onOpenChange }: IProps) {
-  const [step, setStep] = useState(SendStepEnum.recipient);
+  const [step, setStep] = useState(SendStepEnum.send);
   const [isVlaid, setIsValid] = useState(false);
+  const [txData, setTxData] = useState<TxData | undefined>();
   const moveStep = () => {
     if (step === SendStepEnum.review) {
-      return setStep(SendStepEnum.send);
+      return onOpenChange();
     }
     return setStep(step + 1);
   };
@@ -38,12 +46,17 @@ export default function SendModal({ open, onOpenChange }: IProps) {
         <div className="h-full relative">
           <div className="mt-10">
             {step === SendStepEnum.send ? (
-              <SendStep checkIsValid={checkIsValid} />
+              <SendStep checkIsValid={checkIsValid} updateTxData={setTxData} />
             ) : null}
             {step === SendStepEnum.recipient ? (
-              <RecipientStep checkIsValid={checkIsValid} />
+              <RecipientStep
+                checkIsValid={checkIsValid}
+                updateTxData={setTxData}
+              />
             ) : null}
-            {step === SendStepEnum.review ? 'review' : null}
+            {step === SendStepEnum.review ? (
+              <ReviewStep txData={txData} />
+            ) : null}
           </div>
           <div className="absolute bottom-0 left-0 right-0">
             <Button

@@ -2,24 +2,30 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
 import useAccountStore from '@/stores/account';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import questionIcon from '@/assets/icons/question.svg';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { TxData } from '.';
+import { isAddress } from 'viem';
 
 export default function RecipientStep({
   checkIsValid,
+  updateTxData,
 }: {
-  checkIsValid?: (valid: boolean) => void;
+  checkIsValid?: (isValid: boolean) => void;
+  updateTxData: Dispatch<SetStateAction<TxData | undefined>>;
 }) {
   const [address, setAddress] = useState('');
   const { chainType } = useAccountStore();
   useEffect(() => {
-    if (checkIsValid) checkIsValid(Boolean(address));
+    if (checkIsValid) {
+      checkIsValid(isAddress(address, { strict: false }));
+      updateTxData((prev: TxData | undefined) => ({ ...prev, to: address }));
+    }
   }, [address]);
   return (
     <div className="space-y-4">
@@ -48,16 +54,14 @@ export default function RecipientStep({
             alt={chainType}
           />
           <div>{chainType}</div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <img src={questionIcon} alt="question icon" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Network tooltip</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <img src={questionIcon} alt="question icon" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Network tooltip</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>
