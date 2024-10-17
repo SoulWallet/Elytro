@@ -11,22 +11,10 @@ const walletControllerProxy = new Proxy(
   {
     get(_, prop: keyof WalletController) {
       return function (...args: unknown[]) {
-        const descriptor = Object.getOwnPropertyDescriptor(
-          WalletController.prototype,
-          prop
-        );
-
-        if (descriptor && typeof descriptor.get === 'function') {
-          portMessageManager.sendMessage('UI_REQUEST', {
-            method: prop,
-            params: [],
-          });
-        } else {
-          portMessageManager.sendMessage('UI_REQUEST', {
-            method: prop,
-            params: args,
-          });
-        }
+        portMessageManager.sendMessage('UI_REQUEST', {
+          method: prop,
+          params: args,
+        });
 
         return new Promise((resolve) => {
           portMessageManager.onMessage('UI_RESPONSE', (response) => {

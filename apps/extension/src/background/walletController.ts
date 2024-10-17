@@ -1,6 +1,7 @@
 import keyring from './services/keyring';
 import walletClient from './services/walletClient';
 
+// ! DO NOT use getter. They can not be proxied.
 class WalletController {
   constructor() {
     // walletClient.init();

@@ -120,15 +120,6 @@ const initUIMessage = (port: chrome.runtime.Port) => {
   }) {
     const { method, params } = request;
 
-    // const descriptor = Object.getOwnPropertyDescriptor(
-    //   WalletController.prototype,
-    //   method
-    // );
-
-    // if (descriptor && typeof descriptor.get === 'function') {
-    //   return await walletController[method];
-    // }
-
     if (typeof walletController[method] === 'function') {
       return await (
         walletController[method] as (...args: unknown[]) => unknown
