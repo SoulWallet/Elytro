@@ -8,6 +8,8 @@ import { formatAddressToShort } from '@/utils/format';
 import ActivateButton from './ActivateButton';
 import SendModal from './SendModal';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import SettingModal from './SettingModal';
 
 export default function BasicAccountInfo({
   address,
@@ -16,9 +18,10 @@ export default function BasicAccountInfo({
   balance,
 }: TAccountInfo) {
   const [openSendModal, setOpenSendModal] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
 
   const onClickMore = () => {
-    console.log('onClickMore');
+    setOpenSetting(true);
   };
 
   const onClickSend = () => {
@@ -54,7 +57,9 @@ export default function BasicAccountInfo({
               />
             </div>
           </div>
-          <Ellipsis className="w-6 h-6 text-gray-900" onClick={onClickMore} />
+          <Button variant="ghost" onClick={onClickMore}>
+            <Ellipsis className="w-6 h-6 text-gray-900" />
+          </Button>
         </div>
       </div>
       {/* Balance: $XX.xx */}
@@ -85,6 +90,10 @@ export default function BasicAccountInfo({
       <SendModal
         open={openSendModal}
         onOpenChange={() => setOpenSendModal(false)}
+      />
+      <SettingModal
+        open={openSetting}
+        onOpenChange={() => setOpenSetting(false)}
       />
     </div>
   );
