@@ -34,6 +34,7 @@ class BuiltinProvider extends SafeEventEmitter {
     const window = await chrome.windows.getCurrent();
     const height = 932;
     const width = 433;
+
     const top = Math.round(
       (window.top ?? 0) + ((window.height ?? height) - height) / 2
     );

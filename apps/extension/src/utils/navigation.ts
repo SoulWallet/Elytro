@@ -31,6 +31,11 @@ export function navigateTo(
   params?: Record<string, string>
 ) {
   const targetPath = `${path}${params ? `?${new URLSearchParams(params).toString()}` : ''}`;
+  // const isSameRoute = location.hash === '#' + targetPath;
+
+  // if (isSameRoute) {
+  //   return;
+  // }
   const inSameMode = getCurrentType() === target;
 
   // if in same mode, just navigate in router

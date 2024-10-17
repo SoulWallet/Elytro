@@ -40,7 +40,7 @@ export default function Activate() {
 
   const handleDeposit = () => {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Receive, {
-      fromActivate: 1,
+      fromActivate: '1',
     });
   };
 

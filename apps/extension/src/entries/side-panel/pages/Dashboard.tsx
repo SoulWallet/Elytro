@@ -2,49 +2,26 @@ import EmptyAsset from '@/components/EmptyAsset';
 import BasicAccountInfo from '../components/BasicAccountInfo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TokenList from '@/components/TokenList';
-import useAccountStore from '@/stores/account';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Spin from '@/components/Spin';
 import Activities from '../containers/Activities';
-import { useWalletClient } from '../contexts/wallet-context';
-import useKeyringStore from '@/stores/keyring';
+import { useAccount } from '../hooks/use-account';
 
 export default function Dashboard() {
-  const { updateAccount } = useAccountStore();
-  const { walletClient } = useWalletClient();
-  const { isLocked } = useKeyringStore();
-  const [loading, setLoading] = useState(false);
+  const { updateAccount, loading, accountInfo } = useAccount();
 
   const isEmpty = false; // todo: make it real
 
-  const update = async () => {
-    setLoading(true);
-
-    try {
-      const res = await walletClient.initSmartAccount();
-
-      if (res) {
-        updateAccount(res);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (isLocked === false) {
-      update();
-    }
-  }, [isLocked]);
+    updateAccount();
+  }, []);
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
       <Spin isLoading={loading} />
 
       {/* Account Basic Info */}
-      <BasicAccountInfo />
+      <BasicAccountInfo {...accountInfo} />
 
       {/* Empty Fallback or Assets and Activities */}
       <div className="h-full px-2">

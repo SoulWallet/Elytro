@@ -11,12 +11,15 @@ interface IPageContainerProps {
 
 function PageContainer({ children, className }: IPageContainerProps) {
   return (
-    <div className={`w-screen h-screen flex ${className}`}>
-      <WalletProvider>
-        <RequestProvider>{children}</RequestProvider>
-      </WalletProvider>
+    <>
+      <div className={`w-screen h-screen flex ${className}`}>
+        <WalletProvider>
+          <RequestProvider>{children}</RequestProvider>
+        </WalletProvider>
+      </div>
+
       <Toaster />
-    </div>
+    </>
   );
 }
 

@@ -1,9 +1,11 @@
 import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
 import { sendReadyMessageToTabs } from './utils';
 import { PortMessageManager } from '@/utils/message/portMessageManager';
-import walletClient, {
-  ElytroWalletClient,
-} from '@/background/services/walletClient';
+// import walletClient, {
+//   ElytroWalletClient,
+// } from '@/background/services/walletClient';
+
+import { walletController, WalletController } from './walletController';
 import connectionManager from '@/background/services/connection';
 import rpcFlow, { TProviderRequest } from '@/background/provider/rpcFlow';
 import { getDAppInfoFromSender } from '@/utils/url';
@@ -112,24 +114,25 @@ const initUIMessage = (port: chrome.runtime.Port) => {
   const UIPortManager = new PortMessageManager('elytro-ui');
   UIPortManager.connect(port);
 
-  function handleUIRequest(request: {
-    method: keyof ElytroWalletClient;
+  async function handleUIRequest(request: {
+    method: keyof WalletController;
     params: unknown[];
   }) {
     const { method, params } = request;
 
-    const descriptor = Object.getOwnPropertyDescriptor(
-      ElytroWalletClient.prototype,
-      method
-    );
+    // const descriptor = Object.getOwnPropertyDescriptor(
+    //   WalletController.prototype,
+    //   method
+    // );
 
-    if (descriptor && typeof descriptor.get === 'function') {
-      return walletClient[method];
-    }
-    if (typeof walletClient[method] === 'function') {
-      return (walletClient[method] as (...args: unknown[]) => unknown)(
-        ...params
-      );
+    // if (descriptor && typeof descriptor.get === 'function') {
+    //   return await walletController[method];
+    // }
+
+    if (typeof walletController[method] === 'function') {
+      return await (
+        walletController[method] as (...args: unknown[]) => unknown
+      )(...params);
     }
 
     throw new Error(`Method ${method} not found on ElytroWalletClient`);
@@ -139,7 +142,7 @@ const initUIMessage = (port: chrome.runtime.Port) => {
     try {
       const result = await handleUIRequest(
         data as {
-          method: keyof ElytroWalletClient;
+          method: keyof WalletController;
           params: unknown[];
         }
       );

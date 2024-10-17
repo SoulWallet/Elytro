@@ -12,6 +12,7 @@ export interface ActivityProps {
   id: string;
   type: ActivityTypes;
   info: unknown;
+  address: string; // todo: maybe need mapped
 }
 
 const IconTypeMap = {
@@ -20,60 +21,34 @@ const IconTypeMap = {
   [ActivityTypes.callContract]: CallContractIcon,
 };
 
-export default function Activity({ activity }: { activity: ActivityProps }) {
-  const genActivityTitle = (activity: ActivityProps) => {
-    switch (activity.type) {
-      case ActivityTypes.receive:
-        return (
-          <>
-            <div>Recieved 1.12 USDC</div>
-          </>
-        );
-      case ActivityTypes.send:
-        return (
-          <>
-            <div>Send 1.12 USDC</div>
-          </>
-        );
-      case ActivityTypes.callContract:
-        return <div>Call contract</div>;
-      default:
-        return <div>Unknown Activity</div>;
-    }
-  };
-  const genActivityDesc = (activity: ActivityProps) => {
-    switch (activity.type) {
-      case ActivityTypes.receive:
-        return (
-          <>
-            <div>From: 0xjds…ysia8</div>
-          </>
-        );
-      case ActivityTypes.send:
-        return (
-          <>
-            <div>To: 0xjds…ysia8</div>
-          </>
-        );
-      case ActivityTypes.callContract:
-        return <div>On: 0xjds…ysia8</div>;
-      default:
-        return <div>Unknown Activity</div>;
-    }
-  };
-  const handleActivityInfo = (activity: ActivityProps) => ({
-    icon: IconTypeMap[activity.type],
-    title: genActivityTitle(activity),
-    desc: genActivityDesc(activity),
-  });
+const ActivityTitleMap = {
+  [ActivityTypes.receive]: 'Received ${value} USDC',
+  [ActivityTypes.send]: 'Sent ${value} USDC',
+  [ActivityTypes.callContract]: 'Call contract',
+};
+const ActivityDescMap = {
+  [ActivityTypes.callContract]: 'On',
+  [ActivityTypes.receive]: 'From',
+  [ActivityTypes.send]: 'To',
+};
 
-  const displayData = handleActivityInfo(activity);
+export default function Activity({
+  activity: { type, address },
+}: {
+  activity: ActivityProps;
+}) {
   return (
     <div className="flex py-2">
-      <img src={displayData.icon} alt={activity.type} />
+      <img src={IconTypeMap[type]} alt={type} />
       <div className="ml-2">
-        <div className="text-lg font-medium">{displayData.title}</div>
-        <div className="text-gray-400">{displayData.desc}</div>
+        <div className="text-lg font-medium">
+          {ActivityTitleMap[type] ?? 'Unknown Activity'}
+        </div>
+        <div className="text-gray-400">
+          {ActivityDescMap[type]
+            ? `${ActivityDescMap[type]}: ${address}`
+            : 'Unknown Activity'}
+        </div>
       </div>
     </div>
   );

@@ -1,19 +1,18 @@
 import SignTxModal from '../components/SignTxModal';
-import { createContext, useContext, useEffect } from 'react';
+import { createContext, useContext } from 'react';
 import { PortMessageManager } from '@/utils/message/portMessageManager';
-import { ElytroWalletClient } from '@/background/services/walletClient';
-import useKeyringStore from '@/stores/keyring';
+import { WalletController } from '@/background/walletController';
 
 const portMessageManager = new PortMessageManager('elytro-ui');
 portMessageManager.connect();
 
-const walletClientProxy = new Proxy(
+const walletControllerProxy = new Proxy(
   {},
   {
-    get(_, prop: keyof ElytroWalletClient) {
+    get(_, prop: keyof WalletController) {
       return function (...args: unknown[]) {
         const descriptor = Object.getOwnPropertyDescriptor(
-          ElytroWalletClient.prototype,
+          WalletController.prototype,
           prop
         );
 
@@ -37,33 +36,27 @@ const walletClientProxy = new Proxy(
       };
     },
   }
-) as ElytroWalletClient;
+) as WalletController;
 
 type IWalletContext = {
-  walletClient: ElytroWalletClient;
+  wallet: WalletController;
 };
 
 const WalletContext = createContext<IWalletContext>({
-  walletClient: walletClientProxy as ElytroWalletClient,
+  wallet: walletControllerProxy as WalletController,
 });
 
 export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
-  const { tryUnlock, isLocked } = useKeyringStore();
-
-  useEffect(() => {
-    if (isLocked === null) {
-      tryUnlock();
-    }
-  }, [isLocked]);
-
   return (
-    <WalletContext.Provider value={{ walletClient: walletClientProxy }}>
-      <>{children}</>
+    <WalletContext.Provider value={{ wallet: walletControllerProxy }}>
+      {children}
       <SignTxModal />
     </WalletContext.Provider>
   );
 };
 
-export const useWalletClient = () => {
-  return useContext(WalletContext);
+export const useWallet = () => {
+  const { wallet } = useContext(WalletContext);
+
+  return wallet;
 };

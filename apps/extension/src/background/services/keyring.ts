@@ -137,6 +137,8 @@ class KeyringService {
       throw new Error('Password is required');
     }
     await this._verifyPassword(password);
+
+    return this._locked;
   }
 
   private async _updateOwnerByKey(key: Hex) {

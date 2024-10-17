@@ -17,7 +17,7 @@ export const SIDE_PANEL_ROUTE_PATHS = {
 export const routes: TRoute[] = [
   {
     path: SIDE_PANEL_ROUTE_PATHS.Home,
-    component: Dashboard,
+    component: Unlock,
   },
   {
     path: SIDE_PANEL_ROUTE_PATHS.Dashboard,

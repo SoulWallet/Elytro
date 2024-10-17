@@ -3,18 +3,15 @@ import ReactDOM from 'react-dom/client';
 import HashRouter from '@/components/HashRouter';
 import { routes } from './routes';
 import PageContainer from '@/components/PageContainer';
-import { WalletProvider } from './contexts/wallet-context';
 import { bootstrap } from '@/utils/bootstrap';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const main = () => {
   const SidePanelApp: React.FC = () => (
     <PageContainer className="min-w-96">
-      <WalletProvider>
-        <TooltipProvider>
-          <HashRouter routes={routes} />
-        </TooltipProvider>
-      </WalletProvider>
+      <TooltipProvider>
+        <HashRouter routes={routes} />
+      </TooltipProvider>
     </PageContainer>
   );
 

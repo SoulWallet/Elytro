@@ -1,5 +1,4 @@
 import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
-import useAccountStore from '@/stores/account';
 import { ArrowDownLeft, ArrowUpRight, Ellipsis } from 'lucide-react';
 import CopyableText from '@/components/CopyableText';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
@@ -10,8 +9,12 @@ import ActivateButton from './ActivateButton';
 import SendModal from './SendModal';
 import { useState } from 'react';
 
-export default function BasicAccountInfo() {
-  const { address, isActivated, chainType, balance } = useAccountStore();
+export default function BasicAccountInfo({
+  address,
+  isActivated,
+  chainType,
+  balance,
+}: TAccountInfo) {
   const [openSendModal, setOpenSendModal] = useState(false);
 
   const onClickMore = () => {
