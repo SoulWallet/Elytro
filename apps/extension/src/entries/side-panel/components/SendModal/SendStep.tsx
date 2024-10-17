@@ -71,7 +71,7 @@ export default function SendStep({
         if (prev) {
           return { ...prev, token, amount };
         } else {
-          return prev;
+          return { token, amount };
         }
       });
     }
