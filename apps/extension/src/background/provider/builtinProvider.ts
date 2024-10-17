@@ -128,6 +128,6 @@ class BuiltinProvider extends SafeEventEmitter {
   }
 }
 
-const provider = new BuiltinProvider();
+const builtinProvider = new BuiltinProvider();
 
-export default provider;
+export default builtinProvider;

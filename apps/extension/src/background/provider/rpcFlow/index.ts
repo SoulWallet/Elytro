@@ -3,7 +3,7 @@
 import AsyncTaskFlow from '@/utils/asyncTaskFlow';
 import { checkMethodExist } from './checkMethodExist';
 import { checkLock } from './checkLock';
-
+import { callProvider } from './callProvider';
 export type TProviderRequest = {
   ctx?: unknown;
   dApp: TDAppInfo;
@@ -18,7 +18,11 @@ export type TRpcFlowContext = {
 
 const taskFlow = new AsyncTaskFlow<TRpcFlowContext>();
 
-const composedTasks = taskFlow.use(checkMethodExist).use(checkLock).compose();
+const composedTasks = taskFlow
+  .use(checkMethodExist)
+  .use(checkLock)
+  .use(callProvider)
+  .compose();
 
 export default (request: TProviderRequest) => {
   const initContext = {

@@ -71,29 +71,27 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
         dApp: await getDAppInfoFromSender(port.sender!),
       };
 
-      return rpcFlow(providerReq);
+      try {
+        const result = await rpcFlow(providerReq);
 
-      // try {
-      //   const result = await builtinProvider.request(data);
-
-      //   providerPortManager.sendMessage(
-      //     'BUILTIN_PROVIDER_RESPONSE',
-      //     {
-      //       method: data.method,
-      //       data: result,
-      //     },
-      //     port.sender?.id
-      //   );
-      // } catch (error) {
-      //   providerPortManager.sendMessage(
-      //     'BUILTIN_PROVIDER_RESPONSE',
-      //     {
-      //       method: data.method,
-      //       error: (error as Error).message,
-      //     },
-      //     port.sender?.id
-      //   );
-      // }
+        providerPortManager.sendMessage(
+          'BUILTIN_PROVIDER_RESPONSE',
+          {
+            method: data.method,
+            data: result,
+          },
+          port.sender?.id
+        );
+      } catch (error) {
+        providerPortManager.sendMessage(
+          'BUILTIN_PROVIDER_RESPONSE',
+          {
+            method: data.method,
+            error: (error as Error).message,
+          },
+          port.sender?.id
+        );
+      }
     }
   );
 
