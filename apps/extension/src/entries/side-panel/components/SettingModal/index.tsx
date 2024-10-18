@@ -7,6 +7,7 @@ import { BackArrow } from '@/assets/icons/BackArrow';
 import ReceiveAddress from '../ReceiveAddress';
 import useAccountStore from '@/stores/account';
 import NetworkSetting from './NetworkSetting';
+import useKeyringStore from '@/stores/keyring';
 
 interface IProps {
   open: boolean;
@@ -16,7 +17,7 @@ interface IProps {
 export default function SettingModal({ open, onOpenChange }: IProps) {
   const { address, chainType } = useAccountStore();
   const [currentSetting, setCurrentSetting] = useState('');
-
+  const { lock } = useKeyringStore();
   const handleOnOpenChange = () => {
     setCurrentSetting('');
     onOpenChange();
@@ -36,7 +37,10 @@ export default function SettingModal({ open, onOpenChange }: IProps) {
     {
       icon: LockIcon,
       label: 'Lock Wallet',
-      action: () => {},
+      action: async () => {
+        await lock();
+        setCurrentSetting('');
+      },
     },
   ];
 
