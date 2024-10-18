@@ -18,6 +18,7 @@ export default function SettingModal({ open, onOpenChange }: IProps) {
   const [currentSetting, setCurrentSetting] = useState('');
 
   const handleOnOpenChange = () => {
+    setCurrentSetting('');
     onOpenChange();
   };
 
