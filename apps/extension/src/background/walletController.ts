@@ -1,3 +1,6 @@
+import { SupportedChainTypeEn } from '@/constants/chains';
+import { approvalService } from './services/approval';
+import connectionManager from './services/connection';
 import keyring from './services/keyring';
 import walletClient from './services/walletClient';
 
@@ -39,6 +42,18 @@ class WalletController {
 
   public async unlock(password: string) {
     return await keyring.unlock(password);
+  }
+
+  public async getCurrentApproval() {
+    return approvalService.currentApproval;
+  }
+
+  public async connectWallet(dApp: TDAppInfo, chainType: SupportedChainTypeEn) {
+    connectionManager.connect(dApp, chainType);
+  }
+
+  public async sendTransaction(tx: TTransactionInfo[]) {
+    return await walletClient.sendTransaction(tx);
   }
 }
 

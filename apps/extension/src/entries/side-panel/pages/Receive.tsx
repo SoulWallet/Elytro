@@ -1,9 +1,11 @@
 import { BackArrow } from '@/assets/icons/BackArrow';
 import ReceiveAddress from '../components/ReceiveAddress';
-import useAccountStore from '@/stores/account';
+import { useAccount } from '../contexts/account-context';
 
 export default function Receive() {
-  const { address, chainType } = useAccountStore();
+  const {
+    accountInfo: { address, chainType },
+  } = useAccount();
 
   return (
     <div className="flex flex-col flex-grow w-full bg-gray-50 p-4">

@@ -119,15 +119,20 @@ const initUIMessage = (port: chrome.runtime.Port) => {
     const { method, params } = request;
 
     if (typeof walletController[method] === 'function') {
-      return await (
+      const res = await (
         walletController[method] as (...args: unknown[]) => unknown
       )(...params);
+
+      console.log('method', method, 'result,', res);
+      return res;
     }
 
     throw new Error(`Method ${method} not found on ElytroWalletClient`);
   }
 
   UIPortManager.onMessage('UI_REQUEST', async (data, port) => {
+    const msgKey = `UI_RESPONSE_${data.method}`;
+
     try {
       const result = await handleUIRequest(
         data as {
@@ -135,10 +140,10 @@ const initUIMessage = (port: chrome.runtime.Port) => {
           params: unknown[];
         }
       );
-      UIPortManager.sendMessage('UI_RESPONSE', { result }, port.sender?.id);
+      UIPortManager.sendMessage(msgKey, { result }, port.sender?.id);
     } catch (error) {
       UIPortManager.sendMessage(
-        'UI_RESPONSE',
+        msgKey,
         { error: (error as Error).message },
         port.sender?.id
       );

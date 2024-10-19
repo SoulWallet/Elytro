@@ -3,7 +3,7 @@ import { localStorage } from '@/utils/storage/local';
 import { SubscribableStore } from '@/utils/store/subscribableStore';
 
 type TConnectedDAppInfo = TDAppInfo & {
-  chain: SupportedChainTypeEn;
+  chainType: SupportedChainTypeEn;
   isConnected: boolean;
 };
 
@@ -43,28 +43,39 @@ class ConnectionManager {
       this._store.setState(prevState);
 
       prevState.sites.forEach((site) => {
-        this.connectedSites.set(site.origin, site);
+        if (site.origin) {
+          this.connectedSites.set(site.origin, site);
+        }
       });
     }
 
     this._initialized = true;
   }
 
-  getSite(origin: string) {
+  public connect(dApp: TDAppInfo, chainType: SupportedChainTypeEn) {
+    if (!dApp.origin) {
+      return;
+    }
+
+    this.addConnectedSite({ ...dApp, isConnected: true, chainType: chainType });
+  }
+
+  public getSite(origin: string) {
     return this.connectedSites.get(String(origin));
   }
 
-  setSite(origin: string, info: TConnectedDAppInfo) {
+  public setSite(origin: string, info: TConnectedDAppInfo) {
     this.connectedSites.set(String(origin), info);
     this.syncToStorage();
   }
 
-  addConnectedSite({ origin, ...rest }: TConnectedDAppInfo) {
+  public addConnectedSite({ origin, ...rest }: TConnectedDAppInfo) {
     this.connectedSites.set(origin!, { ...rest, origin });
     this.syncToStorage();
   }
 
-  updateConnectSite(
+  // maybe turn isConnected to false a while later
+  public updateConnectSite(
     origin: string,
     updates: Omit<TConnectedDAppInfo, 'origin'>
   ) {
@@ -76,7 +87,7 @@ class ConnectionManager {
     }
   }
 
-  hasPermission(origin: string): boolean {
+  public hasPermission(origin: string): boolean {
     return this.connectedSites.get(origin)?.isConnected || false;
   }
 

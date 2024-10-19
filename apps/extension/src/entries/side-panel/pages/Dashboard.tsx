@@ -5,7 +5,7 @@ import TokenList from '@/components/TokenList';
 import { useEffect } from 'react';
 import Spin from '@/components/Spin';
 import Activities from '../containers/Activities';
-import { useAccount } from '../hooks/use-account';
+import { useAccount } from '../contexts/account-context';
 
 export default function Dashboard() {
   const { updateAccount, loading, accountInfo } = useAccount();

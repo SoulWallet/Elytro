@@ -31,9 +31,9 @@ type ProviderEvent =
   | 'chainChanged'
   | 'accountsChanged'
   | 'message';
+
 type ProviderMethodType =
   | 'eth_chainId' //!
-  | 'eth_accounts' //!
   // | 'eth_subscribe'
   | 'eth_accounts' // !
   | 'eth_requestAccounts' // !

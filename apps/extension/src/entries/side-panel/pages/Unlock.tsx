@@ -4,14 +4,25 @@ import { useState } from 'react';
 import { navigateTo } from '@/utils/navigation';
 import { TAB_ROUTE_PATHS } from '@/entries/tab/routes';
 import Slogan from '@/components/Slogan';
-import { useKeyring } from '../hooks/use-keyring';
+import { useKeyring } from '@/contexts/keyring';
+import { useApproval } from '../contexts/approval-context';
 
 export default function Unlock() {
   const [pwd, setPwd] = useState<string>('');
   const { unlock } = useKeyring();
+  const { approval } = useApproval();
 
   const handleUnlock = async () => {
-    await unlock(pwd);
+    await unlock(
+      pwd,
+      () => {
+        if (approval?.resolve) {
+          approval.resolve();
+          window.close();
+        }
+      },
+      approval?.reject
+    );
   };
 
   return (

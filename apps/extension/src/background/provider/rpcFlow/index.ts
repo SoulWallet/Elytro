@@ -4,6 +4,9 @@ import AsyncTaskFlow from '@/utils/asyncTaskFlow';
 import { checkMethodExist } from './checkMethodExist';
 import { checkLock } from './checkLock';
 import { callProvider } from './callProvider';
+import { requestConnect } from './requestConnect';
+import { sendTx } from './sendTx';
+
 export type TProviderRequest = {
   ctx?: unknown;
   dApp: TDAppInfo;
@@ -21,6 +24,8 @@ const taskFlow = new AsyncTaskFlow<TRpcFlowContext>();
 const composedTasks = taskFlow
   .use(checkMethodExist)
   .use(checkLock)
+  .use(requestConnect)
+  .use(sendTx)
   .use(callProvider)
   .compose();
 
@@ -33,6 +38,6 @@ export default (request: TProviderRequest) => {
   };
 
   return composedTasks(initContext).finally(() => {
-    console.log('YES, final context is');
+    console.log(initContext.request.rpcReq.method, 'finished');
   });
 };

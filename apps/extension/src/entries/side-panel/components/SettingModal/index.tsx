@@ -5,7 +5,7 @@ import NetworkIcon from '@/assets/icons/network.svg';
 import LockIcon from '@/assets/icons/lock.svg';
 import { BackArrow } from '@/assets/icons/BackArrow';
 import ReceiveAddress from '../ReceiveAddress';
-import useAccountStore from '@/stores/account';
+import { useAccount } from '../../contexts/account-context';
 import NetworkSetting from './NetworkSetting';
 import useKeyringStore from '@/stores/keyring';
 
@@ -15,7 +15,9 @@ interface IProps {
 }
 
 export default function SettingModal({ open, onOpenChange }: IProps) {
-  const { address, chainType } = useAccountStore();
+  const {
+    accountInfo: { chainType, address },
+  } = useAccount();
   const [currentSetting, setCurrentSetting] = useState('');
   const { lock } = useKeyringStore();
   const handleOnOpenChange = () => {

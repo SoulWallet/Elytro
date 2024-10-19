@@ -1,9 +1,11 @@
-import Settings from '../pages/Settings';
 import { TRoute } from '@/types/route';
-import Unlock from '../pages/Unlock';
-import Dashboard from '../pages/Dashboard';
-import Activate from '../pages/Activate';
-import Receive from '../pages/Receive';
+import Unlock from './pages/Unlock';
+import Dashboard from './pages/Dashboard';
+import Activate from './pages/Activate';
+import Receive from './pages/Receive';
+import Settings from './pages/Settings';
+import Connect from './pages/Connect';
+import SendTx from './pages/SendTx';
 
 export const SIDE_PANEL_ROUTE_PATHS = {
   Home: '/',
@@ -12,12 +14,14 @@ export const SIDE_PANEL_ROUTE_PATHS = {
   Dashboard: '/dashboard',
   Activate: '/activate',
   Receive: '/receive',
+  Connect: '/connect',
+  SendTx: '/sendTx',
 } as const;
 
 export const routes: TRoute[] = [
   {
     path: SIDE_PANEL_ROUTE_PATHS.Home,
-    component: Unlock,
+    component: Dashboard,
   },
   {
     path: SIDE_PANEL_ROUTE_PATHS.Dashboard,
@@ -39,5 +43,13 @@ export const routes: TRoute[] = [
   {
     path: SIDE_PANEL_ROUTE_PATHS.Receive,
     component: Receive,
+  },
+  {
+    path: SIDE_PANEL_ROUTE_PATHS.Connect,
+    component: Connect,
+  },
+  {
+    path: SIDE_PANEL_ROUTE_PATHS.SendTx,
+    component: SendTx,
   },
 ];

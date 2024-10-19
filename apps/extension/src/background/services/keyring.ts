@@ -26,7 +26,6 @@ class KeyringService {
   private _key: Nullable<Hex> = null;
   private _owner: Nullable<PrivateKeyAccount> = null;
   private _sa: Nullable<Address> = null;
-
   private _store!: SubscribableStore<KeyringServiceState>;
 
   constructor() {

@@ -1,11 +1,10 @@
 import keyring from '@/background/services/keyring';
 import type { TFlowMiddleWareFn } from '@/utils/asyncTaskFlow';
-import {
-  approvalService,
-  ApprovalTypeEn,
-} from '@/background/services/approval';
+import { approvalService } from '@/background/services/approval';
 import { ethErrors } from 'eth-rpc-errors';
+import { ApprovalTypeEn } from '@/constants/operations';
 
+// todo: move to keyring service
 let isUnlocking = false;
 
 export const checkLock: TFlowMiddleWareFn = async (ctx, next) => {
@@ -24,12 +23,14 @@ export const checkLock: TFlowMiddleWareFn = async (ctx, next) => {
 
     try {
       isUnlocking = true;
-      await approvalService.request(ApprovalTypeEn.Unlock, {});
+      await approvalService.request(ApprovalTypeEn.Unlock);
     } catch {
       // do nth.
     } finally {
       isUnlocking = false;
     }
+  } else {
+    isUnlocking = false;
   }
 
   return next();

@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import TabLayout from '../components/TabLayout';
 import { BackArrow } from '@/assets/icons/BackArrow';
 import { PasswordSetter } from '../components/PasswordSetter';
-import { useKeyring } from '@/entries/side-panel/hooks/use-keyring';
 import { navigateTo } from '@/utils/navigation';
-import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 import { toast } from '@/hooks/use-toast';
 import { TAB_ROUTE_PATHS } from '../routes';
+import { useKeyring } from '@/contexts/keyring';
+import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 
 const Create: React.FC = () => {
-  const { createNewOwner } = useKeyring();
   const [loading, setLoading] = useState(false);
+  const { createNewOwner } = useKeyring();
   const goBack = () => {
     history.back();
   };

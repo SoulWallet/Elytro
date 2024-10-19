@@ -2,7 +2,8 @@ import React from 'react';
 import RequestProvider from './RequestProvider';
 import '@/index.css';
 import { Toaster } from './ui/toaster';
-import { WalletProvider } from '@/entries/side-panel/contexts/wallet-context';
+import { WalletProvider } from '@/contexts/wallet';
+import { KeyringProvider } from '@/contexts/keyring';
 
 interface IPageContainerProps {
   children: React.ReactNode;
@@ -14,7 +15,9 @@ function PageContainer({ children, className }: IPageContainerProps) {
     <>
       <div className={`w-screen h-screen flex ${className}`}>
         <WalletProvider>
-          <RequestProvider>{children}</RequestProvider>
+          <KeyringProvider>
+            <RequestProvider>{children}</RequestProvider>
+          </KeyringProvider>
         </WalletProvider>
       </div>
 

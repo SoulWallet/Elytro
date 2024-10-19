@@ -79,6 +79,7 @@ class ElytroWalletClient {
 
       return {
         address: this._address,
+        ownerAddress: keyring.owner?.address,
         isActivated: this._isDeployed,
         chainType: this._chainType,
         balance: this._balance,

@@ -1,5 +1,5 @@
 import { Label } from '@/components/ui/label';
-import useAccountStore from '@/stores/account';
+import { useAccount } from '../../contexts/account-context';
 import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
 import {
   Tooltip,
@@ -11,7 +11,9 @@ import { TxData } from '.';
 import { ChevronRight } from 'lucide-react';
 
 export default function ReviewStep({ txData }: { txData?: TxData }) {
-  const { chainType } = useAccountStore();
+  const {
+    accountInfo: { chainType },
+  } = useAccount();
   const handleAddress = () => {
     const address = txData?.to as string;
     const prefix = address.slice(0, 6);

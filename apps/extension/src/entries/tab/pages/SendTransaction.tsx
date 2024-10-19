@@ -1,19 +1,13 @@
 import { useEffect, useState } from 'react';
 import TabLayout from '../components/TabLayout';
-import useAccountStore from '@/stores/account';
-import {
-  Account,
-  Address,
-  PrepareTransactionRequestReturnType,
-  SendTransactionParameters,
-} from 'viem';
+import { Address, PrepareTransactionRequestReturnType } from 'viem';
 import { Button } from '@/components/ui/button';
-import keyring from '@/background/services/keyring';
 import _omitBy from 'lodash/omitBy';
 import _isEmpty from 'lodash/isEmpty';
+import { useWallet } from '@/contexts/wallet';
 
 function SendTransaction() {
-  const { walletClient } = useAccountStore();
+  const wallet = useWallet();
   const [request, setRequest] = useState<PrepareTransactionRequestReturnType>();
   const [isSigned, setIsSigned] = useState(false);
   const [txHash, setTxHash] = useState<Address | ''>('');
@@ -21,50 +15,50 @@ function SendTransaction() {
   const [balance, setBalance] = useState('0');
   // TODO: repeat prepare tx for showing lastest gas estimation
   const prepareTransactionRequest = async (params: unknown[]) => {
-    // @ts-ignore: Unnecessary try/catch wrapper
-    try {
-      if (params && params.length) {
-        const requestParams = params[0] as unknown as { value: number };
-        const args = {
-          ..._omitBy(
-            {
-              ...requestParams,
-            },
-            _isEmpty
-          ),
-          value: BigInt(requestParams?.value * 1e18),
-          account: keyring.owner as Account,
-          type: 'eip1559',
-        };
-        const req = await walletClient.prepareTransactionRequest(
-          args as SendTransactionParameters
-        );
-        const balance = await walletClient.getBalance();
-        setRequest(req);
-        setBalance((Number(balance) / 1e18).toString());
-      }
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
+    // TODO: use real wallet
+    // // @ts-ignore: Unnecessary try/catch wrapper
+    // try {
+    //   if (params && params.length) {
+    //     const requestParams = params[0] as unknown as { value: number };
+    //     const args = {
+    //       ..._omitBy(
+    //         {
+    //           ...requestParams,
+    //         },
+    //         _isEmpty
+    //       ),
+    //       value: BigInt(requestParams?.value * 1e18),
+    //       account: keyring.owner as Account,
+    //       type: 'eip1559',
+    //     };
+    //     const req = await wallet.prepareTransactionRequest(
+    //       args as SendTransactionParameters
+    //     );
+    //     const balance = await wallet.getBalance();
+    //     setRequest(req);
+    //     setBalance((Number(balance) / 1e18).toString());
+    //   }
+    // } catch (err) {
+    //   console.log(err);
+    //   throw err;
+    // }
   };
 
   const signAndSend = async () => {
-    try {
-      setIsLoading(true);
-      const serializedTransaction = await walletClient.signTransaction(request);
-      if (serializedTransaction) {
-        const hash = await walletClient.sendRawTransaction(
-          serializedTransaction
-        );
-        setIsLoading(false);
-        setTxHash(hash);
-        setIsSigned(true);
-      }
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
+    // TODO: use real wallet
+    // try {
+    //   setIsLoading(true);
+    //   const serializedTransaction = await wallet.signTransaction(request);
+    //   if (serializedTransaction) {
+    //     const hash = await wallet.sendRawTransaction(serializedTransaction);
+    //     setIsLoading(false);
+    //     setTxHash(hash);
+    //     setIsSigned(true);
+    //   }
+    // } catch (err) {
+    //   console.log(err);
+    //   throw err;
+    // }
   };
 
   useEffect(() => {
@@ -86,7 +80,8 @@ function SendTransaction() {
         {!isSigned ? (
           <>
             <h3 className="text-lg text-center">Tx details</h3>
-            <div>Chain: {walletClient.chain.name}</div>
+            {/* TODO: add chain info */}
+            {/* <div>Chain: {wallet.chain.name}</div> */}
             <div>Balance: {balance} ETH</div>
             <div>From: {request.from}</div>
             <div>To: {request.to}</div>

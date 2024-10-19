@@ -8,6 +8,7 @@ type TUserOperationPreFundResult = {
 
 type TAccountInfo = {
   address: Nullable<string>;
+  ownerAddress: Nullable<string>;
   balance: Nullable<string>;
   isActivated: boolean;
   chainType: SupportedChainTypeEn;
@@ -37,4 +38,17 @@ type TDAppInfo = {
   name: string;
   origin?: string;
   icon: string;
+};
+
+type TApprovalData = {
+  dApp: TDAppInfo;
+  tx?: TTransactionInfo[];
+};
+
+type TApprovalInfo = {
+  type: ApprovalTypeEn;
+  id: string;
+  data?: TApprovalData;
+  resolve: (data?: unknown) => void;
+  reject: (data?: unknown) => void;
 };

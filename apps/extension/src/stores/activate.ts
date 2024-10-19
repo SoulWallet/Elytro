@@ -1,15 +1,13 @@
-import keyring from '@/background/services/keyring';
 import { elytroSDK } from '@/background/services/sdk';
 import { create } from 'zustand';
 import useDialogStore from './dialog';
 import { navigateTo } from '@/utils/navigation';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
-import useAccountStore from './account';
 
 interface ActivateState {
   calcResult: Nullable<TUserOperationPreFundResult>;
   deployUserOp: ElytroUserOperation | null;
-  createDeployUserOp: () => Promise<void>;
+  createDeployUserOp: (ownerAddress: string) => Promise<void>;
   calculateDeployUserOp: (
     userOp: ElytroUserOperation
   ) => Promise<TUserOperationPreFundResult | undefined>;
@@ -36,10 +34,9 @@ const useActivateStore = create<ActivateState>((set, get) => ({
       set({ isCalculating: false });
     }
   },
-  async createDeployUserOp() {
-    const deployUserOp = await elytroSDK.createUnsignedDeployWalletUserOp(
-      keyring.owner!.address
-    );
+  async createDeployUserOp(ownerAddress: string) {
+    const deployUserOp =
+      await elytroSDK.createUnsignedDeployWalletUserOp(ownerAddress);
 
     await elytroSDK.estimateGas(deployUserOp);
     const calcResult = await get().calculateDeployUserOp(deployUserOp);
@@ -50,8 +47,6 @@ const useActivateStore = create<ActivateState>((set, get) => ({
         deployUserOp,
         () => {
           navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
-          // todo: when activated, UI need to be updated (but it seems have seconds latency)
-          useAccountStore.getState().setIsActivated(true);
         },
         'Activate account'
       );

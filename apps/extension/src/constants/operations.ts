@@ -27,3 +27,9 @@ export type TTxDetail = {
   fee: string;
   callData: string;
 };
+
+export enum ApprovalTypeEn {
+  Unlock = 'Unlock',
+  Connect = 'Connect',
+  SendTx = 'SendTx',
+}

@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
-import useAccountStore from '@/stores/account';
+
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import questionIcon from '@/assets/icons/question.svg';
 import {
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { TxData } from '.';
 import { isAddress } from 'viem';
+import { useAccount } from '../../contexts/account-context';
 
 export default function RecipientStep({
   checkIsValid,
@@ -20,7 +21,9 @@ export default function RecipientStep({
   updateTxData: Dispatch<SetStateAction<TxData | undefined>>;
 }) {
   const [address, setAddress] = useState('');
-  const { chainType } = useAccountStore();
+  const {
+    accountInfo: { chainType },
+  } = useAccount();
   useEffect(() => {
     if (checkIsValid) {
       checkIsValid(isAddress(address, { strict: false }));
