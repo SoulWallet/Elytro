@@ -1,6 +1,7 @@
 import { mutate_sponsor_op } from '@/requests/mutate';
 import { mutate } from '@/requests';
-import { getHexString, paddingBytesToEven } from '../format';
+import { paddingBytesToEven } from '../format';
+import { toHex } from 'viem';
 
 export const canUserOpGetSponsor = async (
   userOp: ElytroUserOperation,
@@ -12,22 +13,22 @@ export const canUserOpGetSponsor = async (
   try {
     const res = await mutate(mutate_sponsor_op, {
       input: {
-        chainID: getHexString(chainID),
+        chainID: toHex(chainID),
         entryPoint,
         op: {
           sender: userOp.sender,
-          nonce: getHexString(userOp.nonce),
+          nonce: toHex(userOp.nonce),
           factory: userOp.factory,
           factoryData:
             userOp.factory === null
               ? null
               : paddingBytesToEven(userOp.factoryData ?? ''),
           callData: userOp.callData,
-          callGasLimit: getHexString(userOp.callGasLimit),
-          verificationGasLimit: getHexString(userOp.verificationGasLimit),
-          preVerificationGas: getHexString(userOp.preVerificationGas),
-          maxFeePerGas: getHexString(userOp.maxFeePerGas),
-          maxPriorityFeePerGas: getHexString(userOp.maxPriorityFeePerGas),
+          callGasLimit: toHex(userOp.callGasLimit),
+          verificationGasLimit: toHex(userOp.verificationGasLimit),
+          preVerificationGas: toHex(userOp.preVerificationGas),
+          maxFeePerGas: toHex(userOp.maxFeePerGas),
+          maxPriorityFeePerGas: toHex(userOp.maxPriorityFeePerGas),
           signature: userOp.signature,
         },
       },
