@@ -6,7 +6,7 @@ import ConnectionConfirmation from '../components/ConnectConfirmation';
 
 export default function Connect() {
   const wallet = useWallet();
-  const { approval } = useApproval();
+  const { approval, resolve, reject } = useApproval();
   const {
     accountInfo: { chainType },
   } = useAccount();
@@ -22,16 +22,16 @@ export default function Connect() {
   const handleConnect = async () => {
     try {
       await wallet.connectWallet(dApp, chainType);
-      approval.resolve();
+      resolve();
     } catch (error) {
-      approval.reject(error);
+      reject(error as Error);
     } finally {
       window.close();
     }
   };
 
   const handleReject = () => {
-    approval.reject(ethErrors.provider.userRejectedRequest());
+    reject(ethErrors.provider.userRejectedRequest());
     window.close();
   };
 

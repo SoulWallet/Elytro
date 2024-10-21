@@ -123,7 +123,6 @@ const initUIMessage = (port: chrome.runtime.Port) => {
         walletController[method] as (...args: unknown[]) => unknown
       )(...params);
 
-      console.log('method', method, 'result,', res);
       return res;
     }
 

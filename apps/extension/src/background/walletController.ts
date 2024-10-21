@@ -48,6 +48,14 @@ class WalletController {
     return approvalService.currentApproval;
   }
 
+  public async resolveApproval(id: string) {
+    return approvalService.resolveApproval(id);
+  }
+
+  public async rejectApproval(id: string) {
+    return approvalService.rejectApproval(id);
+  }
+
   public async connectWallet(dApp: TDAppInfo, chainType: SupportedChainTypeEn) {
     connectionManager.connect(dApp, chainType);
   }

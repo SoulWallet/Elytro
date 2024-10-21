@@ -10,18 +10,18 @@ import { useApproval } from '../contexts/approval-context';
 export default function Unlock() {
   const [pwd, setPwd] = useState<string>('');
   const { unlock } = useKeyring();
-  const { approval } = useApproval();
+  const { approval, resolve, reject } = useApproval();
 
   const handleUnlock = async () => {
     await unlock(
       pwd,
       () => {
         if (approval?.resolve) {
-          approval.resolve();
+          resolve();
           window.close();
         }
       },
-      approval?.reject
+      reject
     );
   };
 

@@ -152,6 +152,9 @@ class ElytroSDK {
   }
 
   public async sendUserOperation(userOp: ElytroUserOperation) {
+    // estimate gas before sending userOp, but can not do it here (for the case of sign tx)
+    // await this.estimateGas(userOp);
+
     const res = await this._sdk.sendUserOperation(userOp);
 
     if (res.isErr()) {
@@ -399,6 +402,7 @@ class ElytroSDK {
 
       const userOp = await this._createUserOpFromTxs(tx);
 
+      await this.estimateGas(userOp);
       return await this.sendUserOperation(userOp);
     } catch (error) {
       console.error('Elytro:: send_transaction failed:', error);

@@ -59,6 +59,22 @@ class ApprovalService {
     this._currentApproval?.reject(ethErrors.provider.userRejectedRequest());
     this._currentApproval = null;
   };
+
+  public resolveApproval = (id: string) => {
+    if (id !== this._currentApproval?.id) {
+      return;
+    }
+    this._currentApproval?.resolve(id);
+    this._currentApproval = null;
+  };
+
+  public rejectApproval = (id: string) => {
+    if (id !== this._currentApproval?.id) {
+      return;
+    }
+    this._currentApproval?.reject(id);
+    this._currentApproval = null;
+  };
 }
 
 const approvalService = new ApprovalService();

@@ -9,7 +9,7 @@ export default function SendTx() {
   const {
     accountInfo: { chainType },
   } = useAccount();
-  const { approval } = useApproval();
+  const { approval, reject, resolve } = useApproval();
   const wallet = useWallet();
   const [loading, setLoading] = useState(true);
 
@@ -24,18 +24,22 @@ export default function SendTx() {
   }
 
   const handleConfirm = async () => {
-    console.log('confirm');
     try {
+      setLoading(true);
       await wallet.sendTransaction(approval.data!.tx!);
-
-      approval.resolve();
+      resolve();
     } catch (error) {
-      approval.reject(error);
+      reject(error as Error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    console.log('cancel');
+    reject();
+    setTimeout(() => {
+      window.close();
+    }, 300);
   };
 
   return (
