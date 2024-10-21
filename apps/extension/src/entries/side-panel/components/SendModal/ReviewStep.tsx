@@ -9,24 +9,13 @@ import {
 import questionIcon from '@/assets/icons/question.svg';
 import { TxData } from '.';
 import { ChevronRight } from 'lucide-react';
+import SplitedGrayAddress from '@/components/SplitedGrayAddress';
+import { Address } from 'viem';
 
 export default function ReviewStep({ txData }: { txData?: TxData }) {
   const {
     accountInfo: { chainType },
   } = useAccount();
-  const handleAddress = () => {
-    const address = txData?.to as string;
-    const prefix = address.slice(0, 6);
-    const suffix = address.slice(address.length - 6, address.length);
-    const middle = address.slice(6, address.length - 6);
-    return (
-      <>
-        <span>{prefix}</span>
-        <span className="text-gray-300">{middle}</span>
-        <span>{suffix}</span>
-      </>
-    );
-  };
   return (
     <div className="space-y-4">
       <h3 className="text-3xl">Recipient</h3>
@@ -47,7 +36,10 @@ export default function ReviewStep({ txData }: { txData?: TxData }) {
       </div>
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">To</Label>
-        <div className="text-2xl font-medium break-all">{handleAddress()}</div>
+        <SplitedGrayAddress
+          className="text-2xl font-medium"
+          address={txData?.to as Address}
+        />
       </div>
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">Network</Label>

@@ -6,6 +6,8 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { safeClipboard } from '@/utils/clipboard';
 import { Button } from '@/components/ui/button';
+import SplitedGrayAddress from '@/components/SplitedGrayAddress';
+import { Address } from 'viem';
 
 interface IReceiveProps {
   address: string;
@@ -36,11 +38,10 @@ export default function ReceiveAddress({ address, chainType }: IReceiveProps) {
       <QRCodeSVG value={address} size={200} />
 
       {/* Address */}
-      <div className="text-sm text-gray-500 my-4">
-        {address?.slice(0, 6)}
-        <span className="opacity-50">{address?.slice(6, -6)}</span>
-        {address?.slice(-6)}
-      </div>
+      <SplitedGrayAddress
+        className="text-sm text-gray-500 my-4"
+        address={address as Address}
+      />
 
       {/* Copy Address */}
       <Button className="rounded-full" onClick={() => safeClipboard(address)}>
