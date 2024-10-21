@@ -17,7 +17,7 @@ export default function AccountsModal({ open, onOpenChange }: IProps) {
       address,
       balance,
       chainType,
-      isActivated,
+      isActivated
     },
   ];
   return (
