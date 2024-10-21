@@ -102,6 +102,7 @@ class KeyringService {
     this._locked = true;
     this._key = null;
     this._store?.setState({});
+    this._sa = null;
   }
 
   public async createNewOwner(password: string) {

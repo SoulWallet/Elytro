@@ -1,6 +1,6 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import useAccountStore from '@/stores/account';
 import Account from './Account';
+import { useAccount } from '../contexts/account-context';
 
 interface IProps {
   open: boolean;
@@ -8,9 +8,11 @@ interface IProps {
 }
 
 export default function AccountsModal({ open, onOpenChange }: IProps) {
-  const { address, balance, chainType, isActivated } = useAccountStore();
+  const {
+    accountInfo: { address, chainType, balance, isActivated },
+  } = useAccount();
   // TODO: get accounts by what? need to handle accounts
-  const mockAccouts: TAccountInfo[] = [
+  const mockAccouts: Omit<TAccountInfo, 'ownerAddress'>[] = [
     {
       address,
       balance,

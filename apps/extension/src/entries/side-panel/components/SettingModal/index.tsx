@@ -7,7 +7,7 @@ import { BackArrow } from '@/assets/icons/BackArrow';
 import ReceiveAddress from '../ReceiveAddress';
 import { useAccount } from '../../contexts/account-context';
 import NetworkSetting from './NetworkSetting';
-import useKeyringStore from '@/stores/keyring';
+import { useKeyring } from '@/contexts/keyring';
 
 interface IProps {
   open: boolean;
@@ -19,7 +19,7 @@ export default function SettingModal({ open, onOpenChange }: IProps) {
     accountInfo: { chainType, address },
   } = useAccount();
   const [currentSetting, setCurrentSetting] = useState('');
-  const { lock } = useKeyringStore();
+  const { lock } = useKeyring();
   const handleOnOpenChange = () => {
     setCurrentSetting('');
     onOpenChange();
