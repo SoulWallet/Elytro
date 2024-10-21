@@ -1,9 +1,14 @@
 export const isWinOS = /windows/i.test(navigator?.userAgent);
 import { EventEmitter } from 'events';
 
+const iPhone14ProMaxSize = {
+  width: 430,
+  height: 932,
+};
+
 const WINDOW_SIZE = {
-  width: 400 + (isWinOS ? 14 : 0),
-  height: 900,
+  width: iPhone14ProMaxSize.width + (isWinOS ? 14 : 0),
+  height: iPhone14ProMaxSize.height,
 };
 
 const approvalWindowEvent = new EventEmitter();
