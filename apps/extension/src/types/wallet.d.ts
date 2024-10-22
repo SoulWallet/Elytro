@@ -43,6 +43,7 @@ type TDAppInfo = {
 type TApprovalData = {
   dApp: TDAppInfo;
   tx?: TTransactionInfo[];
+  options?: unknown;
 };
 
 type TApprovalInfo = {

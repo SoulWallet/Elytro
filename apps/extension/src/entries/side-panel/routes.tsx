@@ -6,6 +6,7 @@ import Receive from './pages/Receive';
 import Settings from './pages/Settings';
 import Connect from './pages/Connect';
 import SendTx from './pages/SendTx';
+import Alert from './pages/Alert';
 
 export const SIDE_PANEL_ROUTE_PATHS = {
   Home: '/',
@@ -16,6 +17,7 @@ export const SIDE_PANEL_ROUTE_PATHS = {
   Receive: '/receive',
   Connect: '/connect',
   SendTx: '/sendTx',
+  Alert: '/alert',
 } as const;
 
 export const routes: TRoute[] = [
@@ -51,5 +53,9 @@ export const routes: TRoute[] = [
   {
     path: SIDE_PANEL_ROUTE_PATHS.SendTx,
     component: SendTx,
+  },
+  {
+    path: SIDE_PANEL_ROUTE_PATHS.Alert,
+    component: Alert,
   },
 ];

@@ -32,4 +32,5 @@ export enum ApprovalTypeEn {
   Unlock = 'Unlock',
   Connect = 'Connect',
   SendTx = 'SendTx',
+  Alert = 'Alert',
 }

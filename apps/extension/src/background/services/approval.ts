@@ -12,6 +12,7 @@ const APPROVAL_TYPE_ROUTE_MAP: Record<ApprovalTypeEn, string> = {
   [ApprovalTypeEn.Unlock]: 'unlock',
   [ApprovalTypeEn.Connect]: 'connect',
   [ApprovalTypeEn.SendTx]: 'sendTx',
+  [ApprovalTypeEn.Alert]: 'alert',
 };
 
 class ApprovalService {
