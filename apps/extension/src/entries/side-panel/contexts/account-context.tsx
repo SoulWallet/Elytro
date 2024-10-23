@@ -1,6 +1,7 @@
 import { DEFAULT_CHAIN_TYPE } from '@/constants/chains';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
+import { useHashLocation } from 'wouter/use-hash-location';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
@@ -31,6 +32,7 @@ export const AccountProvider = ({
   const [accountInfo, setAccountInfo] =
     useState<TAccountInfo>(DEFAULT_ACCOUNT_INFO);
   const [loading, setLoading] = useState(false);
+  const [pathname] = useHashLocation();
 
   const updateAccount = async () => {
     try {
@@ -43,6 +45,12 @@ export const AccountProvider = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!loading && !accountInfo.address) {
+      updateAccount();
+    }
+  }, [pathname]);
 
   return (
     <AccountContext.Provider value={{ accountInfo, updateAccount, loading }}>

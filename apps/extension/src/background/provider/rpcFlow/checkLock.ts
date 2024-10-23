@@ -7,7 +7,13 @@ import { ApprovalTypeEn } from '@/constants/operations';
 // todo: move to keyring service
 let isUnlocking = false;
 
+const PUBLIC_METHODS: ProviderMethodType[] = ['eth_chainId'];
+
 export const checkLock: TFlowMiddleWareFn = async (ctx, next) => {
+  if (PUBLIC_METHODS.includes(ctx.request.rpcReq.method)) {
+    return next();
+  }
+
   await keyring.tryUnlock();
 
   if (keyring.locked) {

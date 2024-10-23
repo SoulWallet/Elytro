@@ -59,8 +59,8 @@ export function formatAddressToShort(address: Nullable<string>) {
 }
 
 export function formatTokenAmount(amount: string): string {
-  // todo: format amount
-  return formatUnits(BigInt(amount), 16) + ' ETH';
+  // todo: format amount. 8 decimal places is enough?
+  return formatUnits(BigInt(amount), 8) + ' ETH';
 }
 
 export function formatSimulationResultToTxDetail(

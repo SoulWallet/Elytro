@@ -26,7 +26,11 @@ export default function SendTx() {
 
   const handleConfirm = async () => {
     resolve();
-    window.close();
+
+    // todo: what to do when tx is sent?
+    setTimeout(() => {
+      navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
+    }, 200);
   };
 
   const handleCancel = () => {

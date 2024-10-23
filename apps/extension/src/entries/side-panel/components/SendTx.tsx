@@ -96,6 +96,11 @@ export default function SendTx({
       setSending(true);
       userOpRef.current = await wallet.signUserOperation(userOpRef.current!);
       await elytroSDK.sendUserOperation(userOpRef.current!);
+
+      toast({
+        title: 'Success',
+        description: 'Transaction sent successfully',
+      });
       onConfirm();
     } catch (error) {
       toast({

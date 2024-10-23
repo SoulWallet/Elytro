@@ -76,7 +76,7 @@ export default function TxDetail({ tx, type }: ITxDetail) {
             label={label}
             value={
               (format
-                ? tx[key]
+                ? tx[key] !== undefined
                   ? format(tx[key] as string)
                   : '--'
                 : tx[key] || '--') as string

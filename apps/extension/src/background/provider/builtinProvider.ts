@@ -2,7 +2,6 @@
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 import { toHex } from 'viem';
 import walletClient from '../services/walletClient';
-import keyring from '../services/keyring';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
@@ -87,34 +86,14 @@ class BuiltinProvider extends SafeEventEmitter {
   }
 
   public async request({ method, params }: RequestArguments) {
-    // TODO: try unlock if needed -> call up the unlock page
-    keyring.tryUnlock();
     switch (method) {
       case 'eth_chainId':
-        // return '0xa';
         return toHex(walletClient.chain.id);
       case 'eth_accounts':
       case 'eth_requestAccounts':
-        // return ['12Hxfu93cCXatFWELpc3Bp6X8BP5sCS4D6'];
         return walletClient.address ? [walletClient.address] : [];
       case 'eth_getBlockByNumber':
         return walletClient.getBlockByNumber();
-      // TODO: implement the rest of the methods
-      // case 'eth_sendTransaction':
-      //   // return this._sendTransaction(params);
-
-      //   try {
-      //     const mappedParams = (params as TTransactionInfo[]).map((tx) => ({
-      //       data: tx?.input,
-      //       gasLimit: tx?.gasPrice,
-      //       ...tx,
-      //     }));
-      //     return walletClient.sendTransaction(mappedParams);
-      //   } catch {
-      //     return ethErrors.provider.userRejectedRequest();
-      //   }
-
-      // // return walletClient.sendTransaction(params);
       case 'eth_signTypedDataV4':
         return walletClient.signTypedDataV4(params);
       case 'personal_sign':

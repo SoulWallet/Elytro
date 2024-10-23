@@ -2,19 +2,14 @@ import EmptyAsset from '@/components/EmptyAsset';
 import BasicAccountInfo from '../components/BasicAccountInfo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TokenList from '@/components/TokenList';
-import { useEffect } from 'react';
 import Spin from '@/components/Spin';
 import Activities from '../containers/Activities';
 import { useAccount } from '../contexts/account-context';
 
 export default function Dashboard() {
-  const { updateAccount, loading, accountInfo } = useAccount();
+  const { loading, accountInfo } = useAccount();
 
   const isEmpty = false; // todo: make it real
-
-  useEffect(() => {
-    updateAccount();
-  }, []);
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
