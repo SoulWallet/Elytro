@@ -3,6 +3,7 @@ import { approvalService } from './services/approval';
 import connectionManager from './services/connection';
 import keyring from './services/keyring';
 import walletClient from './services/walletClient';
+import { elytroSDK } from './services/sdk';
 
 // ! DO NOT use getter. They can not be proxied.
 class WalletController {
@@ -60,8 +61,8 @@ class WalletController {
     connectionManager.connect(dApp, chainType);
   }
 
-  public async sendTransaction(tx: TTransactionInfo[]) {
-    return await walletClient.sendTransaction(tx);
+  public async signUserOperation(userOp: ElytroUserOperation) {
+    return await elytroSDK.signUserOperation(userOp);
   }
 }
 

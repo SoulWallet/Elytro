@@ -17,18 +17,18 @@ export const canUserOpGetSponsor = async (
         entryPoint,
         op: {
           sender: userOp.sender,
-          nonce: toHex(userOp.nonce),
+          nonce: userOp.nonce,
           factory: userOp.factory,
           factoryData:
             userOp.factory === null
               ? null
               : paddingBytesToEven(userOp.factoryData ?? ''),
           callData: userOp.callData,
-          callGasLimit: toHex(userOp.callGasLimit),
+          callGasLimit: userOp.callGasLimit,
           verificationGasLimit: toHex(userOp.verificationGasLimit),
           preVerificationGas: toHex(userOp.preVerificationGas),
-          maxFeePerGas: toHex(userOp.maxFeePerGas),
-          maxPriorityFeePerGas: toHex(userOp.maxPriorityFeePerGas),
+          maxFeePerGas: userOp.maxFeePerGas,
+          maxPriorityFeePerGas: userOp.maxPriorityFeePerGas,
           signature: userOp.signature,
         },
       },

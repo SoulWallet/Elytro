@@ -16,7 +16,7 @@ import {
   TEMP_VALIDATOR,
 } from '@/constants/temp';
 import { getHexString, paddingZero } from '@/utils/format';
-import { Bundler, SignkeyType, SoulWallet } from '@soulwallet/sdk';
+import { Bundler, SignkeyType, SoulWallet, Transaction } from '@soulwallet/sdk';
 import { DecodeUserOp } from '@soulwallet/decoder';
 import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
 import keyring from './keyring';
@@ -276,16 +276,29 @@ class ElytroSDK {
   }
 
   private async _getFeeData() {
-    const fee = await this._sdk.provider.getFeeData();
-    return fee;
+    try {
+      const fee = await this._sdk.provider.getFeeData();
+      return fee;
+    } catch {
+      throw ethErrors.rpc.server({
+        code: 32011,
+        message: 'Elytro:Failed to get fee data.',
+      });
+    }
   }
 
-  public async estimateGas(userOp: ElytroUserOperation) {
-    const gasPrice = await this._getFeeData();
+  public async estimateGas(
+    userOp: ElytroUserOperation,
+    useDefaultGasPrice = true
+  ) {
+    // looks like only deploy wallet will need this
+    if (useDefaultGasPrice) {
+      const gasPrice = await this._getFeeData();
 
-    // todo: what if it's null? set as 0?
-    userOp.maxFeePerGas = gasPrice?.maxFeePerGas ?? 0;
-    userOp.maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas ?? 0;
+      // todo: what if it's null? set as 0?
+      userOp.maxFeePerGas = gasPrice?.maxFeePerGas ?? 0;
+      userOp.maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas ?? 0;
+    }
 
     // todo: sdk can be optimized (fetch balance in sdk)
 
@@ -374,12 +387,14 @@ class ElytroSDK {
     return signature;
   }
 
-  private async _createUserOpFromTxs(tx: TElytroTxInfo) {
+  public async createUserOpFromTxs(from: string, txs: Transaction[]) {
+    const gasPrice = await this._getFeeData();
+
     const _userOp = await this._sdk.fromTransaction(
-      tx.maxFeePerGas,
-      tx.maxPriorityFeePerGas,
-      tx.from,
-      tx.txs
+      toHex(gasPrice?.maxFeePerGas ?? 0),
+      toHex(gasPrice?.maxPriorityFeePerGas ?? 0),
+      from,
+      txs as Transaction[]
     );
 
     if (_userOp.isErr()) {
@@ -389,20 +404,11 @@ class ElytroSDK {
     }
   }
 
-  public async sendTransaction(txs: TTransactionInfo[], saAddress: Address) {
+  public async sendTransaction(userOp: ElytroUserOperation) {
     try {
-      const { maxFeePerGas, maxPriorityFeePerGas } = await this._getFeeData();
-
-      const tx = {
-        maxFeePerGas: getHexString(maxFeePerGas ?? 0),
-        maxPriorityFeePerGas: getHexString(maxPriorityFeePerGas ?? 0),
-        from: saAddress,
-        txs,
-      };
-
-      const userOp = await this._createUserOpFromTxs(tx);
-
-      await this.estimateGas(userOp);
+      // const userOp = await this.createUserOpFromTxs(tx);
+      // todo: use outer gas estimation, not auto
+      // await this.estimateGas(userOp, false);
       return await this.sendUserOperation(userOp);
     } catch (error) {
       console.error('Elytro:: send_transaction failed:', error);

@@ -20,7 +20,7 @@ export const ApprovalProvider = ({
   children: React.ReactNode;
 }) => {
   const wallet = useWallet();
-  const [approval, setApproval] = useState<Nullable<TApprovalInfo>>();
+  const [approval, setApproval] = useState<Nullable<TApprovalInfo>>(null);
 
   const getCurrentApproval = async () => {
     const approval = await wallet.getCurrentApproval();
@@ -48,7 +48,7 @@ export const ApprovalProvider = ({
 
   // todo: optimize it
   useInterval(() => {
-    if (approval === undefined) {
+    if (!approval) {
       getCurrentApproval();
     }
   }, 1000);

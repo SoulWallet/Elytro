@@ -1,6 +1,6 @@
 import { TTxDetail } from '@/constants/operations';
 import { SimulationResult } from './ethRpc/simulate';
-import { Hex, toHex, size as getSize, pad } from 'viem';
+import { Hex, toHex, size as getSize, pad, formatUnits } from 'viem';
 
 export function paddingZero(
   value: string | number | bigint,
@@ -54,8 +54,13 @@ export function formatAddressToShort(address: Nullable<string>) {
   // 0x12345...123456
   // todo: check if address is valid
   return address && address?.length > 12
-    ? `${address?.substring(0, 6)}...${address?.substring(address?.length - 6)}`
+    ? `${address?.slice(0, 6)}...${address?.slice(-4)}`
     : '--';
+}
+
+export function formatTokenAmount(amount: string): string {
+  // todo: format amount
+  return formatUnits(BigInt(amount), 16) + ' ETH';
 }
 
 export function formatSimulationResultToTxDetail(
@@ -67,4 +72,15 @@ export function formatSimulationResultToTxDetail(
     value: parseInt(simulationResult.assetChanges[0].rawAmount, 16),
     fee: simulationResult.gasUsed, // todo: calculate fee
   } as TTxDetail;
+}
+
+export function formatRawData(data: any) {
+  const bigintReplacer = (_: string, value: any) => {
+    if (typeof value === 'bigint') {
+      return value.toString();
+    }
+    return value;
+  };
+
+  return JSON.stringify(data, bigintReplacer, 2);
 }

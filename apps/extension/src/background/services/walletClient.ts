@@ -124,10 +124,6 @@ class ElytroWalletClient {
     }
   }
 
-  public async sendTransaction(params: TTransactionInfo[]) {
-    return await elytroSDK.sendTransaction(params, this._address!);
-  }
-
   public async prepareTransactionRequest(
     args: PrepareTransactionRequestParameters
   ) {

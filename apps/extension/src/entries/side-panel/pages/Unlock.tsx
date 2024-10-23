@@ -40,7 +40,7 @@ export default function Unlock() {
           onClick={handleUnlock}
           disabled={!pwd}
         >
-          {'Unlock'}
+          Unlock
         </Button>
         <div className="text-sm text-[#32417]}">
           Can’t access account?{' '}

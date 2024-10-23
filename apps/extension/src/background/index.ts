@@ -131,7 +131,6 @@ const initUIMessage = (port: chrome.runtime.Port) => {
 
   UIPortManager.onMessage('UI_REQUEST', async (data, port) => {
     const msgKey = `UI_RESPONSE_${data.method}`;
-
     try {
       const result = await handleUIRequest(
         data as {

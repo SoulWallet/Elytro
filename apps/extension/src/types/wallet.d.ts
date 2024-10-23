@@ -16,11 +16,12 @@ type TAccountInfo = {
 
 type TTransactionInfo = {
   from: string; // Address
-  to: string; // Address
+  to?: string; // Address. (if it's a contract deploy tx, it's null)
+  gas?: string; // Hex
   value: string; // Hex
-  gas: string; // Hex
   gasPrice: string; // Hex
-  input: string; // Hex
+  input?: string; // Hex
+  type?: string; // Hex
 
   // sw sdk need below, maybe change it to standards arguments?
   gasLimit?: string; // Hex

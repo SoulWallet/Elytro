@@ -1,7 +1,6 @@
 // import walletClient from '../walletClient';
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 import { toHex } from 'viem';
-import { ethErrors } from 'eth-rpc-errors';
 import walletClient from '../services/walletClient';
 import keyring from '../services/keyring';
 
@@ -101,21 +100,21 @@ class BuiltinProvider extends SafeEventEmitter {
       case 'eth_getBlockByNumber':
         return walletClient.getBlockByNumber();
       // TODO: implement the rest of the methods
-      case 'eth_sendTransaction':
-        // return this._sendTransaction(params);
+      // case 'eth_sendTransaction':
+      //   // return this._sendTransaction(params);
 
-        try {
-          const mappedParams = (params as TTransactionInfo[]).map((tx) => ({
-            data: tx?.input,
-            gasLimit: tx?.gasPrice,
-            ...tx,
-          }));
-          return walletClient.sendTransaction(mappedParams);
-        } catch {
-          return ethErrors.provider.userRejectedRequest();
-        }
+      //   try {
+      //     const mappedParams = (params as TTransactionInfo[]).map((tx) => ({
+      //       data: tx?.input,
+      //       gasLimit: tx?.gasPrice,
+      //       ...tx,
+      //     }));
+      //     return walletClient.sendTransaction(mappedParams);
+      //   } catch {
+      //     return ethErrors.provider.userRejectedRequest();
+      //   }
 
-      // return walletClient.sendTransaction(params);
+      // // return walletClient.sendTransaction(params);
       case 'eth_signTypedDataV4':
         return walletClient.signTypedDataV4(params);
       case 'personal_sign':
