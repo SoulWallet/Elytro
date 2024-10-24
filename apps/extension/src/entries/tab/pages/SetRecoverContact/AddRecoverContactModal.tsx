@@ -1,7 +1,16 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import AddEmailContactFrom from './AddContactForm';
+import AddContactFrom from './AddContactForm';
 import FormConfig from './EmailFormConfig';
-import { useForm } from 'react-hook-form';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import { Address } from 'viem';
+
+type SubmitDataType = {
+  email: string;
+  confirm: string;
+} & {
+  address: Address;
+  guardian: string;
+};
 
 export default function AddReoverContactModal({
   open,
@@ -24,16 +33,8 @@ export default function AddReoverContactModal({
     return FormConfig.Email;
   };
   const formConfig = getFormConfig();
-  const handleSubmit = (
-    data: {
-      email: string;
-      confirm: string;
-    } & {
-      address: `0x${string}`;
-      guardian: string;
-    }
-  ) => {
-    formConfig.handleSubmit(data);
+  const handleSubmit: SubmitHandler<FieldValues> = (data) => {
+    formConfig.handleSubmit(data as SubmitDataType);
     handleOnOpenChange();
   };
   // @ts-ignore
@@ -48,7 +49,7 @@ export default function AddReoverContactModal({
           <h3 className="text-[28px] font-medium">
             {titleMapping[type as keyof typeof titleMapping]}
           </h3>
-          <AddEmailContactFrom
+          <AddContactFrom
             form={form}
             formFields={formConfig.fields}
             handleSubmit={handleSubmit}
