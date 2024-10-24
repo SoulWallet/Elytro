@@ -13,6 +13,7 @@ const APPROVAL_TYPE_ROUTE_MAP: Record<ApprovalTypeEn, string> = {
   [ApprovalTypeEn.Connect]: 'connect',
   [ApprovalTypeEn.SendTx]: 'sendTx',
   [ApprovalTypeEn.Alert]: 'alert',
+  [ApprovalTypeEn.Sign]: 'sign',
 };
 
 class ApprovalService {
@@ -61,11 +62,11 @@ class ApprovalService {
     this._currentApproval = null;
   };
 
-  public resolveApproval = (id: string) => {
+  public resolveApproval = (id: string, data: unknown) => {
     if (id !== this._currentApproval?.id) {
       return;
     }
-    this._currentApproval?.resolve(id);
+    this._currentApproval?.resolve(data);
     this._currentApproval = null;
   };
 

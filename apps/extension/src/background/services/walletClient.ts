@@ -8,15 +8,12 @@ import {
   Address,
   createWalletClient,
   formatEther,
-  Hex,
   http,
-  PrepareTransactionRequestParameters,
   publicActions,
   PublicClient,
   WalletClient,
 } from 'viem';
 import keyring from './keyring';
-import { SignTypedDataParameters } from 'viem/accounts';
 import { elytroSDK } from './sdk';
 import { ethErrors } from 'eth-rpc-errors';
 
@@ -96,53 +93,78 @@ class ElytroWalletClient {
     return await this._client.getBlockNumber();
   }
 
-  public async signTypedDataV4(params: unknown) {
-    // todo: maybe need format the params
-    return await keyring.owner?.signTypedData(
-      params as unknown as SignTypedDataParameters
-    );
-  }
+  public async signMessage(message: string) {
+    if (!this._address) {
+      throw ethErrors.rpc.internal();
+    }
 
-  public async personalSign(params: unknown) {
-    if (!Array.isArray(params) || params?.length < 2) {
+    if (typeof message !== 'string') {
       throw ethErrors.rpc.invalidParams();
     }
 
     // todo: maybe more params check?
-    return await elytroSDK.signMessage(params[0], params[1] as Hex);
+    return await elytroSDK.signMessage(message, this._address);
   }
 
-  public async getTransactionByHash(params: unknown) {
-    try {
-      if (Array.isArray(params) && params.length)
-        return await this._client.getTransaction({ hash: params[0] });
-      else {
-        return new Error('Elytro: invalid params');
-      }
-    } catch {
-      // do nth.
-    }
-  }
+  // public async signTypedDataV4(params: unknown) {
+  //   // todo: maybe need format the params
+  //   return await keyring.owner?.signTypedData(
+  //     params as unknown as SignTypedDataParameters
+  //   );
+  // }
 
-  public async prepareTransactionRequest(
-    args: PrepareTransactionRequestParameters
-  ) {
-    return await this._client.prepareTransactionRequest(args);
-  }
+  // public async personalSign(message: string) {
+  //   if (!this._address) {
+  //     throw ethErrors.rpc.internal();
+  //   }
 
-  public async signTransaction(request: SafeAny) {
-    return await this._client.signTransaction(request);
-  }
+  //   if (typeof message !== 'string') {
+  //     throw ethErrors.rpc.invalidParams();
+  //   }
 
-  public async sendRawTransaction(serializedTransaction: `0x${string}`) {
-    return await this._client.sendRawTransaction({ serializedTransaction });
-  }
+  //   // todo: maybe more params check?
+  //   return await elytroSDK.signMessage(message, this._address);
+  // }
 
-  public async getBalance() {
-    return await this._client.getBalance({
-      address: keyring.owner?.address as Address,
-    });
-  }
+  // public async signTypedData(data: string) {
+  //   if (!this._address) {
+  //     throw ethErrors.rpc.internal();
+  //   }
+
+  //   return await elytroSDK.signMessage(data, this._address);
+  // }
+
+  // public async getTransactionByHash(params: unknown) {
+  //   try {
+  //     if (Array.isArray(params) && params.length)
+  //       return await this._client.getTransaction({ hash: params[0] });
+  //     else {
+  //       return new Error('Elytro: invalid params');
+  //     }
+  //   } catch {
+  //     // do nth.
+  //   }
+  // }
+
+  // public async prepareTransactionRequest(
+  //   args: PrepareTransactionRequestParameters
+  // ) {
+  //   return await this._client.prepareTransactionRequest(args);
+  // }
+
+  // public async signTransaction(request: SafeAny) {
+  //   return await this._client.signTransaction(request);
+  // }
+
+  // public async sendRawTransaction(serializedTransaction: `0x${string}`) {
+  //   return await this._client.sendRawTransaction({ serializedTransaction });
+  // }
+
+  // public async getBalance() {
+  //   return await this._client.getBalance({
+  //     address: keyring.owner?.address as Address,
+  //   });
+  // }
 }
 
 const walletClient = new ElytroWalletClient();

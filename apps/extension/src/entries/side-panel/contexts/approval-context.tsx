@@ -2,9 +2,10 @@ import { createContext, useContext, useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
 import { useInterval } from 'usehooks-ts';
 import { toast } from '@/hooks/use-toast';
+
 type IApprovalContext = {
   approval: Nullable<TApprovalInfo>;
-  resolve: () => Promise<void>;
+  resolve: (data: unknown) => Promise<void>;
   reject: (e?: Error) => Promise<void>;
 };
 
@@ -27,11 +28,11 @@ export const ApprovalProvider = ({
     setApproval(approval);
   };
 
-  const resolve = async () => {
+  const resolve = async (data: unknown) => {
     if (!approval) {
       return;
     }
-    await wallet.resolveApproval(approval.id);
+    await wallet.resolveApproval(approval.id, data);
   };
 
   const reject = async (e?: Error) => {

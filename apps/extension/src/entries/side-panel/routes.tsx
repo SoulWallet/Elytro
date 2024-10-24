@@ -7,6 +7,7 @@ import Settings from './pages/Settings';
 import Connect from './pages/Connect';
 import SendTx from './pages/SendTx';
 import Alert from './pages/Alert';
+import Sign from './pages/Sign';
 
 export const SIDE_PANEL_ROUTE_PATHS = {
   Home: '/',
@@ -18,6 +19,7 @@ export const SIDE_PANEL_ROUTE_PATHS = {
   Connect: '/connect',
   SendTx: '/sendTx',
   Alert: '/alert',
+  Sign: '/sign',
 } as const;
 
 export const routes: TRoute[] = [
@@ -57,5 +59,9 @@ export const routes: TRoute[] = [
   {
     path: SIDE_PANEL_ROUTE_PATHS.Alert,
     component: Alert,
+  },
+  {
+    path: SIDE_PANEL_ROUTE_PATHS.Sign,
+    component: Sign,
   },
 ];

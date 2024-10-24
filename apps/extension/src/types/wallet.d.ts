@@ -41,10 +41,21 @@ type TDAppInfo = {
   icon: string;
 };
 
+type TSignData = {
+  method:
+    | 'personal_sign'
+    | 'eth_signTypedData'
+    | 'eth_signTypedData_v1'
+    | 'eth_signTypedData_v3'
+    | 'eth_signTypedData_v4';
+  params: string[];
+};
+
 type TApprovalData = {
   dApp: TDAppInfo;
   tx?: TTransactionInfo[];
   options?: unknown;
+  sign?: TSignData;
 };
 
 type TApprovalInfo = {

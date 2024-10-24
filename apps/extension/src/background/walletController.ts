@@ -49,8 +49,8 @@ class WalletController {
     return approvalService.currentApproval;
   }
 
-  public async resolveApproval(id: string) {
-    return approvalService.resolveApproval(id);
+  public async resolveApproval(id: string, data: unknown) {
+    return approvalService.resolveApproval(id, data);
   }
 
   public async rejectApproval(id: string) {
@@ -63,6 +63,10 @@ class WalletController {
 
   public async signUserOperation(userOp: ElytroUserOperation) {
     return await elytroSDK.signUserOperation(userOp);
+  }
+
+  public async signMessage(message: string) {
+    return await walletClient.signMessage(message);
   }
 }
 

@@ -375,7 +375,7 @@ class ElytroSDK {
 
   public async signMessage(
     message: Uint8Array | string | bigint | number | boolean | Hex,
-    saAddress: Hex
+    saAddress: Address
   ) {
     const rawMessage = getHexString(message, 32);
 

@@ -4,15 +4,7 @@ import { formatAddressToShort } from '@/utils/format';
 import Spin from '@/components/Spin';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-
-const LabelValue = ({ label, value }: { label: string; value?: string }) => {
-  return (
-    <div className="w-full flex items-center justify-between text-sm">
-      <div className="text-gray-400 font-medium">{label}</div>
-      <div className="text-gray-900">{value || '--'}</div>
-    </div>
-  );
-};
+import LabelValue from './LabelValue';
 
 export default function SignTxModal() {
   const [showMore, setShowMore] = useState(false);
