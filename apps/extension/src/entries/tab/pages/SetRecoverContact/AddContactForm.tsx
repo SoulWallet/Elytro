@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { FieldValues, SubmitHandler, UseFormReturn } from 'react-hook-form';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 
 export interface FormFieldProps {
   name: string;
@@ -19,22 +19,27 @@ export interface FormFieldProps {
 }
 
 interface IProps {
-  form: UseFormReturn;
+  formConfig?: unknown;
   formFields: FormFieldProps[];
   handleSubmit?: SubmitHandler<FieldValues>;
 }
 
 export default function AddEmailContactFrom({
-  form,
+  formConfig,
   formFields,
   handleSubmit,
 }: IProps) {
+  if (!formConfig) return null;
+  const form = useForm(formConfig);
+  const onSubmit = () => {
+    if (handleSubmit) {
+      const value = form.getValues();
+      handleSubmit(value);
+    }
+  };
   return (
     <Form {...form}>
-      <form
-        onSubmit={() => handleSubmit && form.handleSubmit(handleSubmit)}
-        className="mt-8 space-y-6 flex-1 relative"
-      >
+      <form className="mt-8 space-y-6 flex-1 relative">
         {formFields.map((formField: FormFieldProps) => (
           <FormField
             control={form.control}
@@ -63,6 +68,8 @@ export default function AddEmailContactFrom({
         <Button
           className="absolute bottom-0 right-0 min-w-[200px]"
           type="submit"
+          disabled={!form.formState.isValid}
+          onClick={onSubmit}
         >
           Add
         </Button>

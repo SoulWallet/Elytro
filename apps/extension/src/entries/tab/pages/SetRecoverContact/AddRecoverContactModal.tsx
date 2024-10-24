@@ -1,10 +1,10 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import AddContactFrom from './AddContactForm';
-import FormConfig from './EmailFormConfig';
-import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import { useRecoverContactForm } from './useRecoverContactForm';
+import { FieldValues, SubmitHandler } from 'react-hook-form';
 import { Address } from 'viem';
 
-type SubmitDataType = {
+type Data = {
   email: string;
   confirm: string;
 } & {
@@ -12,33 +12,43 @@ type SubmitDataType = {
   guardian: string;
 };
 
+export type SubmitDataType = {
+  type: string;
+  data: Data;
+};
+
+const titleMapping = {
+  Wallet: 'Add wallet address',
+  Email: 'Email',
+};
+
+export enum ContactEnum {
+  Wallet = 'Wallet',
+  Email = 'Email',
+}
+
 export default function AddReoverContactModal({
+  contacts,
   open,
   type,
+  onSubmit,
   handleOnOpenChange,
 }: {
   open: boolean;
+  contacts: SubmitDataType[];
   type?: string;
+  onSubmit: (data: SubmitDataType) => void;
   handleOnOpenChange: () => void;
 }) {
-  const titleMapping = {
-    Wallet: 'Add wallet address',
-    Email: 'Email',
-  };
-
   if (!type) return null;
-  const getFormConfig = () => {
-    if (type === 'Email') return FormConfig.Email;
-    if (type === 'Wallet') return FormConfig.Wallet;
-    return FormConfig.Email;
-  };
-  const formConfig = getFormConfig();
+  const { formConfig, formFields } = useRecoverContactForm(type, contacts);
   const handleSubmit: SubmitHandler<FieldValues> = (data) => {
-    formConfig.handleSubmit(data as SubmitDataType);
+    onSubmit({
+      type,
+      data: data as Data,
+    });
     handleOnOpenChange();
   };
-  // @ts-ignore
-  const form = useForm(formConfig.form as unknown);
   return (
     <Dialog open={open} onOpenChange={handleOnOpenChange}>
       <DialogContent
@@ -50,8 +60,8 @@ export default function AddReoverContactModal({
             {titleMapping[type as keyof typeof titleMapping]}
           </h3>
           <AddContactFrom
-            form={form}
-            formFields={formConfig.fields}
+            formConfig={formConfig}
+            formFields={formFields}
             handleSubmit={handleSubmit}
           />
         </div>
