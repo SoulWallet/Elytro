@@ -2,14 +2,21 @@ import EmptyAsset from '@/components/EmptyAsset';
 import BasicAccountInfo from '../components/BasicAccountInfo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TokenList from '@/components/TokenList';
+import Spin from '@/components/Spin';
+import Activities from '../containers/Activities';
+import { useAccount } from '../contexts/account-context';
 
 export default function Dashboard() {
-  const isEmpty = false; // todo: make this dynamic
+  const { loading, accountInfo } = useAccount();
+
+  const isEmpty = false; // todo: make it real
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
+      <Spin isLoading={loading} />
+
       {/* Account Basic Info */}
-      <BasicAccountInfo />
+      <BasicAccountInfo {...accountInfo} />
 
       {/* Empty Fallback or Assets and Activities */}
       <div className="h-full px-2">
@@ -42,7 +49,9 @@ export default function Dashboard() {
                     ]}
                   />
                 </TabsContent>
-                <TabsContent value="activities">Activities</TabsContent>
+                <TabsContent value="activities">
+                  <Activities />
+                </TabsContent>
               </div>
             </Tabs>
           )}

@@ -9,22 +9,38 @@ type SidePanelRoutePath =
   (typeof SIDE_PANEL_ROUTE_PATHS)[keyof typeof SIDE_PANEL_ROUTE_PATHS];
 type TabRoutePath = (typeof TAB_ROUTE_PATHS)[keyof typeof TAB_ROUTE_PATHS];
 
-export function navigateTo(target: 'popup', path: SidePanelRoutePath): void;
-export function navigateTo(target: 'tab', path: TabRoutePath): void;
+export function navigateTo(
+  target: 'popup',
+  path: SidePanelRoutePath,
+  params?: Record<string, string>
+): void;
+export function navigateTo(
+  target: 'tab',
+  path: TabRoutePath,
+  params?: Record<string, string>
+): void;
 export function navigateTo(
   target: 'side-panel',
-  path: SidePanelRoutePath
+  path: SidePanelRoutePath,
+  params?: Record<string, string>
 ): void;
 
 export function navigateTo(
   target: 'popup' | 'tab' | 'side-panel', //| 'options' | 'notification',
-  path: SidePanelRoutePath | TabRoutePath
+  path: SidePanelRoutePath | TabRoutePath,
+  params?: Record<string, string>
 ) {
+  const targetPath = `${path}${params ? `?${new URLSearchParams(params).toString()}` : ''}`;
+  // const isSameRoute = location.hash === '#' + targetPath;
+
+  // if (isSameRoute) {
+  //   return;
+  // }
   const inSameMode = getCurrentType() === target;
 
   // if in same mode, just navigate in router
   if (inSameMode) {
-    navigate(path);
+    navigate(targetPath);
     return;
   }
 
@@ -32,7 +48,7 @@ export function navigateTo(
     // TODO: remove popup. no need for it.
     case 'popup':
       chrome.action.setPopup({
-        popup: chrome.runtime.getURL(`popup.html#${path}`),
+        popup: chrome.runtime.getURL(`popup.html#${targetPath}`),
       });
       break;
     case 'side-panel':
@@ -48,7 +64,7 @@ export function navigateTo(
       break;
     case 'tab':
       chrome.tabs.create({
-        url: chrome.runtime.getURL(`src/entries/tab/index.html#${path}`),
+        url: chrome.runtime.getURL(`src/entries/tab/index.html#${targetPath}`),
       });
       break;
     default:

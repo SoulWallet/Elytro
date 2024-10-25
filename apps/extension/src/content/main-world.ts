@@ -1,4 +1,4 @@
-import PageProvider from '@/services/providers/pageProvider';
+import PageProvider from '@/background/provider/pageProvider';
 
 const generateUUID4 = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {

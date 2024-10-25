@@ -2,6 +2,8 @@ import React from 'react';
 import RequestProvider from './RequestProvider';
 import '@/index.css';
 import { Toaster } from './ui/toaster';
+import { WalletProvider } from '@/contexts/wallet';
+import { KeyringProvider } from '@/contexts/keyring';
 
 interface IPageContainerProps {
   children: React.ReactNode;
@@ -10,10 +12,17 @@ interface IPageContainerProps {
 
 function PageContainer({ children, className }: IPageContainerProps) {
   return (
-    <div className={`w-screen h-screen ${className}`}>
-      <RequestProvider>{children}</RequestProvider>
+    <>
+      <div className={`w-screen h-screen flex ${className}`}>
+        <WalletProvider>
+          <KeyringProvider>
+            <RequestProvider>{children}</RequestProvider>
+          </KeyringProvider>
+        </WalletProvider>
+      </div>
+
       <Toaster />
-    </div>
+    </>
   );
 }
 

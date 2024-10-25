@@ -1,15 +1,19 @@
+import { cn } from '@/utils/shadcn/utils';
 import React from 'react';
 
 interface TabLayoutProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
+  className?: string;
 }
 
-function TabLayout({ children, footer }: TabLayoutProps) {
+function TabLayout({ children, footer, className }: TabLayoutProps) {
   return (
     <div className="w-full h-full bg-elytro-background flex flex-col items-center justify-center">
       <header className="fixed top-4 left-4">Elytro</header>
-      <main className="rounded-super p-6 bg-white ">{children}</main>
+      <main className={cn('rounded-super p-6 bg-white', className)}>
+        {children}
+      </main>
       {footer && (
         <footer className="flex gap-4 items-center mt-6">{footer}</footer>
       )}

@@ -2,8 +2,8 @@ import { safeClipboard } from '@/utils/clipboard';
 import { cn } from '@/utils/shadcn/utils';
 import { Copy } from 'lucide-react';
 interface ICopyableTextProps {
-  text: string;
-  originalText?: Nullable<string>;
+  text: React.ReactNode;
+  originalText: Nullable<string>;
   className?: string;
 }
 
@@ -17,7 +17,7 @@ export default function CopyableText({
       <div>{text}</div>
       <Copy
         className="w-4 h-4 cursor-pointer"
-        onClick={() => safeClipboard(originalText || text)}
+        onClick={() => safeClipboard(originalText || '')}
       />
     </div>
   );

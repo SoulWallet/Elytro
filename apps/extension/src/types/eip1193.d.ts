@@ -31,23 +31,23 @@ type ProviderEvent =
   | 'chainChanged'
   | 'accountsChanged'
   | 'message';
+
 type ProviderMethodType =
   | 'eth_chainId' //!
-  | 'eth_accounts' //!
   // | 'eth_subscribe'
   | 'eth_accounts' // !
   | 'eth_requestAccounts' // !
   | 'eth_sendTransaction' // !
   | 'eth_getBlockByNumber'
   | 'eth_signTypedData' // !
-  | 'eth_signTypedDataV1' //!
-  | 'eth_signTypedDataV3' // !
-  | 'eth_signTypedDataV4' // !
+  | 'eth_signTypedData_v1' //!
+  | 'eth_signTypedData_v3' // !
+  | 'eth_signTypedData_v4' // !
   | 'net_version' // !
   | 'personal_sign' // !
   | 'eth_decrypt' // !
-  | 'eth_getEncryptionPublicKey'; // !
-// | 'eth_getTransactionByHash';
+  | 'eth_getEncryptionPublicKey' // !
+  | 'eth_getTransactionByHash';
 // | 'wallet_addEthereumChain' // EIP-3085. Temporary not supported
 // | 'wallet_switchEthereumChain' // EIP-3326. Temporary not supported
 // | 'wallet_watchAsset' // Temporary not supported
@@ -78,3 +78,9 @@ interface Eip1193Provider extends EventEmitter {
   // networkChanged(networkId: string): Promise<void>;
   // notification(type: string, params: object): Promise<void>;
 }
+
+type TTypedDataItem = {
+  name: string;
+  type: string;
+  value: string;
+};

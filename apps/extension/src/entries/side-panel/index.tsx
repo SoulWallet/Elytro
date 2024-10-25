@@ -1,43 +1,33 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import HashRouter from '@/components/HashRouter';
-import { routes } from './routes';
 import PageContainer from '@/components/PageContainer';
-import { WalletProvider } from './contexts/wallet-context';
-import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
-
-const container = document.getElementById('root')!;
-const root = ReactDOM.createRoot(container);
+import { bootstrap } from '@/utils/bootstrap';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { ApprovalProvider } from './contexts/approval-context';
+import { AccountProvider } from './contexts/account-context';
+import { routes } from './routes';
+import SignTxModal from '@/entries/side-panel/components/SignTxModal';
 
 const main = () => {
   const SidePanelApp: React.FC = () => (
-    <PageContainer className="min-w-96">
-      <WalletProvider>
-        <HashRouter routes={routes} />
-      </WalletProvider>
-    </PageContainer>
+    <AccountProvider>
+      <ApprovalProvider>
+        <PageContainer className="min-w-96">
+          <TooltipProvider>
+            <HashRouter routes={routes} />
+            <SignTxModal />
+          </TooltipProvider>
+        </PageContainer>
+      </ApprovalProvider>
+    </AccountProvider>
   );
 
-  root.render(
+  ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <SidePanelApp />
     </React.StrictMode>
   );
 };
 
-const bootstrap = () => {
-  chrome.runtime
-    .sendMessage({ type: RUNTIME_MESSAGE_TYPE.DOM_READY })
-    .then((res) => {
-      if (!res) {
-        setTimeout(() => {
-          bootstrap();
-        }, 100);
-        return;
-      }
-
-      main();
-    });
-};
-
-bootstrap();
+bootstrap(main);

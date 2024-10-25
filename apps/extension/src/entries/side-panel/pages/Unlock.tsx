@@ -3,12 +3,27 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { navigateTo } from '@/utils/navigation';
 import { TAB_ROUTE_PATHS } from '@/entries/tab/routes';
-import useKeyringStore from '@/stores/keyring';
 import Slogan from '@/components/Slogan';
+import { useKeyring } from '@/contexts/keyring';
+import { useApproval } from '../contexts/approval-context';
 
 export default function Unlock() {
   const [pwd, setPwd] = useState<string>('');
-  const { unlock } = useKeyringStore();
+  const { unlock } = useKeyring();
+  const { approval, resolve, reject } = useApproval();
+
+  const handleUnlock = async () => {
+    await unlock(
+      pwd,
+      () => {
+        if (approval?.resolve) {
+          resolve();
+          window.close();
+        }
+      },
+      reject
+    );
+  };
 
   return (
     <div className="w-full h-full flex flex-col px-8 items-center justify-center gap-y-8 bg-elytro-background min-w-80">
@@ -22,7 +37,7 @@ export default function Unlock() {
         />
         <Button
           className="w-full bg-white text-black rounded-full hover:bg-gray-100"
-          onClick={() => unlock(pwd)}
+          onClick={handleUnlock}
           disabled={!pwd}
         >
           Unlock

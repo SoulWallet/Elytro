@@ -1,10 +1,11 @@
-import { ENDPOINT } from '@/constants/endpoints';
 import { ApolloClient, InMemoryCache, HttpLink, from } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 
+const graphqlEndpoint = 'https://api-dev.soulwallet.io/elytroapi/graphql/';
+
 // create http link
 const httpLink = new HttpLink({
-  uri: ENDPOINT,
+  uri: graphqlEndpoint,
 });
 
 // create error link

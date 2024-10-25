@@ -22,6 +22,21 @@ export async function mutate<T>(
   }
 }
 
+export const mutate_create_account = gql`
+  mutation CreateAccount($input: CreateAccountInput!) {
+    createAccount(input: $input) {
+      address
+      chainID
+      initInfo {
+        index
+        initialKeys
+        initialGuardianHash
+        initialGuardianSafePeriod
+      }
+    }
+  }
+`;
+
 export const mutate_sponsor_op = gql`
   mutation SponsorOp($input: SponsorOpInput!) {
     sponsorOp(input: $input) {

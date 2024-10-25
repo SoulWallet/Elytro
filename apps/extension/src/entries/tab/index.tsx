@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import routes from './routes';
 import HashRouter from '@/components/HashRouter';
 import PageContainer from '@/components/PageContainer';
-import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
+import { bootstrap } from '@/utils/bootstrap';
 
 const main = () => {
   const TabApp: React.FC = () => (
@@ -19,19 +19,4 @@ const main = () => {
   );
 };
 
-const bootstrap = () => {
-  chrome.runtime
-    .sendMessage({ type: RUNTIME_MESSAGE_TYPE.DOM_READY })
-    .then((res) => {
-      if (!res) {
-        setTimeout(() => {
-          bootstrap();
-        }, 100);
-        return;
-      }
-
-      main();
-    });
-};
-
-bootstrap();
+bootstrap(main);

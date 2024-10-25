@@ -1,33 +1,72 @@
 import { TSignTxDetail } from '@/constants/operations';
+import { ELYTRO_SESSION_DATA, TSessionData } from '@/constants/session';
 import { toast } from '@/hooks/use-toast';
+import { elytroSDK } from '@/background/services/sdk';
+import { formatSimulationResultToTxDetail } from '@/utils/format';
 import { create } from 'zustand';
 
 interface DialogState {
   isSignTxDialogOpen: boolean;
   signTxDetail: Nullable<TSignTxDetail>;
-  openSignTxDialog: (detail: TSignTxDetail) => void;
+  userOp: Nullable<ElytroUserOperation>;
+  openSignTxDialog: (
+    userOp: ElytroUserOperation,
+    onSuccess?: () => void,
+    actionName?: string,
+    fromSession?: TSessionData,
+    toSession?: TSessionData
+  ) => void;
   closeSignTxDialog: () => void;
+  loading: boolean;
+  confirmTx: () => Promise<void>;
+  successCallback: Nullable<() => void>;
 }
 
-const useDialogStore = create<DialogState>((set) => ({
+const useDialogStore = create<DialogState>((set, get) => ({
+  loading: false,
   isSignTxDialogOpen: false,
+  userOp: null,
+  successCallback: null,
   // todo: remove this
-  signTxDetail: {
-    accountAddress: '0x123',
-    contractAddress: '0x123',
-    fee: '100',
-    txHash: '0x123',
-    action: {
-      dAppLogo:
-        'https://assets.coingecko.com/coins/images/25244/standard/Optimism.png',
-      name: 'Transfer',
-      description: 'Transfer 10 USDC to 0x123',
-    },
-  },
-  openSignTxDialog: (detail) => {
-    if (detail) {
-      set({ isSignTxDialogOpen: true, signTxDetail: detail });
+  signTxDetail: null,
+  openSignTxDialog: async (
+    userOp: ElytroUserOperation,
+    onSuccess?: () => void,
+    actionName: string = 'Confirm Transaction',
+    // default is elytro internal interaction
+    fromSession: TSessionData = ELYTRO_SESSION_DATA,
+    toSession: TSessionData = ELYTRO_SESSION_DATA
+  ) => {
+    if (userOp) {
+      set({ isSignTxDialogOpen: true, loading: true });
+
+      try {
+        await elytroSDK.signUserOperation(userOp);
+
+        const simulationResult = await elytroSDK.simulateUserOperation(userOp);
+        const txDetail = formatSimulationResultToTxDetail(simulationResult);
+
+        set({
+          signTxDetail: {
+            txDetail,
+            fromSession,
+            toSession,
+            actionName,
+          },
+          userOp,
+          successCallback: onSuccess,
+        });
+      } catch (_error) {
+        set({ isSignTxDialogOpen: false });
+        toast({
+          title: 'Oops!',
+          description: 'Failed to get transaction detail',
+        });
+      } finally {
+        set({ loading: false });
+      }
     } else {
+      set({ isSignTxDialogOpen: false });
       toast({
         title: 'Oops!',
         description: 'No sign transaction detail provided',
@@ -35,7 +74,38 @@ const useDialogStore = create<DialogState>((set) => ({
     }
   },
   closeSignTxDialog: () => {
-    set({ isSignTxDialogOpen: false, signTxDetail: null });
+    set({
+      isSignTxDialogOpen: false,
+      signTxDetail: null,
+      loading: false,
+      userOp: null,
+    });
+  },
+  confirmTx: async () => {
+    try {
+      set({ loading: true });
+      const { userOp } = get();
+      if (userOp) {
+        await elytroSDK.sendUserOperation(userOp);
+        get().closeSignTxDialog();
+      } else {
+        throw new Error('No user operation to send');
+      }
+
+      toast({
+        title: 'Success!',
+        description: 'Transaction sent successfully',
+      });
+
+      get().successCallback?.();
+    } catch (_error) {
+      toast({
+        title: 'Oops!',
+        description: 'Failed to send transaction',
+      });
+    } finally {
+      set({ loading: false });
+    }
   },
 }));
 

@@ -1,5 +1,3 @@
-export const ENDPOINT = 'https://api-dev.soulwallet.io/elytroapi/graphql/';
-
 export const SW_BUNDLER_RPC_URL =
   'https://api-dev.soulwallet.io/appapi/bundler/base-sepolia/rpc';
 
