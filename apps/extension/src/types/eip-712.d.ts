@@ -19,6 +19,6 @@ type EIP712Type = {
   primaryType: string;
   types: {
     EIP712Domain: Array<{ name: string; type: string }>;
-    EIP712Message: Array<{ name: string; type: string }>;
+    [key: string]: Array<{ name: string; type: string }>;
   };
 };

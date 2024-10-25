@@ -1,3 +1,4 @@
+import { WalletController } from '@/background/walletController';
 import { formatRawData } from '@/utils/format';
 import { isHex } from 'viem';
 
@@ -39,10 +40,12 @@ const getProcessingFromSignType = (signType: SignTypeEn) => {
   let format: (params: string[]) => string;
   let messageIdx = 0;
   let showDetail = false;
+  let signMethod: keyof WalletController = 'signMessage';
 
   switch (signType) {
     case SignTypeEn.SignTypedData:
       title = 'Sign Typed Data';
+      signMethod = 'signTypedData';
       format = (params) => {
         const rawData = parseTypedData(
           params[0] as unknown as TTypedDataItem[]
@@ -55,6 +58,7 @@ const getProcessingFromSignType = (signType: SignTypeEn) => {
       title = 'Sign Typed Data';
       messageIdx = 1;
       showDetail = true;
+      signMethod = 'signTypedData';
       format = (params: string[]) =>
         formatRawData(JSON.parse(params[messageIdx]).message as string);
       break;
@@ -69,6 +73,7 @@ const getProcessingFromSignType = (signType: SignTypeEn) => {
     format,
     messageIdx,
     showDetail,
+    signMethod,
   };
 };
 

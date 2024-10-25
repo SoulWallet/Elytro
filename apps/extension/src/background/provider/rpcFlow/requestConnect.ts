@@ -22,7 +22,7 @@ export const requestConnect: TFlowMiddleWareFn = async (ctx, next) => {
     const isConnected = connectionManager.getSite(dApp.origin)?.isConnected;
 
     if (!isConnected) {
-      await approvalService.request(ApprovalTypeEn.Connect, {
+      return await approvalService.request(ApprovalTypeEn.Connect, {
         dApp,
       });
     }

@@ -4,6 +4,8 @@ import connectionManager from './services/connection';
 import keyring from './services/keyring';
 import walletClient from './services/walletClient';
 import { elytroSDK } from './services/sdk';
+import { hashEarlyTypedData, hashSignTypedData } from '@/utils/hash';
+import { ethErrors } from 'eth-rpc-errors';
 
 // ! DO NOT use getter. They can not be proxied.
 class WalletController {
@@ -67,6 +69,25 @@ class WalletController {
 
   public async signMessage(message: string) {
     return await walletClient.signMessage(message);
+  }
+
+  public async signTypedData(typedData: string | TTypedDataItem[]) {
+    try {
+      let hash;
+      if (typeof typedData === 'string') {
+        hash = hashSignTypedData(JSON.parse(typedData));
+      } else {
+        hash = hashEarlyTypedData(typedData);
+      }
+
+      if (hash) {
+        return await walletClient.signMessage(hash);
+      }
+
+      throw new Error('Elytro: Cannot generate hash for typed data');
+    } catch (error) {
+      throw ethErrors.rpc.internal((error as Error)?.message);
+    }
   }
 }
 

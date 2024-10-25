@@ -6,6 +6,7 @@ import { checkLock } from './checkLock';
 import { callProvider } from './callProvider';
 import { requestConnect } from './requestConnect';
 import { sendTx } from './sendTx';
+import { requestSignature } from './requestSignature';
 
 export type TProviderRequest = {
   ctx?: unknown;
@@ -25,6 +26,7 @@ const composedTasks = taskFlow
   .use(checkMethodExist)
   .use(checkLock)
   .use(requestConnect)
+  .use(requestSignature)
   .use(sendTx)
   .use(callProvider)
   .compose();

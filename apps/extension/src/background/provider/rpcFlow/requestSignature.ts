@@ -16,7 +16,7 @@ export const requestSignature: TFlowMiddleWareFn = async (ctx, next) => {
   const { rpcReq, dApp } = ctx.request;
 
   if (SIGN_METHODS.includes(rpcReq.method)) {
-    await approvalService.request(ApprovalTypeEn.Sign, {
+    return await approvalService.request(ApprovalTypeEn.Sign, {
       dApp,
       sign: rpcReq,
     });

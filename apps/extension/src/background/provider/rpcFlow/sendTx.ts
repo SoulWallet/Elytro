@@ -15,7 +15,7 @@ export const sendTx: TFlowMiddleWareFn = async (ctx, next) => {
   if (SEND_TX_METHODS.includes(method)) {
     // const connection = connectionManager.getSite(origin);
 
-    await approvalService.request(ApprovalTypeEn.SendTx, {
+    return await approvalService.request(ApprovalTypeEn.SendTx, {
       dApp,
       tx: params,
     });

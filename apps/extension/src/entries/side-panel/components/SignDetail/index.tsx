@@ -11,6 +11,7 @@ import { useWallet } from '@/contexts/wallet';
 import { toast } from '@/hooks/use-toast';
 import { SignTypeEn, getProcessingFromSignType } from './utils';
 import DomainDetail from './DomainDetail';
+import { WalletController } from '@/background/walletController';
 
 interface ISendTxProps {
   signData: TSignData;
@@ -30,16 +31,27 @@ export default function SignDetail({
   const wallet = useWallet();
   const signType = method as SignTypeEn;
 
-  const { title, format, messageIdx, showDetail } =
+  const { title, format, messageIdx, showDetail, signMethod } =
     getProcessingFromSignType(signType);
 
   const handleConfirm = async () => {
     try {
-      const signature = await wallet.signMessage(params[messageIdx] as string);
+      let signature;
 
-      onConfirm(signature);
-    } catch (error) {
-      console.error(error);
+      if (signMethod && params[messageIdx]) {
+        signature = await (
+          wallet[signMethod] as
+            | WalletController['signMessage']
+            | WalletController['signTypedData']
+        )(params[messageIdx]);
+      }
+
+      if (signature) {
+        onConfirm(signature);
+      } else {
+        throw new Error('Sign failed');
+      }
+    } catch {
       toast({
         title: 'Sign failed',
         description: 'Please try again',
