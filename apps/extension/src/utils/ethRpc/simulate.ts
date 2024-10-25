@@ -1,6 +1,6 @@
 import { query } from '@/requests';
 import { query_simulated_op } from '@/requests/query';
-import { getHexString, paddingBytesToEven } from '../format';
+import { formatHex, paddingBytesToEven } from '../format';
 import { Hex } from 'viem';
 
 type StateChangeItem = {
@@ -55,29 +55,29 @@ export const simulateSendUserOp = async (
     const req = [
       {
         callData: paddingBytesToEven(userOp.callData),
-        callGasLimit: getHexString(userOp.callGasLimit),
+        callGasLimit: formatHex(userOp.callGasLimit),
         factory: userOp.factory,
         factoryData: paddingBytesToEven(userOp.factoryData),
-        maxFeePerGas: getHexString(userOp.maxFeePerGas),
-        maxPriorityFeePerGas: getHexString(userOp.maxPriorityFeePerGas),
-        nonce: getHexString(userOp.nonce),
+        maxFeePerGas: formatHex(userOp.maxFeePerGas),
+        maxPriorityFeePerGas: formatHex(userOp.maxPriorityFeePerGas),
+        nonce: formatHex(userOp.nonce),
         paymaster: userOp.paymaster,
         paymasterData: paddingBytesToEven(userOp.paymasterData),
         paymasterPostOpGasLimit: userOp.paymasterPostOpGasLimit
-          ? getHexString(userOp.paymasterPostOpGasLimit)
+          ? formatHex(userOp.paymasterPostOpGasLimit)
           : null,
         paymasterVerificationGasLimit: userOp.paymasterVerificationGasLimit
-          ? getHexString(userOp.paymasterVerificationGasLimit)
+          ? formatHex(userOp.paymasterVerificationGasLimit)
           : null,
-        preVerificationGas: getHexString(userOp.preVerificationGas),
+        preVerificationGas: formatHex(userOp.preVerificationGas),
         sender: userOp.sender,
         signature: userOp.signature,
-        verificationGasLimit: getHexString(userOp.verificationGasLimit),
+        verificationGasLimit: formatHex(userOp.verificationGasLimit),
       },
     ];
 
     const res = (await query(query_simulated_op, {
-      chainID: getHexString(chainID), // todo: change it to chain id when backend is ready
+      chainID: formatHex(chainID), // todo: change it to chain id when backend is ready
       request: {
         entryPoint,
         userOps: req,

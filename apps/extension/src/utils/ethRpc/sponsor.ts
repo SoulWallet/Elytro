@@ -1,6 +1,6 @@
 import { mutate_sponsor_op } from '@/requests/mutate';
 import { mutate } from '@/requests';
-import { paddingBytesToEven } from '../format';
+import { paddingBytesToEven, formatHex } from '../format';
 import { toHex } from 'viem';
 
 export const canUserOpGetSponsor = async (
@@ -17,18 +17,18 @@ export const canUserOpGetSponsor = async (
         entryPoint,
         op: {
           sender: userOp.sender,
-          nonce: userOp.nonce,
+          nonce: formatHex(userOp.nonce),
           factory: userOp.factory,
           factoryData:
             userOp.factory === null
               ? null
               : paddingBytesToEven(userOp.factoryData ?? ''),
           callData: userOp.callData,
-          callGasLimit: userOp.callGasLimit,
-          verificationGasLimit: toHex(userOp.verificationGasLimit),
-          preVerificationGas: toHex(userOp.preVerificationGas),
-          maxFeePerGas: userOp.maxFeePerGas,
-          maxPriorityFeePerGas: userOp.maxPriorityFeePerGas,
+          callGasLimit: formatHex(userOp.callGasLimit),
+          verificationGasLimit: formatHex(userOp.verificationGasLimit),
+          preVerificationGas: formatHex(userOp.preVerificationGas),
+          maxFeePerGas: formatHex(userOp.maxFeePerGas),
+          maxPriorityFeePerGas: formatHex(userOp.maxPriorityFeePerGas),
           signature: userOp.signature,
         },
       },

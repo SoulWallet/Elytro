@@ -39,6 +39,18 @@ export function getHexString(
   return toHex(value, { size });
 }
 
+export const formatHex = (
+  value: string | number | bigint | boolean | Uint8Array
+) => {
+  {
+    if (typeof value === 'string' && value.startsWith('0x')) {
+      return value;
+    }
+
+    return toHex(value);
+  }
+};
+
 // make the hex string length even
 export function paddingBytesToEven(value?: string): string | null {
   if (!value) return null;

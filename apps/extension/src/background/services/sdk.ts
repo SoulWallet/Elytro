@@ -234,6 +234,9 @@ class ElytroSDK {
       throw rawHashRes.ERR;
     }
 
+    // TODO： move sign userOp to wallet controller, so the keyring will be same instance
+    await keyring.tryUnlock();
+
     // raw sign -> personal sign
     const _eoaSignature = await keyring.owner?.signMessage({
       message: { raw: rawHashRes.OK.packedHash as Hex },
