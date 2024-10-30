@@ -81,6 +81,7 @@ export const KeyringProvider = ({
   };
 
   const createNewOwner = async (password: string) => {
+    await lock();
     await wallet.createNewOwner(password);
   };
 
