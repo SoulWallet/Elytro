@@ -46,7 +46,9 @@ const useActivateStore = create<ActivateState>((set, get) => ({
       useDialogStore.getState().openSignTxDialog(
         deployUserOp,
         () => {
-          navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
+          navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard, {
+            activating: '1',
+          });
         },
         'Activate account'
       );

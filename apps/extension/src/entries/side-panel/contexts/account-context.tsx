@@ -1,7 +1,8 @@
 import { DEFAULT_CHAIN_TYPE } from '@/constants/chains';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
 import { useHashLocation } from 'wouter/use-hash-location';
+import useSearchParams from '@/hooks/use-search-params';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
@@ -33,16 +34,23 @@ export const AccountProvider = ({
     useState<TAccountInfo>(DEFAULT_ACCOUNT_INFO);
   const [loading, setLoading] = useState(false);
   const [pathname] = useHashLocation();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const searchParams = useSearchParams();
 
   const updateAccount = async () => {
     try {
       setLoading(true);
       const res = (await wallet.getSmartAccountInfo()) ?? DEFAULT_ACCOUNT_INFO;
       setAccountInfo(res);
+
+      if (intervalRef.current && res.isActivated) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false);
+      setLoading(intervalRef.current ? true : false);
     }
   };
 
@@ -51,6 +59,20 @@ export const AccountProvider = ({
       updateAccount();
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (searchParams.activating) {
+      intervalRef.current = setInterval(() => {
+        updateAccount();
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [searchParams]);
 
   return (
     <AccountContext.Provider value={{ accountInfo, updateAccount, loading }}>
