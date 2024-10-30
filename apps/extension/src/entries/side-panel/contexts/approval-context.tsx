@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 
 type IApprovalContext = {
   approval: Nullable<TApprovalInfo>;
-  resolve: (data: unknown) => Promise<void>;
+  resolve: (data?: unknown) => Promise<void>;
   reject: (e?: Error) => Promise<void>;
 };
 
