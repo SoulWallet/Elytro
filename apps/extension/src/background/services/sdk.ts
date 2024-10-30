@@ -142,14 +142,15 @@ class ElytroSDK {
     return code !== undefined && code !== '0x';
   }
 
-  public async activateSmartAccount(address: string) {
-    try {
-      const userOp = await this.createUnsignedDeployWalletUserOp(address);
-      await this.sendUserOperation(userOp);
-    } catch (error) {
-      console.error('Elytro: Failed to activate smart account.', error);
-    }
-  }
+  // public async activateSmartAccount(address: string) {
+  //   try {
+  //     const userOp = await this.createUnsignedDeployWalletUserOp(address);
+  //     await this.estimateGas(userOp);
+  //     await this.sendUserOperation(userOp);
+  //   } catch (error) {
+  //     console.error('Elytro: Failed to activate smart account.', error);
+  //   }
+  // }
 
   public async sendUserOperation(userOp: ElytroUserOperation) {
     // estimate gas before sending userOp, but can not do it here (for the case of sign tx)

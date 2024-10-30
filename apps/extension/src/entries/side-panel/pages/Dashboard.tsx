@@ -7,7 +7,7 @@ import Activities from '../containers/Activities';
 import { useAccount } from '../contexts/account-context';
 
 export default function Dashboard() {
-  const { loading, accountInfo } = useAccount();
+  const { loading } = useAccount();
 
   const isEmpty = false; // todo: make it real
 
@@ -16,7 +16,7 @@ export default function Dashboard() {
       <Spin isLoading={loading} />
 
       {/* Account Basic Info */}
-      <BasicAccountInfo {...accountInfo} />
+      <BasicAccountInfo />
 
       {/* Empty Fallback or Assets and Activities */}
       <div className="h-full px-2">

@@ -50,7 +50,9 @@ export default function Activate() {
         deployUserOp,
         () => {
           // todo: when activated, UI need to be updated (but it seems have seconds latency)
-          navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
+          navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard, {
+            activating: '1',
+          });
         },
         'Activate account'
       );

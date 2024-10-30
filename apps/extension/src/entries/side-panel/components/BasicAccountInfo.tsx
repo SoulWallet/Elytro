@@ -9,13 +9,12 @@ import { Button } from '@/components/ui/button';
 import SettingModal from './SettingModal';
 import AccountsModal from './AccountsModal';
 import Account from './Account';
+import { useAccount } from '../contexts/account-context';
 
-export default function BasicAccountInfo({
-  address,
-  isActivated,
-  chainType,
-  balance,
-}: TAccountInfo) {
+export default function BasicAccountInfo() {
+  const {
+    accountInfo: { isActivated, address, balance, chainType },
+  } = useAccount();
   const [openSendModal, setOpenSendModal] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [openAccounts, setOpenAccounts] = useState(false);
