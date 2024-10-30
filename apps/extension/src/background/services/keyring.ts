@@ -140,7 +140,7 @@ class KeyringService {
     }
     await this._verifyPassword(password);
 
-    return this._locked;
+    return this._sa;
   }
 
   private async _updateOwnerByKey(key: Hex) {
