@@ -13,7 +13,7 @@ export type TFlowMiddleWareFn<T extends ContextType = ContextType> = FlowTask<
 
 export default class AsyncTaskFlow<T extends ContextType = ContextType> {
   private _tasks: FlowTask<T>[] = [];
-  private _context: ContextType = {};
+  // private _context: ContextType = {};
   public requestedApproval = false;
 
   use(fn: FlowTask<T>): this {

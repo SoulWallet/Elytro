@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@apollo/client': ^3.11.8
-  '@crxjs/vite-plugin': 2.0.0-beta.25
+  '@crxjs/vite-plugin': 2.0.0-beta.26
   '@eslint/js': ^9.9.0
   '@hookform/resolvers': ^3.9.0
   '@metamask/post-message-stream': 8.1.0
@@ -105,7 +105,7 @@ dependencies:
   zustand: 4.5.5_vhfblam3newwcpiwkw3tsgpmum
 
 devDependencies:
-  '@crxjs/vite-plugin': 2.0.0-beta.25
+  '@crxjs/vite-plugin': 2.0.0-beta.26
   '@eslint/js': 9.10.0
   '@types/chrome': 0.0.270
   '@types/koa-compose': 3.2.8
@@ -377,8 +377,8 @@ packages:
       to-fast-properties: 2.0.0
     dev: true
 
-  /@crxjs/vite-plugin/2.0.0-beta.25:
-    resolution: {integrity: sha512-g5ytTNiFpFCi+T0trSDJLohVz5PufLBLh6OGljyGTHkQCKiApuEgZ1bAjgPXluMDhMUvbPfZT10LYl5ROefXog==}
+  /@crxjs/vite-plugin/2.0.0-beta.26:
+    resolution: {integrity: sha512-fZiSeOB4LOwq3cLIwHJnJ4x/duBU/Gkn3JKF7b7mZIRAXtu1waorJ6QaH7qoZPcN5LzyA3J+/t3Kuwa/oo8XNg==}
     dependencies:
       '@rollup/pluginutils': 4.2.1
       '@webcomponents/custom-elements': 1.6.0

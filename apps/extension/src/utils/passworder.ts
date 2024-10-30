@@ -12,7 +12,7 @@ function generateSalt(size = 32) {
   return crypto.getRandomValues(new Uint8Array(randomBytes));
 }
 
-function getBase64Salt(salt: Uint8Array<ArrayBuffer>) {
+function getBase64Salt(salt: Uint8Array) {
   return Buffer.from(salt).toString(BUFFER_ENCODING);
 }
 

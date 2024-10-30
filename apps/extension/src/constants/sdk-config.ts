@@ -22,6 +22,25 @@ export const SDK_INIT_CONFIG_BY_CHAIN_MAP: Record<
     fallback: '0x880c6eb80583795625935B08AA28EB37F16732C7',
     recovery: '0x3Cc36538cf53A13AF5C28BB693091e23CF5BB567',
   },
+  // TODO: change to respective chain config
+  [SupportedChainTypeEn.ETH]: {
+    endpoint:
+      'https://opt-sepolia.g.alchemy.com/v2/q9tQ1GMZy-4gtTuQQO6JF_5m_Bf1NYdq', //this.chain.rpcUrls.default.http[0], //
+    bundler:
+      'https://soulwallet.optimism-sepolia.voltaire.candidewallet.com/rpc',
+    factory: '0xF78Ae187CED0Ca5Fb98100d3F0EAB7a6461d6fC6',
+    fallback: '0x880c6eb80583795625935B08AA28EB37F16732C7',
+    recovery: '0x3Cc36538cf53A13AF5C28BB693091e23CF5BB567',
+  },
+  [SupportedChainTypeEn.OP]: {
+    endpoint:
+      'https://opt-sepolia.g.alchemy.com/v2/q9tQ1GMZy-4gtTuQQO6JF_5m_Bf1NYdq', //this.chain.rpcUrls.default.http[0], //
+    bundler:
+      'https://soulwallet.optimism-sepolia.voltaire.candidewallet.com/rpc',
+    factory: '0xF78Ae187CED0Ca5Fb98100d3F0EAB7a6461d6fC6',
+    fallback: '0x880c6eb80583795625935B08AA28EB37F16732C7',
+    recovery: '0x3Cc36538cf53A13AF5C28BB693091e23CF5BB567',
+  },
 };
 
 const SOUL_WALLET_MSG_TYPE_HASH =
