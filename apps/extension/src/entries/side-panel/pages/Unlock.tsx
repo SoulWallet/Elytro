@@ -16,7 +16,7 @@ export default function Unlock() {
     await unlock(
       pwd,
       () => {
-        if (approval?.resolve) {
+        if (approval) {
           resolve();
           window.close();
         }
