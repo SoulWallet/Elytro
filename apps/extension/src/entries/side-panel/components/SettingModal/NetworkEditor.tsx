@@ -33,7 +33,7 @@ export default function NetworkEditor({
   const onSave = () => {
     onCancel();
     toast({
-      title: (
+      description: (
         <div className="flex">
           <img className="mr-2" src={TickCircle} />
           {network.name} Network updated

@@ -6,16 +6,16 @@ import { resolve } from 'path';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig({
-  define: {
-    // a workaround for @metamask/post-message-stream - readable-stream
-    'process.env.DEBUG': 'false',
-    'process.nextTick': `(callback, ...args) => {
-          if (typeof callback !== 'function') {
-            throw new TypeError('Callback must be a function');
-          }
-          Promise.resolve().then(() => callback(...args));
-        }`,
-  },
+  // define: {
+  //   // a workaround for @metamask/post-message-stream - readable-stream
+  //   'process.env.DEBUG': 'false',
+  //   'process.nextTick': `(callback, ...args) => {
+  //         if (typeof callback !== 'function') {
+  //           throw new TypeError('Callback must be a function');
+  //         }
+  //         Promise.resolve().then(() => callback(...args));
+  //       }`,
+  // },
   plugins: [
     react(),
     crx({ manifest }),

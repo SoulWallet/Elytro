@@ -33,7 +33,7 @@ export default function Activities() {
   ];
   const [activities, setActivities] = useState<DailyActivitiesProps[]>([]);
   const getActivities = async () => {
-    setTimeout(() => setActivities(mockdata), 500);
+    setTimeout(() => setActivities(mockdata as DailyActivitiesProps[]), 500);
   };
   useEffect(() => {
     getActivities();
