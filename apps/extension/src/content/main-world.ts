@@ -16,14 +16,16 @@ const mainWorld = () => {
     rdns: 'com.elytro',
   };
 
-  //! todo: remove this when not testing with https://metamask.github.io/test-dapp/
-  // temp workaround for @metamask/post-message-stream - readable-stream when using https://metamask.github.io/test-dapp/
-  window.process.nextTick = (callback, ...args) => {
-    if (typeof callback !== 'function') {
-      throw new TypeError('Callback must be a function');
-    }
-    Promise.resolve().then(() => callback(...args));
-  };
+  if (window.process) {
+    //! todo: remove this when not testing with https://metamask.github.io/test-dapp/
+    // temp workaround for @metamask/post-message-stream - readable-stream when using https://metamask.github.io/test-dapp/
+    window.process.nextTick = (callback, ...args) => {
+      if (typeof callback !== 'function') {
+        throw new TypeError('Callback must be a function');
+      }
+      Promise.resolve().then(() => callback(...args));
+    };
+  }
 
   const injectedProvider = new Proxy(new PageProvider(), {
     deleteProperty: () => {
