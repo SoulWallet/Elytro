@@ -20,7 +20,12 @@ export default function Account({
         }
       />
       <div className="flex flex-col justify-center">
-        <div className="text-xl font-medium text-gray-900">{chainType}</div>
+        <div
+          className="text-xl font-medium text-gray-900"
+          data-testid="chain_name"
+        >
+          {chainType}
+        </div>
         <CopyableText
           className="text-sm text-gray-500"
           text={formatAddressToShort(address)}

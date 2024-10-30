@@ -17,6 +17,7 @@ export default function CopyableText({
       <div>{text}</div>
       <Copy
         className="w-4 h-4 cursor-pointer"
+        data-testid="copy_icon"
         onClick={() => safeClipboard(originalText || '')}
       />
     </div>

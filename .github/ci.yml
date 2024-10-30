@@ -1,0 +1,93 @@
+name: ci
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  UnitTest:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+          cd apps/extension
+          pnpm install
+          cd test
+          pnpm install
+          pnpm exec playwright install chromium --with-deps
+
+      - name: Build
+        run: |
+          cd apps/extension
+          pnpm run build
+
+      - name: Run UI:Test
+        run: |
+          cd apps/extension/test
+          xvfb-run npx playwright test
+        timeout-minutes: 20
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: apps/extension/test/playwright-report/
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: screen recording
+          path: apps/extension/test/archive/screenrecord/
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: network recording
+          path: apps/extension/test/archive/network/
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: dist
+          path: apps/extension/dist/
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: dist(failure)
+          path: apps/extension/dist/
+          retention-days: 1
