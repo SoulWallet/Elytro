@@ -2,6 +2,7 @@
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 import { toHex } from 'viem';
 import walletClient from '../services/walletClient';
+import { ethErrors } from 'eth-rpc-errors';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
@@ -44,7 +45,7 @@ class BuiltinProvider extends SafeEventEmitter {
       // case 'eth_getTransactionByHash':
       //   return await walletClient.getTransactionByHash(params);
       default:
-        throw new Error(`Elytro: ${method} is not supported yet.`);
+        throw ethErrors.rpc.methodNotFound(method);
     }
   }
 }

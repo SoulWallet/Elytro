@@ -1,8 +1,8 @@
 import {
   DEFAULT_CHAIN_TYPE,
   SUPPORTED_CHAIN_MAP,
+  SUPPORTED_CHAIN_RPC_URL_MAP,
   SupportedChainTypeEn,
-  TEMP_RPC_URL,
 } from '@/constants/chains';
 import {
   Address,
@@ -56,7 +56,7 @@ class ElytroWalletClient {
 
       this._client = createWalletClient({
         chain: SUPPORTED_CHAIN_MAP[this._chainType],
-        transport: http(TEMP_RPC_URL),
+        transport: http(SUPPORTED_CHAIN_RPC_URL_MAP[this._chainType]),
       }).extend(publicActions);
     }
   }

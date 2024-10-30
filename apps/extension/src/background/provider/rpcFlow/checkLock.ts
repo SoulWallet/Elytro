@@ -29,9 +29,7 @@ export const checkLock: TFlowMiddleWareFn = async (ctx, next) => {
 
     try {
       isUnlocking = true;
-      await approvalService.request(ApprovalTypeEn.Unlock);
-    } catch {
-      // do nth.
+      return await approvalService.request(ApprovalTypeEn.Unlock);
     } finally {
       isUnlocking = false;
     }

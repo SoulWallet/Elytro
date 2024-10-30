@@ -47,7 +47,9 @@ type ProviderMethodType =
   | 'personal_sign' // !
   | 'eth_decrypt' // !
   | 'eth_getEncryptionPublicKey' // !
-  | 'eth_getTransactionByHash';
+  | 'eth_getTransactionByHash'
+  | 'wallet_requestPermissions' // !
+  | 'wallet_getPermissions'; // !
 // | 'wallet_addEthereumChain' // EIP-3085. Temporary not supported
 // | 'wallet_switchEthereumChain' // EIP-3326. Temporary not supported
 // | 'wallet_watchAsset' // Temporary not supported

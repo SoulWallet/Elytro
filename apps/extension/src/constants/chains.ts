@@ -15,6 +15,14 @@ export const SUPPORTED_CHAIN_MAP: Record<SupportedChainTypeEn, Chain> = {
   [SupportedChainTypeEn.OP_SEPOLIA]: optimismSepolia,
 };
 
+export const SUPPORTED_CHAIN_RPC_URL_MAP: Record<SupportedChainTypeEn, string> =
+  {
+    [SupportedChainTypeEn.ETH]: 'https://ethereum-rpc.publicnode.com',
+    [SupportedChainTypeEn.OP]: 'https://optimism-rpc.publicnode.com',
+    [SupportedChainTypeEn.OP_SEPOLIA]:
+      'https://optimism-sepolia-rpc.publicnode.com', //https://optimism-sepolia.drpc.org
+  };
+
 export const SUPPORTED_CHAIN_ICON_MAP: Record<SupportedChainTypeEn, string> = {
   [SupportedChainTypeEn.ETH]:
     'https://assets.coingecko.com/coins/images/279/standard/Ethereum.png',
