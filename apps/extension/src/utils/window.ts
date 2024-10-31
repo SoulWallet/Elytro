@@ -1,14 +1,10 @@
 export const isWinOS = /windows/i.test(navigator?.userAgent);
+
 import { EventEmitter } from 'events';
 
-const iPhone14ProMaxSize = {
-  width: 430,
-  height: 932,
-};
-
 const WINDOW_SIZE = {
-  width: iPhone14ProMaxSize.width + (isWinOS ? 14 : 0),
-  height: iPhone14ProMaxSize.height,
+  width: 400 + (isWinOS ? 14 : 0),
+  height: 900,
 };
 
 const approvalWindowEvent = new EventEmitter();
@@ -91,6 +87,25 @@ const tryRemoveWindow = async (winId: number | null | undefined) => {
 };
 
 const openPopupWindow = async (path: string) => {
+  // try {
+  //   // chrome.runtime.sendMessage(
+  //   //   { type: RUNTIME_MESSAGE_TYPE.OPEN_SIDE_PANEL, payload: { path } },
+  //   //   () => {
+  //   //     if (chrome.runtime.lastError) {
+  //   //       chrome.runtime.sendMessage({
+  //   //         type: RUNTIME_MESSAGE_TYPE.OPEN_SIDE_PANEL,
+  //   //         payload: { path },
+  //   //       });
+  //   //     }
+  //   //   }
+  //   // );
+
+  //   console.log('Message sent to open side panel with path:', path);
+  // } catch (error) {
+  //   console.error('Error sending message:', error);
+  //   // do nth
+  // }
+
   return await createWindow(
     chrome.runtime.getURL(`src/entries/side-panel/index.html#/${path}`)
   );

@@ -42,27 +42,16 @@ export default function SendTx({
   const userOpRef = useRef<ElytroUserOperation>();
   const [isLoading, setIsLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [decodedDetail, setDecodedDetail] = useState<DecodeResult[]>([
-    {
-      from: '0x7C9A1897dFd01b0287347A1b824f95387ffB0024',
-      fromInfo: undefined,
-      method: undefined,
-      to: '0x0c54FcCd2e384b4BB6f2E405Bf5Cbc15a017AaFb',
-      toInfo: undefined,
-      value: 0n,
-    },
-  ]);
+  const [decodedDetail, setDecodedDetail] = useState<DecodeResult[]>([]);
 
   const [needDeposit, setNeedDeposit] = useState(false);
 
   const getUserOpFromTx = async () => {
     setIsLoading(true);
     try {
-      const res = await elytroSDK.createUserOpFromTxs(
-        // '0x7C9A1897dFd01b0287347A1b824f95387ffB0024',
-        address!,
-        [txParams as Transaction]
-      );
+      const res = await elytroSDK.createUserOpFromTxs(address!, [
+        { ...txParams, data: undefined } as Transaction,
+      ]);
 
       const decodeRes = await elytroSDK.getDecodedUserOperation(res);
 
@@ -84,7 +73,9 @@ export default function SendTx({
   };
 
   useEffect(() => {
-    getUserOpFromTx();
+    if (txParams && address) {
+      getUserOpFromTx();
+    }
   }, [txParams, address]);
 
   const onGasChange = (gasEstimate: TGasEstimate) => {

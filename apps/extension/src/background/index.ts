@@ -1,9 +1,6 @@
 import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
 import { sendReadyMessageToTabs } from './utils';
 import { PortMessageManager } from '@/utils/message/portMessageManager';
-// import walletClient, {
-//   ElytroWalletClient,
-// } from '@/background/services/walletClient';
 
 import { walletController, WalletController } from './walletController';
 import connectionManager from '@/background/services/connection';
