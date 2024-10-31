@@ -8,6 +8,7 @@ import {
   Address,
   createWalletClient,
   formatEther,
+  GetBlockParameters,
   http,
   publicActions,
   PublicClient,
@@ -16,6 +17,7 @@ import {
 import keyring from './keyring';
 import { elytroSDK } from './sdk';
 import { ethErrors } from 'eth-rpc-errors';
+import { formatBlockInfo } from '@/utils/format';
 
 class ElytroWalletClient {
   private _address: Nullable<Address> = null;
@@ -89,8 +91,9 @@ class ElytroWalletClient {
     console.log('Elytro: Implement recovery.', walletAddress);
   }
 
-  public async getBlockByNumber() {
-    return await this._client.getBlockNumber();
+  public async getBlockByNumber(params: GetBlockParameters) {
+    const res = await this._client.getBlock(params);
+    return formatBlockInfo(res);
   }
 
   public async signMessage(message: string) {

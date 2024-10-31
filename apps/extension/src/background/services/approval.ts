@@ -53,7 +53,7 @@ class ApprovalService {
   }
 
   private _openApprovalWindow = async (path: string) => {
-    tryRemoveWindow(this._winId);
+    await tryRemoveWindow(this._winId);
     this._winId = (await openPopupWindow(path)) || null;
   };
 
@@ -74,8 +74,7 @@ class ApprovalService {
     if (id !== this._currentApproval?.id) {
       return;
     }
-    this._currentApproval?.reject(id);
-    this._currentApproval = null;
+    this._rejectApproval();
   };
 }
 

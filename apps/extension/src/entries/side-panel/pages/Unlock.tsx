@@ -18,7 +18,6 @@ export default function Unlock() {
       () => {
         if (approval) {
           resolve();
-          window.close();
         }
       },
       reject

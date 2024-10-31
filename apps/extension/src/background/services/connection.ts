@@ -5,6 +5,7 @@ import { SubscribableStore } from '@/utils/store/subscribableStore';
 type TConnectedDAppInfo = TDAppInfo & {
   chainType: SupportedChainTypeEn;
   isConnected: boolean;
+  permissions: WalletPermission[];
 };
 
 type TConnectionManagerState = {
@@ -13,6 +14,10 @@ type TConnectionManagerState = {
 
 const CONNECTION_STORAGE_KEY = 'elytroConnectionState';
 
+/**
+ * Manage connected sites
+ * Support EIP-2255
+ */
 class ConnectionManager {
   private connectedSites: Map<string, TConnectedDAppInfo> = new Map(); // Store connected sites
   private _store: SubscribableStore<TConnectionManagerState>;
@@ -57,7 +62,23 @@ class ConnectionManager {
       return;
     }
 
-    this.addConnectedSite({ ...dApp, isConnected: true, chainType: chainType });
+    this.addConnectedSite({
+      ...dApp,
+      isConnected: true,
+      chainType: chainType,
+      permissions: [
+        {
+          parentCapability: 'eth_accounts',
+          date: Date.now(),
+          invoker: dApp.origin,
+        },
+      ],
+    });
+  }
+
+  public disconnect(origin: string) {
+    this.connectedSites.delete(String(origin));
+    this.syncToStorage();
   }
 
   public getSite(origin: string) {
@@ -87,8 +108,38 @@ class ConnectionManager {
     }
   }
 
-  public hasPermission(origin: string): boolean {
+  public isConnected(origin: string): boolean {
     return this.connectedSites.get(origin)?.isConnected || false;
+  }
+
+  public getPermissions(origin: string): WalletPermission[] {
+    return this.connectedSites.get(origin)?.permissions || [];
+  }
+
+  public requestPermissions(
+    origin: string,
+    permissions: WalletPermission[]
+  ): boolean {
+    const site = this.connectedSites.get(origin);
+    if (!site) return false;
+
+    site.permissions = [...new Set([...site.permissions, ...permissions])];
+    this.syncToStorage();
+    return true;
+  }
+
+  public revokePermissions(
+    origin: string,
+    permissions: WalletPermission[]
+  ): void {
+    const site = this.connectedSites.get(origin);
+    if (!site) return;
+
+    site.permissions = site.permissions.filter(
+      ({ parentCapability }) =>
+        !permissions.some((p) => p.parentCapability === parentCapability)
+    );
+    this.syncToStorage();
   }
 
   private syncToStorage() {
