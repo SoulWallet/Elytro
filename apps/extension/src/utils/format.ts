@@ -1,6 +1,6 @@
 import { TTxDetail } from '@/constants/operations';
 import { SimulationResult } from './ethRpc/simulate';
-import { Hex, toHex, size as getSize, pad, formatUnits } from 'viem';
+import { Hex, toHex, size as getSize, pad, formatUnits, Block } from 'viem';
 
 export function paddingZero(
   value: string | number | bigint,
@@ -95,4 +95,23 @@ export function formatRawData(data: any) {
   };
 
   return JSON.stringify(data, bigintReplacer, 2);
+}
+
+export function formatBlockInfo(block: Block) {
+  // transfer bigint to Hex string
+  return {
+    ...block,
+    baseFeePerGas:
+      block.baseFeePerGas !== null ? toHex(block.baseFeePerGas) : null,
+    blobGasUsed: toHex(block.blobGasUsed),
+    difficulty: toHex(block.difficulty),
+    excessBlobGas: toHex(block.excessBlobGas),
+    gasLimit: toHex(block.gasLimit),
+    gasUsed: toHex(block.gasUsed),
+    number: block.number !== null ? toHex(block.number) : null,
+    size: toHex(block.size),
+    timestamp: toHex(block.timestamp),
+    totalDifficulty:
+      block.totalDifficulty !== null ? toHex(block.totalDifficulty) : null,
+  };
 }

@@ -81,8 +81,12 @@ const createWindow = async (url: string): Promise<number | undefined> => {
 };
 
 const tryRemoveWindow = async (winId: number | null | undefined) => {
-  if (winId) {
-    await chrome.windows.remove(winId);
+  try {
+    if (winId) {
+      await chrome.windows.remove(winId);
+    }
+  } catch {
+    // do nth
   }
 };
 

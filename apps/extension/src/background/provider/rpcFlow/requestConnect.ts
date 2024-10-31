@@ -4,11 +4,24 @@ import {
 } from '@/background/services/approval';
 import connectionManager from '@/background/services/connection';
 import type { TFlowMiddleWareFn } from '@/utils/asyncTaskFlow';
+import { ethErrors } from 'eth-rpc-errors';
 
-const NEED_CONNECT_METHODS: ProviderMethodType[] = [
+const CONNECT_METHODS: ProviderMethodType[] = [
   'eth_accounts',
   'eth_requestAccounts',
 ];
+
+const CONNECT_METHODS_WITH_PERMISSIONS: ProviderMethodType[] = [
+  'wallet_requestPermissions',
+];
+
+const GET_CONNECTION_INFO_METHODS: ProviderMethodType[] = [
+  'wallet_getPermissions',
+];
+
+const DISCONNECT_METHODS: ProviderMethodType[] = ['wallet_revokePermissions'];
+
+const connectingSites = new Set<string>();
 
 export const requestConnect: TFlowMiddleWareFn = async (ctx, next) => {
   const {
@@ -16,16 +29,41 @@ export const requestConnect: TFlowMiddleWareFn = async (ctx, next) => {
     dApp,
   } = ctx.request;
 
-  if (NEED_CONNECT_METHODS.includes(method)) {
-    // const connection = connectionManager.getSite(origin);
+  // if the method is to get connection info, return the permissions
+  if (GET_CONNECTION_INFO_METHODS.includes(method)) {
+    return connectionManager.getPermissions(dApp.origin);
+  }
 
-    const isConnected = connectionManager.getSite(dApp.origin)?.isConnected;
-
-    if (!isConnected) {
-      return await approvalService.request(ApprovalTypeEn.Connect, {
-        dApp,
-      });
+  // if the method is to connect, request connection
+  if (
+    CONNECT_METHODS.includes(method) ||
+    CONNECT_METHODS_WITH_PERMISSIONS.includes(method)
+  ) {
+    if (connectingSites.has(dApp.origin)) {
+      throw ethErrors.rpc.resourceNotFound(
+        'Elytro:Multiple connect requests are not allowed. Please wait.'
+      );
     }
+
+    if (connectionManager.isConnected(dApp.origin)) {
+      return CONNECT_METHODS_WITH_PERMISSIONS.includes(method)
+        ? connectionManager.getPermissions(dApp.origin)
+        : next();
+    }
+
+    try {
+      connectingSites.add(dApp.origin);
+      await approvalService.request(ApprovalTypeEn.Connect, { dApp });
+
+      // Only wallet_requestPermissions needs to return the permissions, else leave it to the next middleware
+      if (method === 'wallet_requestPermissions') {
+        return connectionManager.getPermissions(dApp.origin);
+      }
+    } finally {
+      connectingSites.delete(dApp.origin);
+    }
+  } else if (DISCONNECT_METHODS.includes(method)) {
+    return connectionManager.disconnect(dApp.origin);
   }
 
   return next();

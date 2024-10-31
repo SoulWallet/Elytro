@@ -1,6 +1,6 @@
 // import walletClient from '../walletClient';
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
-import { toHex } from 'viem';
+import { BlockTag, toHex } from 'viem';
 import walletClient from '../services/walletClient';
 import { ethErrors } from 'eth-rpc-errors';
 
@@ -29,15 +29,20 @@ class BuiltinProvider extends SafeEventEmitter {
     return this._initialized;
   }
 
-  public async request({ method }: RequestArguments) {
+  public async request({ method, params }: RequestArguments) {
     switch (method) {
+      case 'net_version':
+        return walletClient.chain.id ? walletClient.chain.id.toString() : '0';
       case 'eth_chainId':
         return toHex(walletClient.chain.id);
       case 'eth_accounts':
       case 'eth_requestAccounts':
         return walletClient.address ? [walletClient.address] : [];
       case 'eth_getBlockByNumber':
-        return walletClient.getBlockByNumber();
+        return await walletClient.getBlockByNumber({
+          blockTag: (params as [BlockTag])?.[0] ?? 'latest',
+          includeTransactions: (params as [BlockTag, false])?.[1],
+        });
       // case 'eth_signTypedDataV4':
       //   return walletClient.signTypedDataV4(params);
       // case 'personal_sign':
