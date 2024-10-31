@@ -364,7 +364,7 @@ class ElytroSDK {
 
       const balance = await this._sdk.provider.getBalance(userOp.sender);
       const missAmount = hasSponsored
-        ? transferValue
+        ? transferValue - balance // why transferValue is not accurate? missfund is wrong during preFund?
         : BigInt(missfund) + transferValue - balance;
 
       return {
