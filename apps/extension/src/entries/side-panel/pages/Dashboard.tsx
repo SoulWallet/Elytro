@@ -1,7 +1,7 @@
 import BasicAccountInfo from '../components/BasicAccountInfo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Spin from '@/components/Spin';
-import Activities from '../containers/Activities';
+import Activities from '../components/Activities';
 import { useAccount } from '../contexts/account-context';
 import Assets from '../components/Assets';
 
