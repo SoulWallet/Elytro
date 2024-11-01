@@ -1,4 +1,4 @@
-import { TokenDTO } from '@/entries/side-panel/components/Assets';
+import { TokenDTO } from '@/entries/side-panel/contexts/account-context';
 import TokenItem from './TokenItem';
 import { formatEther, hexToBigInt } from 'viem';
 
