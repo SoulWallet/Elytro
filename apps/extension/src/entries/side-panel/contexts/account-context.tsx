@@ -3,23 +3,9 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
 import { useHashLocation } from 'wouter/use-hash-location';
 import useSearchParams from '@/hooks/use-search-params';
-import { gql } from '@apollo/client';
-import { Address, Hex, toHex } from 'viem';
-import { query } from '@/requests';
+import { Address, toHex } from 'viem';
 import useActivities, { AggregatedTransaction } from '@/hooks/use-activities';
-
-export interface TokenDTO {
-  decimals: number;
-  logoURI: string;
-  name: string;
-  symbol: string;
-  tokenBalance: Hex;
-  price: number;
-}
-
-interface TokenQueryDTO {
-  tokens: TokenDTO[];
-}
+import useTokens, { TokenDTO } from '@/hooks/use-tokens';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
@@ -66,8 +52,6 @@ export const AccountProvider = ({
   const [accountInfo, setAccountInfo] =
     useState<TAccountInfo>(DEFAULT_ACCOUNT_INFO);
   const [loading, setLoading] = useState(false);
-  const [loadingTokens, setLoadingTokens] = useState(false);
-  const [tokens, setTokens] = useState<TokenDTO[]>([]);
   const [pathname] = useHashLocation();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const searchParams = useSearchParams();
@@ -89,42 +73,18 @@ export const AccountProvider = ({
     }
   };
 
-  const getTokens = async (address: Address, chainId: Hex) => {
-    const tokens_query = gql`
-      query TokensQuery($address: String!, $chainId: String!) {
-        tokens(address: $address, chainID: $chainId) {
-          decimals
-          logoURI
-          name
-          symbol
-          tokenBalance
-          price
-        }
-      }
-    `;
-    setLoadingTokens(true);
-    const data = await query<TokenQueryDTO>(tokens_query, { address, chainId });
-    if (data?.tokens) {
-      setTokens(data.tokens);
-    }
-    setLoadingTokens(false);
-  };
-
   const chainId = toHex(
     SUPPORTED_CHAIN_MAP[
       accountInfo.chainType as keyof typeof SUPPORTED_CHAIN_MAP
     ].id
   );
 
-  useEffect(() => {
-    const { address } = accountInfo;
-
-    if (address) {
-      getTokens(address as Address, chainId);
-    }
-  }, [accountInfo]);
-
   const { loadingActivities, activities } = useActivities(
+    accountInfo.address as Address,
+    chainId
+  );
+
+  const { tokens, loadingTokens } = useTokens(
     accountInfo.address as Address,
     chainId
   );
