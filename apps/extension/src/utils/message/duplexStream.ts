@@ -4,12 +4,14 @@
  */
 import { WindowPostMessageStream } from '@metamask/post-message-stream';
 import { ethErrors } from 'eth-rpc-errors';
+import { SafeEventEmitter } from '../safeEventEmitter';
 
 export enum ElytroMessageTypeEn {
   CONNECT = 'connect',
   DISCONNECT = 'disconnect',
   REQUEST_FROM_PAGE_PROVIDER = 'requestFromPageProvider',
   RESPONSE_TO_PAGE_PROVIDER = 'responseToPageProvider',
+  MESSAGE = 'message',
 }
 
 type ElytroMessageData =
@@ -26,11 +28,15 @@ type ElytroMessageData =
   | {
       type: ElytroMessageTypeEn.REQUEST_FROM_PAGE_PROVIDER;
       payload: RequestArguments;
+    }
+  | {
+      type: ElytroMessageTypeEn.MESSAGE;
+      payload: ElytroEventMessage;
     };
 
 type ElytroMessageHandler = (payload: unknown) => unknown;
 
-class ElytroDuplexMessage {
+class ElytroDuplexMessage extends SafeEventEmitter {
   private _stream: WindowPostMessageStream;
   private _isConnected: boolean = false;
 
@@ -42,6 +48,7 @@ class ElytroDuplexMessage {
   private _responseHandler: ((data: RequestArguments) => void) | null = null;
 
   constructor(name: string, target: string) {
+    super();
     this._stream = new WindowPostMessageStream({
       name,
       target,
@@ -72,6 +79,9 @@ class ElytroDuplexMessage {
           break;
         case ElytroMessageTypeEn.RESPONSE_TO_PAGE_PROVIDER:
           this._handleResponse(data.payload);
+          break;
+        case ElytroMessageTypeEn.MESSAGE:
+          this.emit('message', data.payload);
           break;
         default:
           throw ethErrors.rpc.internal();
@@ -114,7 +124,7 @@ class ElytroDuplexMessage {
     this._stream.write(data);
   }
 
-  public once(type: ProviderMethodType, handler: ElytroMessageHandler) {
+  public onceMessage(type: ProviderMethodType, handler: ElytroMessageHandler) {
     if (this._isConnected) {
       const prev = this._requestHandlers.get(type);
 

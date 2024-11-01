@@ -17,7 +17,6 @@ const walletControllerProxy = new Proxy(
 
         return new Promise((resolve) => {
           portMessageManager.onMessage(`UI_RESPONSE_${prop}`, (response) => {
-            console.log('response', prop, response.result);
             resolve(response?.result);
           });
         });

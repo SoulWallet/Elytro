@@ -1,6 +1,5 @@
 import { ElytroDuplexMessage, ElytroMessageTypeEn } from '@/utils/message';
 import mainWorldScript from './main-world?script&module';
-import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
 import { PortMessageManager } from '@/utils/message/portMessageManager';
 
 let portManager: PortMessageManager;
@@ -36,18 +35,16 @@ initDuplexMessageBetweenContentScriptAndPageProvider();
 const initRuntimeMessage = () => {
   portManager = new PortMessageManager('elytro-bg');
   portManager.connect();
+
+  portManager.onMessage('message', (data) => {
+    dAppMessage.send({
+      type: ElytroMessageTypeEn.MESSAGE,
+      payload: data,
+    });
+  });
 };
 
 initRuntimeMessage();
-
-const onBackgroundReady = (msg: { name: string }) => {
-  if (msg.name === RUNTIME_MESSAGE_TYPE.BG_READY && !portManager) {
-    initRuntimeMessage();
-  }
-  return undefined;
-};
-
-chrome.runtime.onMessage.addListener(onBackgroundReady);
 
 const injectMainWorldScript = () => {
   if (
