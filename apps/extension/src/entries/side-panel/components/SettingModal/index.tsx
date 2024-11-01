@@ -33,8 +33,8 @@ export default function SettingModal({ open, onOpenChange }: IProps) {
     },
     {
       icon: NetworkIcon,
-      label: 'Netwotk',
-      action: () => setCurrentSetting('Netwotk'),
+      label: 'Network',
+      action: () => setCurrentSetting('Network'),
     },
     {
       icon: LockIcon,
@@ -66,7 +66,7 @@ export default function SettingModal({ open, onOpenChange }: IProps) {
             </div>
           </>
         );
-      case 'Netwotk':
+      case 'Network':
         return <NetworkSetting onBack={() => setCurrentSetting('')} />;
       default:
         return (
