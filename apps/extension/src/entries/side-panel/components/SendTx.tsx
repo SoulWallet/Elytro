@@ -85,14 +85,21 @@ export default function SendTx({
   const handleSendTx = async () => {
     try {
       setSending(true);
-      userOpRef.current = await wallet.signUserOperation(userOpRef.current!);
+      // TODO: get opHash
+      const { userOp } = await wallet.signUserOperation(userOpRef.current!);
+
+      userOpRef.current = userOp;
+
       await elytroSDK.sendUserOperation(userOpRef.current!);
+      onConfirm();
 
       toast({
-        title: 'Success',
-        description: 'Transaction sent successfully',
+        title: 'Transaction sent successfully',
+        description: 'User operation hash: ',
       });
-      onConfirm();
+
+      // TODO: do sth with the hash (leave it for activity to check?)
+      // await elytroSDK.getUserOperationReceipt(opHash);
     } catch (error) {
       toast({
         title: 'Failed to send transaction',
