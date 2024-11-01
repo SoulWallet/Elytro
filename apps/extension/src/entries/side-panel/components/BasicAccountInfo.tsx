@@ -51,7 +51,7 @@ export default function BasicAccountInfo() {
       <div className="mt-6 text-5xl font-medium py-1">
         <span className=" text-gray-900">{balance?.split?.('.')?.[0]}</span>
         <span className=" text-gray-200">
-          .{balance?.split?.('.')?.[1].slice(0, 3) || '000'}
+          .{balance?.split?.('.')?.[1]?.slice(0, 3) || '000'}
         </span>
       </div>
 
