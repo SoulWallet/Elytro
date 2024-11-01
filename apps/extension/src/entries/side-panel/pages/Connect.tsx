@@ -3,6 +3,7 @@ import { useAccount } from '../contexts/account-context';
 import { useWallet } from '@/contexts/wallet';
 import { ethErrors } from 'eth-rpc-errors';
 import ConnectionConfirmation from '../components/ConnectConfirmation';
+import Spin from '@/components/Spin';
 
 export default function Connect() {
   const wallet = useWallet();
@@ -12,7 +13,7 @@ export default function Connect() {
   } = useAccount();
 
   if (!approval || !approval.data) {
-    return null;
+    return <Spin isLoading />;
   }
 
   const {

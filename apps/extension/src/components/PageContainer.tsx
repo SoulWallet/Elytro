@@ -4,6 +4,7 @@ import '@/index.css';
 import { Toaster } from './ui/toaster';
 import { WalletProvider } from '@/contexts/wallet';
 import { KeyringProvider } from '@/contexts/keyring';
+import ErrorBoundary from './ErrorBoundary';
 
 interface IPageContainerProps {
   children: React.ReactNode;
@@ -13,14 +14,15 @@ interface IPageContainerProps {
 function PageContainer({ children, className }: IPageContainerProps) {
   return (
     <>
-      <div className={`w-screen h-screen flex ${className}`}>
-        <WalletProvider>
-          <KeyringProvider>
-            <RequestProvider>{children}</RequestProvider>
-          </KeyringProvider>
-        </WalletProvider>
-      </div>
-
+      <ErrorBoundary>
+        <div className={`w-screen h-screen flex ${className}`}>
+          <WalletProvider>
+            <KeyringProvider>
+              <RequestProvider>{children}</RequestProvider>
+            </KeyringProvider>
+          </WalletProvider>
+        </div>
+      </ErrorBoundary>
       <Toaster />
     </>
   );

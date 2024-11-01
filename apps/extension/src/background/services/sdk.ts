@@ -177,7 +177,7 @@ class ElytroSDK {
         Math.floor(new Date().getTime() / 1000) + 60 * 5 // 5 mins
       );
       userOp.signature = signature;
-      return userOp;
+      return { userOp, opHash: opHash.OK };
     }
   }
 
