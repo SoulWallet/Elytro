@@ -58,6 +58,10 @@ class PageProvider extends EventEmitter {
   initialize = async () => {
     this._message.connect();
 
+    this._message.addListener('message', (payload) => {
+      this.emit(payload.event, payload.data);
+    });
+
     try {
       //! todo: init message channel between page and background
       // document.addEventListener('visibilitychange', this._checkDomVisibility);
@@ -100,7 +104,7 @@ class PageProvider extends EventEmitter {
     }
 
     return new Promise((resolve) => {
-      this._message.once(data.method, (response) => {
+      this._message.onceMessage(data.method, (response) => {
         resolve(response);
       });
     });

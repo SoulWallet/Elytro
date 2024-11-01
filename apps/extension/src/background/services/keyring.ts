@@ -9,6 +9,7 @@ import {
 } from 'viem/accounts';
 import { elytroSDK } from './sdk';
 import { sessionStorage } from '@/utils/storage/session';
+import sessionService from './session';
 
 type EncryptedData = {
   key: Hex;
@@ -105,6 +106,7 @@ class KeyringService {
     this._store?.setState({});
     this._sa = null;
     sessionStorage.clear();
+    sessionService.broadcastEvent('accountsChanged', []);
   }
 
   public async createNewOwner(password: string) {

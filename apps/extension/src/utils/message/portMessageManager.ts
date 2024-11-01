@@ -39,7 +39,7 @@ export class PortMessageManager {
 
   // @ts-ignore
   public sendMessage(type: string, data: SafeAny, portId: string = 'default') {
-    const port = this.ports.get(portId);
+    const port = this.ports.get(portId) ?? this.ports.values().next().value;
     if (port) {
       port.postMessage({ type, data });
     } else {

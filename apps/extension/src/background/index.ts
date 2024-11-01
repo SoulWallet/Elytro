@@ -1,11 +1,11 @@
 import { RUNTIME_MESSAGE_TYPE } from '@/constants/message';
 import { sendReadyMessageToTabs } from './utils';
 import { PortMessageManager } from '@/utils/message/portMessageManager';
-
 import { walletController, WalletController } from './walletController';
 import connectionManager from '@/background/services/connection';
 import rpcFlow, { TProviderRequest } from '@/background/provider/rpcFlow';
 import { getDAppInfoFromSender } from '@/utils/url';
+import sessionManager from './services/session';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -63,9 +63,22 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
   providerPortManager.onMessage(
     'CONTENT_SCRIPT_REQUEST',
     async (data: RequestArguments, port) => {
+      const tabId = port.sender?.tab?.id;
+
+      if (!tabId || !port.sender?.origin) {
+        return;
+      }
+
+      sessionManager.createSession(
+        tabId,
+        port.sender.origin,
+        providerPortManager
+      );
+
+      const dAppInfo = await getDAppInfoFromSender(port.sender!);
       const providerReq: TProviderRequest = {
         rpcReq: data,
-        dApp: await getDAppInfoFromSender(port.sender!),
+        dApp: dAppInfo,
       };
 
       try {
@@ -91,18 +104,6 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
       }
     }
   );
-
-  // providerPortManager.onMessage(
-  //   'WALLET_CLIENT_REQUEST',
-  //   async (message, port) => {
-  //     const result = await builtinProvider.request(message.data);
-  //     providerPortManager.sendMessage(
-  //       'WALLET_CLIENT_RESPONSE',
-  //       { result },
-  //       port.sender?.id
-  //     );
-  //   }
-  // );
 };
 
 const initUIMessage = (port: chrome.runtime.Port) => {

@@ -29,19 +29,11 @@ export const checkMethodExist: TFlowMiddleWareFn = async (ctx, next) => {
   );
   if (unSupportedMethod) {
     console.error(unSupportedMethod.reason);
-    await approvalService.request(ApprovalTypeEn.Alert, {
+    return await approvalService.request(ApprovalTypeEn.Alert, {
       dApp,
       options: unSupportedMethod,
     });
   }
-
-  console.log(
-    ctx,
-    'received eth method:',
-    rpcReq.method,
-    'params:',
-    rpcReq.params
-  );
 
   return next();
 };
