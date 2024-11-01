@@ -6,6 +6,7 @@ import useSearchParams from '@/hooks/use-search-params';
 import { gql } from '@apollo/client';
 import { Address, Hex, toHex } from 'viem';
 import { query } from '@/requests';
+import useActivities, { AggregatedTransaction } from '@/hooks/use-activities';
 
 export interface TokenDTO {
   decimals: number;
@@ -36,6 +37,10 @@ type IAccountContext = {
     tokens: TokenDTO[];
     loadingTokens: boolean;
   };
+  activityInfo: {
+    loadingActivities: boolean;
+    activities: AggregatedTransaction[];
+  };
 };
 
 const AccountContext = createContext<IAccountContext>({
@@ -45,6 +50,10 @@ const AccountContext = createContext<IAccountContext>({
   tokenInfo: {
     tokens: [],
     loadingTokens: false,
+  },
+  activityInfo: {
+    loadingActivities: false,
+    activities: [],
   },
 });
 
@@ -101,15 +110,24 @@ export const AccountProvider = ({
     setLoadingTokens(false);
   };
 
+  const chainId = toHex(
+    SUPPORTED_CHAIN_MAP[
+      accountInfo.chainType as keyof typeof SUPPORTED_CHAIN_MAP
+    ].id
+  );
+
   useEffect(() => {
-    const { address, chainType } = accountInfo;
-    const chainId = toHex(
-      SUPPORTED_CHAIN_MAP[chainType as keyof typeof SUPPORTED_CHAIN_MAP].id
-    );
+    const { address } = accountInfo;
+
     if (address) {
       getTokens(address as Address, chainId);
     }
   }, [accountInfo]);
+
+  const { loadingActivities, activities } = useActivities(
+    accountInfo.address as Address,
+    chainId
+  );
 
   useEffect(() => {
     if (!loading && !accountInfo.address) {
@@ -139,6 +157,10 @@ export const AccountProvider = ({
         tokenInfo: {
           tokens,
           loadingTokens,
+        },
+        activityInfo: {
+          loadingActivities,
+          activities,
         },
         loading,
       }}

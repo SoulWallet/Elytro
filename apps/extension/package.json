@@ -30,6 +30,7 @@
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
     "eth-rpc-errors": "^4.0.3",
     "events": "^3.3.0",
     "graphql": "^16.9.0",
