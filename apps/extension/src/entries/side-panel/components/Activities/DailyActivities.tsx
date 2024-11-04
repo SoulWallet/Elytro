@@ -10,6 +10,7 @@ export default function DailyActivities({
 }: {
   dailyActivities: DailyActivitiesProps;
 }) {
+  if (!dailyActivities.activities.length) return null;
   return (
     <div>
       <div className="text-sm font-medium text-gray-500">
