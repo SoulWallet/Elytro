@@ -1,5 +1,12 @@
 import PageProvider from '@/background/provider/pageProvider';
 
+declare global {
+  interface Window {
+    elytro: PageProvider;
+    ethereum: PageProvider;
+  }
+}
+
 const generateUUID4 = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -28,17 +35,24 @@ const mainWorld = () => {
   }
 
   const injectedProvider = new Proxy(new PageProvider(), {
-    deleteProperty: () => {
+    deleteProperty: (target, prop) => {
+      if (typeof prop === 'string' && ['on'].includes(prop)) {
+        // @ts-ignore
+        delete target[prop];
+      }
       return true;
     },
-    // get: (target, prop, receiver) => {
-    //   if (typeof target[prop] === 'function') {
-    //     return (...args) => {
-    //       return target[prop](...args);
-    //     };
-    //   }
-    //   return Reflect.get(target, prop, receiver);
-    // },
+    get: (target, prop, receiver) => {
+      const method = target[prop as keyof PageProvider];
+      if (typeof method === 'function') {
+        return (...args: any[]) => {
+          // @ts-ignore
+          return method.apply(target, args);
+        };
+      }
+
+      return Reflect.get(target, prop, receiver);
+    },
   });
 
   const announceEvent: EIP6963AnnounceProviderEvent = new CustomEvent(
@@ -55,6 +69,32 @@ const mainWorld = () => {
   });
 
   announce();
+
+  const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
+  if (!descriptor || descriptor.configurable) {
+    try {
+      Object.defineProperties(window, {
+        elytro: {
+          value: injectedProvider,
+          configurable: false,
+          writable: false,
+        },
+        ethereum: {
+          get() {
+            return window.elytro;
+          },
+          configurable: false,
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      window.ethereum = injectedProvider;
+      window.elytro = injectedProvider;
+    }
+  } else {
+    window.ethereum = injectedProvider;
+    window.elytro = injectedProvider;
+  }
 };
 
 mainWorld();

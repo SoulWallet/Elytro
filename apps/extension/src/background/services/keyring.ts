@@ -8,8 +8,8 @@ import {
   privateKeyToAccount,
 } from 'viem/accounts';
 import { elytroSDK } from './sdk';
-import { sessionStorage } from '@/utils/storage/session';
 import sessionManager from './session';
+import { sessionStorage } from '@/utils/storage/session';
 
 type EncryptedData = {
   key: Hex;
@@ -105,7 +105,8 @@ class KeyringService {
     this._key = null;
     this._store?.setState({});
     this._sa = null;
-    sessionStorage.clear();
+    sessionStorage.clear(); // clear local password encrypted data
+
     sessionManager.broadcastMessage('accountsChanged', []);
   }
 

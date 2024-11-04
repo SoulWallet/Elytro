@@ -15,3 +15,8 @@ Add component from `shadcn/ui`
 # PLEASE USE  --no-overwrite !!!
 pnpm dlx shadcn@latest add xxx --no-overwrite
 ```
+
+## TODO
+
+- Missing eth rpc methods
+  - web3_clientVersion
