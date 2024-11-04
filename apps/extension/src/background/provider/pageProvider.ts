@@ -1,12 +1,14 @@
-import { EventEmitter } from 'events';
 import { ethErrors } from 'eth-rpc-errors';
 import { ElytroDuplexMessage, ElytroMessageTypeEn } from '@/utils/message';
+import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 
 /**
  * Elytro Page Provider: injects Elytro into the page
  */
-class PageProvider extends EventEmitter {
+class PageProvider extends SafeEventEmitter {
   static defaultMaxListeners = 100; // original is 10, very easy to exceed
+  private _currentAddress: string | null = null;
+  private _currentChainId: number | null = null;
 
   private _isDomVisible: boolean = false;
   private _isDomReady: boolean = false;
@@ -62,15 +64,14 @@ class PageProvider extends EventEmitter {
       this.emit(payload.event, payload.data);
     });
 
-    try {
-      //! todo: init message channel between page and background
-      // document.addEventListener('visibilitychange', this._checkDomVisibility);
-      // todo: get connect site info?
-      // todo: init chain & accounts from builtin provider
-      this.emit('connected');
-    } catch {
-      //
-    }
+    // try {
+    //   // document.addEventListener('visibilitychange', this._checkDomVisibility);
+    //   // todo: get connect site info?
+    //   // todo: init chain & accounts from builtin provider
+    //   // this.emit('connected');
+    // } catch {
+    //   //
+    // }
   };
 
   send = async () => {
@@ -110,8 +111,31 @@ class PageProvider extends EventEmitter {
     });
   };
 
+  // TODO: listen dapp's 'connected' event
   on = (event: string | symbol, handler: (...args: unknown[]) => void) => {
     return super.on(event, handler);
+  };
+
+  // @ts-ignore
+  emit = (eventName: string | symbol, ...args: any[]) => {
+    switch (eventName) {
+      case 'accountsChanged':
+        if (args[0] && args[0] !== this._currentAddress) {
+          this._currentAddress = args[0];
+          return super.emit(eventName, ...args);
+        }
+        break;
+      case 'chainChanged':
+        if (args[0] && args[0] !== this._currentChainId) {
+          this._currentChainId = args[0];
+          return super.emit(eventName, ...args);
+        }
+        break;
+      default:
+        return super.emit(eventName, ...args);
+    }
+
+    return false;
   };
 }
 

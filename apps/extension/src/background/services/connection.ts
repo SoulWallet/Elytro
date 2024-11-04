@@ -1,6 +1,7 @@
 import { SupportedChainTypeEn } from '@/constants/chains';
 import { localStorage } from '@/utils/storage/local';
 import { SubscribableStore } from '@/utils/store/subscribableStore';
+import sessionManager from './session';
 
 type TConnectedDAppInfo = TDAppInfo & {
   chainType: SupportedChainTypeEn;
@@ -79,6 +80,7 @@ class ConnectionManager {
   public disconnect(origin: string) {
     this.connectedSites.delete(String(origin));
     this.syncToStorage();
+    sessionManager.broadcastMessageToDApp(origin, 'accountsChanged', []);
   }
 
   public getSite(origin: string) {

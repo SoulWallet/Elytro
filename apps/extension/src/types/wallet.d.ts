@@ -64,4 +64,5 @@ type TApprovalInfo = {
   data?: TApprovalData;
   resolve: (data?: unknown) => void;
   reject: (data?: unknown) => void;
+  winId?: number | null;
 };

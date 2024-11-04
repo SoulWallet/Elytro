@@ -37,6 +37,13 @@ class WalletController {
    */
   public async getSmartAccountInfo() {
     return await walletClient.initSmartAccount();
+    // const res = await walletClient.initSmartAccount();
+
+    // if (res) {
+    //   sessionManager.broadcastMessage('accountsChanged', [res.address]);
+    // }
+
+    // return res;
   }
 
   public async lock() {

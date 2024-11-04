@@ -17,12 +17,12 @@ const APPROVAL_TYPE_ROUTE_MAP: Record<ApprovalTypeEn, string> = {
 };
 
 class ApprovalService {
-  private _winId: Nullable<number> = null;
   private _currentApproval: Nullable<TApprovalInfo> = null;
+  private _approvals: Map<number, TApprovalInfo> = new Map();
 
   constructor() {
-    approvalWindowEvent.on(ApprovalWindowEventNameEn.Removed, () => {
-      this._rejectApproval();
+    approvalWindowEvent.on(ApprovalWindowEventNameEn.Removed, (winId) => {
+      this._rejectApprovalByWinId(winId);
     });
   }
 
@@ -45,21 +45,46 @@ class ApprovalService {
         },
       };
 
-      this._currentApproval = approval;
-
-      // open approval window
-      this._openApprovalWindow(APPROVAL_TYPE_ROUTE_MAP[type]);
+      // open approval window. DO NOT use async/await here, because it's a promise
+      this._openApprovalWindow(APPROVAL_TYPE_ROUTE_MAP[type]).then(
+        (approvalWindowId) => {
+          if (!approvalWindowId) {
+            reject(
+              ethErrors.provider.custom({
+                code: 4001,
+                message: 'Approval window not opened',
+              })
+            );
+          } else {
+            this._currentApproval = {
+              ...approval,
+              winId: approvalWindowId,
+            };
+            this._approvals.set(approvalWindowId, this._currentApproval);
+          }
+        }
+      );
     });
   }
 
   private _openApprovalWindow = async (path: string) => {
-    await tryRemoveWindow(this._winId);
-    this._winId = (await openPopupWindow(path)) || null;
+    return (await openPopupWindow(path)) || null;
   };
 
-  private _rejectApproval = () => {
-    this._currentApproval?.reject(ethErrors.provider.userRejectedRequest());
-    this._currentApproval = null;
+  private _rejectApprovalByWinId = (winId?: number) => {
+    if (!winId || !this._approvals.has(winId)) {
+      return;
+    }
+
+    if (this._currentApproval?.winId === winId) {
+      this._currentApproval = null;
+    }
+
+    const approval = this._approvals.get(winId);
+    approval?.reject(ethErrors.provider.userRejectedRequest());
+    this._approvals.delete(winId);
+
+    tryRemoveWindow(winId);
   };
 
   public resolveApproval = (id: string, data: unknown) => {
@@ -67,6 +92,7 @@ class ApprovalService {
       return;
     }
     this._currentApproval?.resolve(data);
+    tryRemoveWindow(this._currentApproval?.winId);
     this._currentApproval = null;
   };
 
@@ -74,7 +100,8 @@ class ApprovalService {
     if (id !== this._currentApproval?.id) {
       return;
     }
-    this._rejectApproval();
+
+    this._rejectApprovalByWinId(this._currentApproval?.winId);
   };
 }
 

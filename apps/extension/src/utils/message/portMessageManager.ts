@@ -23,9 +23,10 @@ export class PortMessageManager {
       }
     });
 
-    port.onDisconnect.addListener(() => {
-      this.ports.delete(port.sender?.id || 'default');
-    });
+    // TODO: check if we need this?
+    // port.onDisconnect.addListener(() => {
+    //   this.ports.delete(port.sender?.id || 'default');
+    // });
   }
 
   // public listen(onConnect: (port: chrome.runtime.Port) => void) {
@@ -40,6 +41,7 @@ export class PortMessageManager {
   // @ts-ignore
   public sendMessage(type: string, data: SafeAny, portId: string = 'default') {
     const port = this.ports.get(portId) ?? this.ports.values().next().value;
+
     if (port) {
       port.postMessage({ type, data });
     } else {
