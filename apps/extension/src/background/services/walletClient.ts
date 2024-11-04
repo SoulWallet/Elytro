@@ -28,8 +28,8 @@ class ElytroWalletClient {
   private _client!: WalletClient & PublicClient;
 
   constructor() {
-    // default to OP
-    this.init(SupportedChainTypeEn.OP_SEPOLIA);
+    // default to ETH Sepolia
+    this.init(DEFAULT_CHAIN_TYPE);
   }
 
   get chainType() {
