@@ -3,6 +3,13 @@ import { gql } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { Address, Hex } from 'viem';
 import dayjs from 'dayjs';
+import { elytroSDK } from '@/background/services/sdk';
+import {
+  ActivityProps,
+  ActivityTypes,
+} from '@/entries/side-panel/components/Activities/Activity';
+
+export const ZeroAddress: string = '0x0000000000000000000000000000000000000000';
 
 interface ActivitiesDTO {
   transactions: TransactionDTO[];
@@ -29,7 +36,7 @@ interface opListDTO {
 interface ListDTO {
   asset_from: Address;
   asset_to: Address;
-  asset_value: Hex;
+  asset_value: string;
   token_address: Address;
 }
 
@@ -45,14 +52,14 @@ interface TransactionDTO {
 
 export interface AggregatedTransaction {
   date: string;
-  transactions: TransactionDTO[];
+  activities: ActivityProps[];
 }
 
 export default function useActivities(address?: Address, chainId?: Hex) {
   const [loading, setLoading] = useState(false);
   const [activities, setActivities] = useState<AggregatedTransaction[]>([]);
   const aggregateByDay = (
-    transactions: TransactionDTO[]
+    transactions: ActivityProps[]
   ): AggregatedTransaction[] => {
     const aggregatedData: { [key: string]: AggregatedTransaction } = {};
 
@@ -63,11 +70,11 @@ export default function useActivities(address?: Address, chainId?: Hex) {
       if (!aggregatedData[date]) {
         aggregatedData[date] = {
           date: date,
-          transactions: [],
+          activities: [],
         };
       }
 
-      aggregatedData[date].transactions.push(transaction);
+      aggregatedData[date].activities.push(transaction);
     });
 
     return Object.values(aggregatedData);
@@ -113,9 +120,54 @@ export default function useActivities(address?: Address, chainId?: Hex) {
       address,
       chainId,
     });
-    const aggAcitivities = aggregateByDay(data.transactions);
-    setActivities(aggAcitivities);
+    if (data) {
+      const resolvedData = (
+        await Promise.allSettled(
+          data.transactions.map(async (tx) => await activityResolver(tx))
+        )
+      )
+        .filter((res) => res.status === 'fulfilled' && res.value)
+        .map((res) => (res as PromiseFulfilledResult<ActivityProps>).value);
+      const aggAcitivities = aggregateByDay(resolvedData);
+      setActivities(aggAcitivities);
+    }
+
     setLoading(false);
+  };
+
+  const activityResolver = async (
+    tx: TransactionDTO
+  ): Promise<ActivityProps> => {
+    if (tx.type === 'op' && tx.opList.length) {
+      const op = await elytroSDK.getDecodedUserOperation(tx.opList[0]);
+      if (op) {
+        return {
+          type: ActivityTypes.send,
+          id: tx.txhash,
+          from: op[0].from as Hex,
+          to: op[0].to as Hex,
+          value: op[0].value,
+          timestamp: tx.timestamp,
+        };
+      }
+      return {
+        type: ActivityTypes.createWallet,
+        id: tx.txhash,
+        from: tx.opList[0].sender,
+        to: '' as Hex,
+        value: BigInt(0),
+        timestamp: tx.timestamp,
+      };
+    } else {
+      return {
+        type: ActivityTypes.receive,
+        id: tx.txhash,
+        from: tx.list[0].asset_from,
+        to: tx.list[0].asset_to,
+        value: BigInt(tx.list[0].asset_value),
+        timestamp: tx.timestamp,
+      };
+    }
   };
 
   useEffect(() => {
