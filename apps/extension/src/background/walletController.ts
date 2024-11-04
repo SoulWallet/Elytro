@@ -6,6 +6,7 @@ import walletClient from './services/walletClient';
 import { elytroSDK } from './services/sdk';
 import { hashEarlyTypedData, hashSignTypedData } from '@/utils/hash';
 import { ethErrors } from 'eth-rpc-errors';
+import sessionManager from './services/session';
 
 // ! DO NOT use getter. They can not be proxied.
 class WalletController {
@@ -68,6 +69,9 @@ class WalletController {
 
   public async connectWallet(dApp: TDAppInfo, chainType: SupportedChainTypeEn) {
     connectionManager.connect(dApp, chainType);
+    sessionManager.broadcastMessageToDApp(dApp.origin!, 'accountsChanged', [
+      keyring.smartAccountAddress,
+    ]);
   }
 
   public async signUserOperation(userOp: ElytroUserOperation) {
