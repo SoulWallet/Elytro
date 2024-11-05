@@ -7,6 +7,7 @@ import { elytroSDK } from './services/sdk';
 import { hashEarlyTypedData, hashSignTypedData } from '@/utils/hash';
 import { ethErrors } from 'eth-rpc-errors';
 import sessionManager from './services/session';
+import { deformatUserOperation } from '@/utils/format';
 
 // ! DO NOT use getter. They can not be proxied.
 class WalletController {
@@ -75,7 +76,7 @@ class WalletController {
   }
 
   public async signUserOperation(userOp: ElytroUserOperation) {
-    return await elytroSDK.signUserOperation(userOp);
+    return await elytroSDK.signUserOperation(deformatUserOperation(userOp));
   }
 
   public async signMessage(message: string) {

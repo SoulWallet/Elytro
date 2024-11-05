@@ -12,6 +12,7 @@ import {
   http,
   publicActions,
   PublicClient,
+  toHex,
   WalletClient,
 } from 'viem';
 import keyring from './keyring';
@@ -94,6 +95,10 @@ class ElytroWalletClient {
   public async getBlockByNumber(params: GetBlockParameters) {
     const res = await this._client.getBlock(params);
     return formatBlockInfo(res);
+  }
+
+  public async getBlockNumber() {
+    return toHex(await this._client.getBlockNumber());
   }
 
   public async signMessage(message: string) {

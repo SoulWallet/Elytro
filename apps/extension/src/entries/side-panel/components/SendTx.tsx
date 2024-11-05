@@ -18,6 +18,7 @@ import Spin from '@/components/Spin';
 import { DecodeResult } from '@soulwallet/decoder';
 import { toast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
+import { formatUserOperation } from '@/utils/format';
 
 interface ISendTxProps {
   txParams: TTransactionInfo;
@@ -85,10 +86,13 @@ export default function SendTx({
   const handleSendTx = async () => {
     try {
       setSending(true);
-      // TODO: get opHash
-      const { userOp } = await wallet.signUserOperation(userOpRef.current!);
+      await elytroSDK.estimateGas(userOpRef.current!);
 
-      userOpRef.current = userOp;
+      const { signature } = await wallet.signUserOperation(
+        formatUserOperation(userOpRef.current!)
+      );
+
+      userOpRef.current!.signature = signature;
 
       await elytroSDK.sendUserOperation(userOpRef.current!);
       onConfirm();

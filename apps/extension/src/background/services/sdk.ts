@@ -15,7 +15,7 @@ import {
   DEFAULT_GUARDIAN_SAFE_PERIOD,
   TEMP_ENTRY_POINT,
 } from '@/constants/temp';
-import { getHexString, paddingZero } from '@/utils/format';
+import { formatHex, getHexString, paddingZero } from '@/utils/format';
 import { Bundler, SignkeyType, SoulWallet, Transaction } from '@soulwallet/sdk';
 import { DecodeUserOp } from '@soulwallet/decoder';
 import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
@@ -28,6 +28,7 @@ import {
   Hex,
   http,
   parseEther,
+  PublicClient,
   toHex,
 } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
@@ -38,6 +39,7 @@ class ElytroSDK {
   private _bundler!: Bundler;
   private _chainType!: SupportedChainTypeEn;
   private _config!: SDKInitConfig;
+  private _pimlicoRpc: Nullable<PublicClient> = null;
 
   constructor() {
     this._initByChainType(DEFAULT_CHAIN_TYPE);
@@ -184,7 +186,7 @@ class ElytroSDK {
         Math.floor(new Date().getTime() / 1000) + 60 * 5 // 5 mins
       );
       userOp.signature = signature;
-      return { userOp, opHash: opHash.OK };
+      return { signature, opHash: opHash.OK };
     }
   }
 
@@ -286,7 +288,7 @@ class ElytroSDK {
     return await simulateSendUserOp(userOp, TEMP_ENTRY_POINT, this.chain.id);
   }
 
-  private async _getFeeData() {
+  private async _getFeeDataFromSDKProvider() {
     try {
       const fee = await this._sdk.provider.getFeeData();
       return fee;
@@ -299,17 +301,30 @@ class ElytroSDK {
   }
 
   private async _getPimlicoFeeData() {
-    const pimlico_rpc = createPublicClient({
-      chain: this.chain,
-      transport: http(this._config.bundler),
-    });
+    this._pimlicoRpc = this._pimlicoRpc
+      ? this._pimlicoRpc
+      : createPublicClient({
+          chain: this.chain,
+          transport: http(this._config.bundler),
+        });
 
     // TODO: fix type
-    const ret = await pimlico_rpc.request({
+    const ret = await this._pimlicoRpc.request({
       method: 'pimlico_getUserOperationGasPrice' as SafeAny,
       params: [] as SafeAny,
     });
     return (ret as SafeAny)?.standard;
+  }
+
+  private async _getFeeData() {
+    let gasPrice;
+    if (this._config.bundler.includes('pimlico')) {
+      // pimlico uses different gas price
+      gasPrice = await this._getPimlicoFeeData();
+    } else {
+      gasPrice = await this._getFeeDataFromSDKProvider();
+    }
+    return gasPrice;
   }
 
   public async estimateGas(
@@ -319,15 +334,7 @@ class ElytroSDK {
     // looks like only deploy wallet will need this
 
     if (useDefaultGasPrice) {
-      let gasPrice;
-      if (this._config.bundler.includes('pimlico')) {
-        // pimlico uses different gas price
-        gasPrice = await this._getPimlicoFeeData();
-      } else {
-        gasPrice = await this._getFeeData();
-      }
-
-      // const gasPrice = await this._getFeeData();
+      const gasPrice = await this._getFeeData();
 
       // todo: what if it's null? set as 0?
       userOp.maxFeePerGas = gasPrice?.maxFeePerGas ?? 0;
@@ -423,10 +430,9 @@ class ElytroSDK {
 
   public async createUserOpFromTxs(from: string, txs: Transaction[]) {
     const gasPrice = await this._getFeeData();
-
     const _userOp = await this._sdk.fromTransaction(
-      toHex(gasPrice?.maxFeePerGas ?? 0),
-      toHex(gasPrice?.maxPriorityFeePerGas ?? 0),
+      formatHex(gasPrice?.maxFeePerGas ?? 0),
+      formatHex(gasPrice?.maxPriorityFeePerGas ?? 0),
       from,
       txs as Transaction[]
     );

@@ -22,6 +22,10 @@ type TTransactionInfo = {
   gasPrice: string; // Hex
   input?: string; // Hex
   type?: string; // Hex
+  chainId?: string; // Hex
+
+  maxFeePerGas?: string; // Hex
+  maxPriorityFeePerGas?: string; // Hex
 
   // sw sdk need below, maybe change it to standards arguments?
   gasLimit?: string; // Hex
