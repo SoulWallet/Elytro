@@ -60,18 +60,13 @@ class PageProvider extends SafeEventEmitter {
   initialize = async () => {
     this._message.connect();
 
-    this._message.addListener('message', (payload) => {
+    this._message.addListener('event_message', (payload) => {
       this.emit(payload.event, payload.data);
     });
 
-    // try {
-    //   // document.addEventListener('visibilitychange', this._checkDomVisibility);
-    //   // todo: get connect site info?
-    //   // todo: init chain & accounts from builtin provider
-    //   // this.emit('connected');
-    // } catch {
-    //   //
-    // }
+    // this.on('connected', () => {
+    //   console.log('Elytro Provider received connected event');
+    // });
   };
 
   send = async () => {
@@ -117,7 +112,7 @@ class PageProvider extends SafeEventEmitter {
   };
 
   // @ts-ignore
-  emit = (eventName: string | symbol, ...args: any[]) => {
+  emit = (eventName: ProviderEvent, ...args: any[]) => {
     switch (eventName) {
       case 'accountsChanged':
         if (args[0] && args[0] !== this._currentAddress) {

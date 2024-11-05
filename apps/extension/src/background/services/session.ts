@@ -37,7 +37,6 @@ class SessionManager {
 
     const newSession = new DAppSession(tabId, dAppOrigin, portMsgManager);
     this._sessions.set(key, newSession);
-
     return newSession;
   }
 
@@ -64,7 +63,7 @@ class SessionManager {
     event: ElytroEventMessage['event'],
     data: ElytroEventMessage['data']
   ) {
-    session.sendMessage('message', { event, data });
+    session.sendMessage('event_message', { event, data });
   }
 
   public broadcastMessage(

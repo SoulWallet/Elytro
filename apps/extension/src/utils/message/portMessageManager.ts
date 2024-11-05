@@ -23,6 +23,11 @@ export class PortMessageManager {
       }
     });
 
+    port.postMessage({
+      type: 'NEW_PAGE_LOADED',
+      data: '{}', // !DO NOT REMOVE THIS LINE, a workaround for crx message channel
+    });
+
     // TODO: check if we need this?
     // port.onDisconnect.addListener(() => {
     //   this.ports.delete(port.sender?.id || 'default');
@@ -51,5 +56,14 @@ export class PortMessageManager {
 
   public onMessage(type: string, handler: MessageHandler) {
     this.messageHandlers.set(type, handler);
+  }
+
+  public dispose() {
+    this.ports.forEach((port) => {
+      port.disconnect();
+    });
+
+    this.messageHandlers.clear();
+    this.ports.clear();
   }
 }

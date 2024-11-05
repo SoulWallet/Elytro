@@ -6,6 +6,7 @@ import connectionManager from '@/background/services/connection';
 import rpcFlow, { TProviderRequest } from '@/background/provider/rpcFlow';
 import { getDAppInfoFromSender } from '@/utils/url';
 import sessionManager from './services/session';
+import keyring from './services/keyring';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -53,12 +54,33 @@ initApp();
  * @param port
  */
 const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
-  if (!port?.sender?.tab) {
+  const tabId = port.sender?.tab?.id;
+  const origin = port.sender?.origin;
+  if (!port.sender || !origin || !tabId) {
     return;
   }
 
   const providerPortManager = new PortMessageManager('elytro-bg');
   providerPortManager.connect(port);
+
+  port.onDisconnect.addListener(() => {
+    console.log('tab disconnected', tabId);
+    sessionManager.removeSession(tabId, origin);
+  });
+
+  providerPortManager.onMessage('NEW_PAGE_LOADED', async () => {
+    console.log('new page loaded', tabId);
+    sessionManager.createSession(tabId, origin, providerPortManager);
+
+    if (connectionManager.isConnected(origin)) {
+      await keyring.tryUnlock();
+      sessionManager.broadcastMessageToDApp(
+        origin,
+        'accountsChanged',
+        keyring.smartAccountAddress ? [keyring.smartAccountAddress] : []
+      );
+    }
+  });
 
   providerPortManager.onMessage(
     'CONTENT_SCRIPT_REQUEST',
