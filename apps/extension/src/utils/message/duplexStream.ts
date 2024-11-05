@@ -11,7 +11,7 @@ export enum ElytroMessageTypeEn {
   DISCONNECT = 'disconnect',
   REQUEST_FROM_PAGE_PROVIDER = 'requestFromPageProvider',
   RESPONSE_TO_PAGE_PROVIDER = 'responseToPageProvider',
-  MESSAGE = 'message',
+  MESSAGE = 'event_message',
 }
 
 type ElytroMessageData =
@@ -81,7 +81,7 @@ class ElytroDuplexMessage extends SafeEventEmitter {
           this._handleResponse(data.payload);
           break;
         case ElytroMessageTypeEn.MESSAGE:
-          this.emit('message', data.payload);
+          this.emit('event_message', data.payload);
           break;
         default:
           throw ethErrors.rpc.internal();
@@ -140,6 +140,12 @@ class ElytroDuplexMessage extends SafeEventEmitter {
 
   public listen(responseHandler: (data: RequestArguments) => void) {
     this._responseHandler = responseHandler;
+  }
+
+  public dispose() {
+    this._stream.destroy();
+    this._requestHandlers.clear();
+    this._responseHandler = null;
   }
 }
 

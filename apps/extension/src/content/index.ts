@@ -36,7 +36,7 @@ const initRuntimeMessage = () => {
   portManager = new PortMessageManager('elytro-bg');
   portManager.connect();
 
-  portManager.onMessage('message', (data) => {
+  portManager.onMessage('event_message', (data) => {
     dAppMessage.send({
       type: ElytroMessageTypeEn.MESSAGE,
       payload: data,
