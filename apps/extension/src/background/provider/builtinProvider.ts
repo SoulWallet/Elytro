@@ -35,6 +35,8 @@ class BuiltinProvider extends SafeEventEmitter {
         return walletClient.chain.id ? walletClient.chain.id.toString() : '0';
       case 'eth_chainId':
         return toHex(walletClient.chain.id);
+      case 'eth_blockNumber':
+        return await walletClient.getBlockNumber();
       case 'eth_accounts':
       case 'eth_requestAccounts':
         return walletClient.address ? [walletClient.address] : [];

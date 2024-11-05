@@ -73,7 +73,7 @@ export function formatAddressToShort(address: Nullable<string>) {
 export function formatTokenAmount(amount: string | null | undefined): string {
   // todo: format amount. 8 decimal places is enough?
   try {
-    return formatUnits(BigInt(amount!), 8) + ' ETH';
+    return formatUnits(BigInt(amount!), 18) + ' ETH';
   } catch {
     return '--';
   }
@@ -90,8 +90,8 @@ export function formatSimulationResultToTxDetail(
   } as TTxDetail;
 }
 
-export function formatRawData(data: any) {
-  const bigintReplacer = (_: string, value: any) => {
+export function formatRawData(data: SafeAny) {
+  const bigintReplacer = (_: string, value: SafeAny) => {
     if (typeof value === 'bigint') {
       return value.toString();
     }
@@ -118,4 +118,39 @@ export function formatBlockInfo(block: Block) {
     totalDifficulty:
       block.totalDifficulty !== null ? toHex(block.totalDifficulty) : null,
   };
+}
+
+// format bigint to hex string
+export function formatUserOperation(userOp: ElytroUserOperation) {
+  const formatBigIntToHex = (value: SafeAny) => {
+    return typeof value === 'bigint' ? toHex(value) : value;
+  };
+
+  const formattedUserOp = Object.fromEntries(
+    Object.entries(userOp).map(([key, value]) => [
+      key,
+      formatBigIntToHex(value),
+    ])
+  );
+
+  return formattedUserOp as ElytroUserOperation;
+}
+
+const BIGINT_PARAM_KEY = [
+  'callGasLimit',
+  'verificationGasLimit',
+  'paymasterVerificationGasLimit',
+  'paymasterPostOpGasLimit',
+  'preVerificationGas',
+];
+
+export function deformatUserOperation(userOp: ElytroUserOperation) {
+  const deformatUserOp = Object.fromEntries(
+    Object.entries(userOp).map(([key, value]) => [
+      key,
+      BIGINT_PARAM_KEY.includes(key) ? BigInt(value) : value,
+    ])
+  );
+
+  return deformatUserOp as ElytroUserOperation;
 }
