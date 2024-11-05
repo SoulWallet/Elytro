@@ -1,6 +1,6 @@
 import useDialogStore from '@/stores/dialog';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
-import { formatAddressToShort } from '@/utils/format';
+import { formatAddressToShort, formatTokenAmount } from '@/utils/format';
 import Spin from '@/components/Spin';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ export default function SignTxModal() {
       onOpenChange={closeSignTxDialog}
     >
       <DialogContent className="flex flex-col items-center gap-y-6">
-        <Spin isLoading={loading} />
+        <Spin isLoading={loading} showSkeleton={true} />
 
         {/* DApp Action Detail */}
         <div className="flex flex-col items-center">
@@ -54,7 +54,10 @@ export default function SignTxModal() {
             label="Contract Address"
             value={formatAddressToShort(signTxDetail?.txDetail.to)}
           />
-          <LabelValue label="Fee" value={signTxDetail?.txDetail.fee} />
+          <LabelValue
+            label="Fee"
+            value={formatTokenAmount(signTxDetail?.txDetail.fee)}
+          />
 
           {/* TODO: tx detail. implement it later. ux is not ready */}
           <div className="w-full">

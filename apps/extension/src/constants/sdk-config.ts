@@ -1,12 +1,13 @@
 import { SupportedChainTypeEn } from './chains';
 import { keccak256, encodeAbiParameters, encodePacked, Hex } from 'viem';
 
-type SDKInitConfig = {
+export type SDKInitConfig = {
   endpoint: string; // rpc url
   bundler: string; // bundler url
   factory: string; // factory address
   fallback: string; // fallback address
   recovery: string; // social recovery module address
+  validator: string; // validator address
 };
 
 export const SDK_INIT_CONFIG_BY_CHAIN_MAP: Record<
@@ -21,6 +22,7 @@ export const SDK_INIT_CONFIG_BY_CHAIN_MAP: Record<
     factory: '0xF78Ae187CED0Ca5Fb98100d3F0EAB7a6461d6fC6',
     fallback: '0x880c6eb80583795625935B08AA28EB37F16732C7',
     recovery: '0x3Cc36538cf53A13AF5C28BB693091e23CF5BB567',
+    validator: '0x2425b23C5C2B322E664334debBa04eE73871ebf7',
   },
   // TODO: change to respective chain config
   [SupportedChainTypeEn.ETH]: {
@@ -31,6 +33,7 @@ export const SDK_INIT_CONFIG_BY_CHAIN_MAP: Record<
     factory: '0xF78Ae187CED0Ca5Fb98100d3F0EAB7a6461d6fC6',
     fallback: '0x880c6eb80583795625935B08AA28EB37F16732C7',
     recovery: '0x3Cc36538cf53A13AF5C28BB693091e23CF5BB567',
+    validator: '0x162485941bA1FAF21013656DAB1E60e9D7226DC0',
   },
   [SupportedChainTypeEn.ETH_SEPOLIA]: {
     endpoint:
@@ -40,6 +43,7 @@ export const SDK_INIT_CONFIG_BY_CHAIN_MAP: Record<
     factory: '0x70B616f23bDDB18c5c412dB367568Dc360e224Bb',
     fallback: '0xe4eA02c80C3CD86B2f23c8158acF2AAFcCa5A6b3',
     recovery: '0x36693563E41BcBdC8d295bD3C2608eb7c32b1cCb',
+    validator: '0x162485941bA1FAF21013656DAB1E60e9D7226DC0',
   },
   [SupportedChainTypeEn.OP]: {
     endpoint:
@@ -49,6 +53,7 @@ export const SDK_INIT_CONFIG_BY_CHAIN_MAP: Record<
     factory: '0xF78Ae187CED0Ca5Fb98100d3F0EAB7a6461d6fC6',
     fallback: '0x880c6eb80583795625935B08AA28EB37F16732C7',
     recovery: '0x3Cc36538cf53A13AF5C28BB693091e23CF5BB567',
+    validator: '0x2425b23C5C2B322E664334debBa04eE73871ebf7',
   },
 };
 

@@ -8,12 +8,12 @@ import {
   getEncoded1271MessageHash,
   getEncodedSHA,
   SDK_INIT_CONFIG_BY_CHAIN_MAP,
+  SDKInitConfig,
 } from '@/constants/sdk-config';
 import {
   DEFAULT_GUARDIAN_HASH,
   DEFAULT_GUARDIAN_SAFE_PERIOD,
   TEMP_ENTRY_POINT,
-  TEMP_VALIDATOR,
 } from '@/constants/temp';
 import { getHexString, paddingZero } from '@/utils/format';
 import { Bundler, SignkeyType, SoulWallet, Transaction } from '@soulwallet/sdk';
@@ -22,7 +22,14 @@ import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
 import keyring from './keyring';
 import { simulateSendUserOp } from '@/utils/ethRpc/simulate';
 import { UserOperationStatusEn } from '@/constants/operations';
-import { Address, Hex, parseEther, toHex } from 'viem';
+import {
+  Address,
+  createPublicClient,
+  Hex,
+  http,
+  parseEther,
+  toHex,
+} from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
 import { ethErrors } from 'eth-rpc-errors';
 
@@ -30,6 +37,7 @@ class ElytroSDK {
   private _sdk!: SoulWallet;
   private _bundler!: Bundler;
   private _chainType!: SupportedChainTypeEn;
+  private _config!: SDKInitConfig;
 
   constructor() {
     this._initByChainType(DEFAULT_CHAIN_TYPE);
@@ -57,9 +65,8 @@ class ElytroSDK {
   }
 
   private _initByChainType(chainType: SupportedChainTypeEn) {
-    const { endpoint, bundler, factory, fallback, recovery } =
-      SDK_INIT_CONFIG_BY_CHAIN_MAP[chainType];
-
+    this._config = SDK_INIT_CONFIG_BY_CHAIN_MAP[chainType];
+    const { endpoint, bundler, factory, fallback, recovery } = this._config;
     this._sdk = new SoulWallet(endpoint, bundler, factory, fallback, recovery);
     this._bundler = new Bundler(bundler);
     this._chainType = chainType;
@@ -248,7 +255,7 @@ class ElytroSDK {
     }
 
     const signRes = await this._sdk.packUserOpEOASignature(
-      TEMP_VALIDATOR,
+      this._config.validator,
       _eoaSignature,
       rawHashRes.OK.validationData
     );
@@ -291,13 +298,37 @@ class ElytroSDK {
     }
   }
 
+  private async _getPimlicoFeeData() {
+    // todo: implement
+
+    const pimlico_rpc = createPublicClient({
+      chain: this.chain,
+      transport: http(this._config.bundler),
+    });
+
+    const ret = await pimlico_rpc.request({
+      method: 'pimlico_getUserOperationGasPrice',
+      params: [],
+    });
+    return ret?.standard;
+  }
+
   public async estimateGas(
     userOp: ElytroUserOperation,
     useDefaultGasPrice = true
   ) {
     // looks like only deploy wallet will need this
+
     if (useDefaultGasPrice) {
-      const gasPrice = await this._getFeeData();
+      let gasPrice;
+      if (this._config.bundler.includes('pimlico')) {
+        // pimlico uses different gas price
+        gasPrice = await this._getPimlicoFeeData();
+      } else {
+        gasPrice = await this._getFeeData();
+      }
+
+      // const gasPrice = await this._getFeeData();
 
       // todo: what if it's null? set as 0?
       userOp.maxFeePerGas = gasPrice?.maxFeePerGas ?? 0;
@@ -307,7 +338,7 @@ class ElytroSDK {
     // todo: sdk can be optimized (fetch balance in sdk)
 
     const res = await this._sdk.estimateUserOperationGas(
-      TEMP_VALIDATOR,
+      this._config.validator,
       userOp,
       {
         [userOp.sender]: {

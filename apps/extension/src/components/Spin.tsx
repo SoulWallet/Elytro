@@ -1,13 +1,17 @@
+import { Skeleton } from './ui/skeleton';
+
 interface ISpinProps {
   size?: 'sm' | 'md' | 'lg';
   color?: string;
   isLoading?: boolean;
+  showSkeleton?: boolean;
 }
 
 export default function Spin({
   size = 'md',
   color = 'text-blue-600',
   isLoading = false,
+  showSkeleton = false,
 }: ISpinProps) {
   const sizeClasses = {
     sm: 'w-4 h-4',
@@ -16,6 +20,10 @@ export default function Spin({
   };
 
   if (!isLoading) return null;
+
+  if (showSkeleton) {
+    return <Skeleton className={sizeClasses[size]} />;
+  }
 
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50">
