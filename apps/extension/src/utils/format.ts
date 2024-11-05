@@ -70,9 +70,13 @@ export function formatAddressToShort(address: Nullable<string>) {
     : '--';
 }
 
-export function formatTokenAmount(amount: string): string {
+export function formatTokenAmount(amount: string | null | undefined): string {
   // todo: format amount. 8 decimal places is enough?
-  return formatUnits(BigInt(amount), 8) + ' ETH';
+  try {
+    return formatUnits(BigInt(amount!), 8) + ' ETH';
+  } catch {
+    return '--';
+  }
 }
 
 export function formatSimulationResultToTxDetail(

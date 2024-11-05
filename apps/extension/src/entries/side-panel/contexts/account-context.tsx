@@ -57,6 +57,9 @@ export const AccountProvider = ({
   const searchParams = useSearchParams();
 
   const updateAccount = async () => {
+    if (loading) {
+      return;
+    }
     try {
       setLoading(true);
       const res = (await wallet.getSmartAccountInfo()) ?? DEFAULT_ACCOUNT_INFO;
