@@ -32,7 +32,7 @@ export default defineConfig({
   },
   build: {
     manifest: true,
-    outDir: 'dist',
+    outDir: process.env.NODE_ENV === 'production' ? 'build' : 'dist',
     rollupOptions: {
       input: {
         sidePanel: resolve(__dirname, 'src/entries/side-panel/index.html'),
