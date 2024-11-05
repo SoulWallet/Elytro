@@ -86,7 +86,11 @@ export default function SendTx({
   const handleSendTx = async () => {
     try {
       setSending(true);
-      await elytroSDK.estimateGas(userOpRef.current!);
+
+      // TODO: check this logic
+      if (!userOpRef.current?.paymaster) {
+        await elytroSDK.estimateGas(userOpRef.current!);
+      }
 
       const { signature } = await wallet.signUserOperation(
         formatUserOperation(userOpRef.current!)
