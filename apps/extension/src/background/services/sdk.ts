@@ -299,18 +299,17 @@ class ElytroSDK {
   }
 
   private async _getPimlicoFeeData() {
-    // todo: implement
-
     const pimlico_rpc = createPublicClient({
       chain: this.chain,
       transport: http(this._config.bundler),
     });
 
+    // TODO: fix type
     const ret = await pimlico_rpc.request({
-      method: 'pimlico_getUserOperationGasPrice',
-      params: [],
+      method: 'pimlico_getUserOperationGasPrice' as SafeAny,
+      params: [] as SafeAny,
     });
-    return ret?.standard;
+    return (ret as SafeAny)?.standard;
   }
 
   public async estimateGas(
