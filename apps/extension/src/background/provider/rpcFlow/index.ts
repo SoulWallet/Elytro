@@ -12,7 +12,7 @@ export type TProviderRequest = {
   ctx?: unknown;
   dApp: TDAppInfo;
   origin?: string;
-  needApproval?: boolean;
+  needConnection?: boolean;
   rpcReq: RequestArguments;
 };
 
