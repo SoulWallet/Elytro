@@ -6,10 +6,7 @@ import connectionManager from '@/background/services/connection';
 import type { TFlowMiddleWareFn } from '@/utils/asyncTaskFlow';
 import { ethErrors } from 'eth-rpc-errors';
 
-const CONNECT_METHODS: ProviderMethodType[] = [
-  'eth_accounts',
-  'eth_requestAccounts',
-];
+const CONNECT_METHODS: ProviderMethodType[] = ['eth_requestAccounts'];
 
 const CONNECT_METHODS_WITH_PERMISSIONS: ProviderMethodType[] = [
   'wallet_requestPermissions',
@@ -32,6 +29,13 @@ export const requestConnect: TFlowMiddleWareFn = async (ctx, next) => {
   // if the method is to get connection info, return the permissions
   if (GET_CONNECTION_INFO_METHODS.includes(method)) {
     return connectionManager.getPermissions(dApp.origin);
+  }
+
+  if (
+    ctx.request.needConnection &&
+    connectionManager.isConnected(dApp.origin)
+  ) {
+    return next();
   }
 
   // if the method is to connect, request connection

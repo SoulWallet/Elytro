@@ -9,17 +9,19 @@ let isUnlocking = false;
 
 const PUBLIC_METHODS: ProviderMethodType[] = ['eth_chainId'];
 
+const SEMI_PUBLIC_METHODS: ProviderMethodType[] = ['eth_accounts'];
+
 export const checkLock: TFlowMiddleWareFn = async (ctx, next) => {
   if (PUBLIC_METHODS.includes(ctx.request.rpcReq.method)) {
+    return next();
+  } else if (SEMI_PUBLIC_METHODS.includes(ctx.request.rpcReq.method)) {
+    ctx.request.needConnection = true;
     return next();
   }
 
   await keyring.tryUnlock();
 
   if (keyring.locked) {
-    // request user to unlock
-    ctx.request.needApproval = true;
-
     // only allow one unlocking request once at a time
     if (isUnlocking) {
       throw ethErrors.rpc.resourceNotFound(
