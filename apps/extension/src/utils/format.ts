@@ -1,6 +1,14 @@
 import { TTxDetail } from '@/constants/operations';
 import { SimulationResult } from './ethRpc/simulate';
-import { Hex, toHex, size as getSize, pad, formatUnits, Block } from 'viem';
+import {
+  Hex,
+  toHex,
+  size as getSize,
+  pad,
+  formatUnits,
+  Block,
+  BlockTag,
+} from 'viem';
 
 export function paddingZero(
   value: string | number | bigint,
@@ -153,4 +161,12 @@ export function deformatUserOperation(userOp: ElytroUserOperation) {
   );
 
   return deformatUserOp as ElytroUserOperation;
+}
+
+export function formatBlockParam(blockParam: BlockTag | bigint) {
+  const useTag = typeof blockParam === 'string';
+
+  return useTag
+    ? { blockTag: blockParam as BlockTag }
+    : { blockNumber: BigInt(blockParam) };
 }
