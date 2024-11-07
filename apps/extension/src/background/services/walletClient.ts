@@ -6,6 +6,7 @@ import {
 } from '@/constants/chains';
 import {
   Address,
+  BlockTag,
   createWalletClient,
   formatEther,
   GetBlockParameters,
@@ -112,6 +113,38 @@ class ElytroWalletClient {
 
     // todo: maybe more params check?
     return await elytroSDK.signMessage(message, this._address);
+  }
+
+  public async getCode(params: [Address, BlockTag | bigint]) {
+    const useTag = typeof params[1] === 'string';
+
+    try {
+      return await this._client.getCode({
+        address: params[0],
+        ...(useTag
+          ? { blockTag: params[1] as BlockTag }
+          : { blockNumber: BigInt(params[1]) }),
+      });
+    } catch {
+      throw ethErrors.rpc.invalidParams();
+    }
+  }
+
+  public async call(params: [SafeAny, BlockTag | bigint]) {
+    // TODO: differentiate call type (eip / legacy) using params
+    try {
+      const useTag = typeof params[1] === 'string';
+
+      return await this._client.call({
+        ...params[0],
+        account: params[0].from,
+        ...(useTag
+          ? { blockTag: params[1] as BlockTag }
+          : { blockNumber: BigInt(params[1]) }),
+      });
+    } catch {
+      throw ethErrors.rpc.invalidParams();
+    }
   }
 
   // public async signTypedDataV4(params: unknown) {
