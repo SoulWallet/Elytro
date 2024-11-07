@@ -19,7 +19,7 @@ import {
 import keyring from './keyring';
 import { elytroSDK } from './sdk';
 import { ethErrors } from 'eth-rpc-errors';
-import { formatBlockInfo } from '@/utils/format';
+import { formatBlockInfo, formatBlockParam } from '@/utils/format';
 
 class ElytroWalletClient {
   private _address: Nullable<Address> = null;
@@ -115,36 +115,37 @@ class ElytroWalletClient {
     return await elytroSDK.signMessage(message, this._address);
   }
 
-  public async getCode(params: [Address, BlockTag | bigint]) {
-    const useTag = typeof params[1] === 'string';
-
+  public async getCode(address: Address, block: BlockTag | bigint = 'latest') {
     try {
       return await this._client.getCode({
-        address: params[0],
-        ...(useTag
-          ? { blockTag: params[1] as BlockTag }
-          : { blockNumber: BigInt(params[1]) }),
+        address,
+        ...formatBlockParam(block),
       });
     } catch {
       throw ethErrors.rpc.invalidParams();
     }
   }
 
-  public async call(params: [SafeAny, BlockTag | bigint]) {
+  public async call(tx: SafeAny, block: BlockTag | bigint = 'latest') {
     // TODO: differentiate call type (eip / legacy) using params
     try {
-      const useTag = typeof params[1] === 'string';
-
       return await this._client.call({
-        ...params[0],
-        account: params[0].from,
-        ...(useTag
-          ? { blockTag: params[1] as BlockTag }
-          : { blockNumber: BigInt(params[1]) }),
+        ...tx,
+        account: tx.from,
+        ...formatBlockParam(block),
       });
     } catch {
       throw ethErrors.rpc.invalidParams();
     }
+  }
+
+  public async estimateGas(tx: SafeAny, block: BlockTag | bigint = 'latest') {
+    return toHex(
+      await this._client.estimateGas({
+        ...tx,
+        ...formatBlockParam(block),
+      })
+    );
   }
 
   // public async signTypedDataV4(params: unknown) {

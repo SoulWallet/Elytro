@@ -1,6 +1,6 @@
 // import walletClient from '../walletClient';
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
-import { BlockTag, CallParameters, toHex } from 'viem';
+import { Address, BlockTag, toHex } from 'viem';
 import walletClient from '../services/walletClient';
 import { ethErrors } from 'eth-rpc-errors';
 
@@ -29,6 +29,12 @@ class BuiltinProvider extends SafeEventEmitter {
     return this._initialized;
   }
 
+  private _validateArrayParams(params: SafeAny, expectedLength: number = 1) {
+    if (!Array.isArray(params) || params.length < expectedLength) {
+      throw ethErrors.rpc.invalidParams();
+    }
+  }
+
   public async request({ method, params }: RequestArguments) {
     switch (method) {
       case 'net_version':
@@ -45,22 +51,23 @@ class BuiltinProvider extends SafeEventEmitter {
           blockTag: (params as [BlockTag])?.[0] ?? 'latest',
           includeTransactions: (params as [BlockTag, false])?.[1],
         });
-      case 'eth_getCode':
-        if (
-          !Array.isArray(params) ||
-          !params[0].startsWith('0x') ||
-          !params[1]
-        ) {
-          throw ethErrors.rpc.invalidParams();
-        }
 
-        return await walletClient.getCode([params[0], params[1]]);
+      // TODO: optimize this. maybe move the params validating to rpcFlow?
+      case 'eth_getCode':
+        this._validateArrayParams(params);
+
+        return await walletClient.getCode(
+          ...(params as [Address, BlockTag | bigint])
+        );
       case 'eth_call':
-        if (!Array.isArray(params) || !params[0] || !params[1] || !params[2]) {
-          throw ethErrors.rpc.invalidParams();
-        }
+        this._validateArrayParams(params);
         return await walletClient.call(
-          params as [CallParameters, bigint | BlockTag]
+          ...(params as [SafeAny, BlockTag | bigint])
+        );
+      case 'eth_estimateGas':
+        this._validateArrayParams(params);
+        return await walletClient.estimateGas(
+          ...(params as [SafeAny, BlockTag | bigint])
         );
       default:
         throw ethErrors.rpc.methodNotFound(method);

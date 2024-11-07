@@ -53,7 +53,8 @@ type ProviderMethodType =
   | 'wallet_revokePermissions' // !
   | 'eth_blockNumber' // !
   | 'eth_getCode'
-  | 'eth_call';
+  | 'eth_call'
+  | 'eth_estimateGas';
 // | 'wallet_addEthereumChain' // EIP-3085. Temporary not supported
 // | 'wallet_switchEthereumChain' // EIP-3326. Temporary not supported
 // | 'wallet_watchAsset' // Temporary not supported
