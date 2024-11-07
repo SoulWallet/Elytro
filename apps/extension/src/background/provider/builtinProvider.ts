@@ -1,6 +1,6 @@
 // import walletClient from '../walletClient';
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
-import { BlockTag, toHex } from 'viem';
+import { BlockTag, CallParameters, toHex } from 'viem';
 import walletClient from '../services/walletClient';
 import { ethErrors } from 'eth-rpc-errors';
 
@@ -45,12 +45,23 @@ class BuiltinProvider extends SafeEventEmitter {
           blockTag: (params as [BlockTag])?.[0] ?? 'latest',
           includeTransactions: (params as [BlockTag, false])?.[1],
         });
-      // case 'eth_signTypedDataV4':
-      //   return walletClient.signTypedDataV4(params);
-      // case 'personal_sign':
-      //   return await walletClient.personalSign(params);
-      // case 'eth_getTransactionByHash':
-      //   return await walletClient.getTransactionByHash(params);
+      case 'eth_getCode':
+        if (
+          !Array.isArray(params) ||
+          !params[0].startsWith('0x') ||
+          !params[1]
+        ) {
+          throw ethErrors.rpc.invalidParams();
+        }
+
+        return await walletClient.getCode([params[0], params[1]]);
+      case 'eth_call':
+        if (!Array.isArray(params) || !params[0] || !params[1] || !params[2]) {
+          throw ethErrors.rpc.invalidParams();
+        }
+        return await walletClient.call(
+          params as [CallParameters, bigint | BlockTag]
+        );
       default:
         throw ethErrors.rpc.methodNotFound(method);
     }
