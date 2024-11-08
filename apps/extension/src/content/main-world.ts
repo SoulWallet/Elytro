@@ -19,7 +19,7 @@ const mainWorld = () => {
     uuid: generateUUID4(),
     name: 'Elytro',
     // TODO: Add Elytro logo
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>",
+    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03LjY1NTA2IDAuMzk5OTAyQzkuMDM5MTQgMy42MjU5NSAxMi4yNDQyIDUuODg1NTkgMTUuOTc3MSA1Ljg4NTU5SDE3Ljg5N1Y3LjgwNTZMOC44NDU2NCA3LjgwNTZDNC43NTU1OSA3LjgwNTYgMS40Mzk5NCA0LjQ4OTk2IDEuNDM5OTQgMC4zOTk5MDJINy42NTUwNlpNNy42NTUwNiAxOS41OTk5QzkuMDM5MTMgMTYuMzczOSAxMi4yNDQyIDE0LjExNDIgMTUuOTc3MSAxNC4xMTQySDE3Ljg5N1YxMi4xOTQySDguODQ1NjRDNC43NTU1OSAxMi4xOTQyIDEuNDM5OTQgMTUuNTA5OSAxLjQzOTk0IDE5LjU5OTlINy42NTUwNlpNMTcuODk3IDguOTAyNzNWMTEuMDk3QzUuODk2MzUgMTEuMDk3IDEuNDM5OTUgMTEuNjQ1NiAxLjQzOTk1IDExLjY0NTZMMS40Mzk5NSA4LjM1NDE2QzEuNDM5OTUgOC4zNTQxNiA2LjAzNjcxIDguOTAyNzMgMTcuODk3IDguOTAyNzNaIiBmaWxsPSJibGFjayIvPgo8L3N2Zz4K',
     rdns: 'com.elytro',
   };
 
@@ -45,7 +45,7 @@ const mainWorld = () => {
     get: (target, prop, receiver) => {
       const method = target[prop as keyof PageProvider];
       if (typeof method === 'function') {
-        return (...args: any[]) => {
+        return (...args: SafeAny[]) => {
           // @ts-ignore
           return method.apply(target, args);
         };
