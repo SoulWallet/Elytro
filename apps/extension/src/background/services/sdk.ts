@@ -33,6 +33,7 @@ import {
 } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
 import { ethErrors } from 'eth-rpc-errors';
+import walletClient from './walletClient';
 
 class ElytroSDK {
   private _sdk!: SoulWallet;
@@ -197,9 +198,10 @@ class ElytroSDK {
       if (res?.isErr()) {
         throw res.ERR;
       } else if (res?.OK) {
-        return res.OK.success
-          ? UserOperationStatusEn.confirmedSuccess
-          : UserOperationStatusEn.confirmedFailed;
+        if (res.OK.success) {
+          return res.OK.receipt;
+        }
+        return UserOperationStatusEn.confirmedFailed;
       } else {
         return UserOperationStatusEn.pending;
       }
@@ -490,6 +492,49 @@ class ElytroSDK {
   //     }
   //   }
   // }
+
+  public async waitForUserOperationTransaction(
+    args: WaitForUserOperationTxParameters
+  ) {
+    try {
+      const {
+        hash,
+        retries = {
+          maxRetries: 5,
+          intervalMs: 2000,
+          multiplier: 1.5,
+        },
+      } = args;
+
+      for (let i = 0; i < retries.maxRetries; i++) {
+        const txRetryIntervalWithJitterMs =
+          retries.intervalMs * Math.pow(retries.multiplier, i) +
+          Math.random() * 100;
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, txRetryIntervalWithJitterMs)
+        );
+
+        const receipt = await this.getUserOperationReceipt(
+          hash as `0x${string}`
+        );
+
+        if (
+          receipt &&
+          receipt !== UserOperationStatusEn.pending &&
+          receipt.transactionHash
+        ) {
+          const tx = await walletClient.getTransaction(
+            receipt.transactionHash as Hex
+          );
+          return tx;
+        }
+      }
+    } catch (error) {
+      console.error('Elytro: Failed to get user operation transaction.', error);
+      throw error;
+    }
+  }
 }
 
 export const elytroSDK = new ElytroSDK();

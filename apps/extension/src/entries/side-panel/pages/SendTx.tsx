@@ -13,7 +13,6 @@ export default function SendTx() {
   } = useAccount();
   const { approval, reject, resolve } = useApproval();
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (approval?.data?.tx) {
       setLoading(false);
@@ -25,10 +24,9 @@ export default function SendTx() {
   }
 
   const handleConfirm = async () => {
-    resolve();
-
     // todo: what to do when tx is sent?
     setTimeout(() => {
+      resolve();
       navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
     }, 200);
   };

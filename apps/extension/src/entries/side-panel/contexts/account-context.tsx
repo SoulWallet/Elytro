@@ -6,6 +6,10 @@ import useSearchParams from '@/hooks/use-search-params';
 import { Address, toHex } from 'viem';
 import useActivities, { AggregatedTransaction } from '@/hooks/use-activities';
 import useTokens, { TokenDTO } from '@/hooks/use-tokens';
+import {
+  elytroTxHistoryEventManager,
+  TxHistory,
+} from '@/background/services/txHistory';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
@@ -27,6 +31,7 @@ type IAccountContext = {
     loadingActivities: boolean;
     activities: AggregatedTransaction[];
   };
+  history: TxHistory[];
 };
 
 const AccountContext = createContext<IAccountContext>({
@@ -41,6 +46,7 @@ const AccountContext = createContext<IAccountContext>({
     loadingActivities: false,
     activities: [],
   },
+  history: [],
 });
 
 export const AccountProvider = ({
@@ -55,6 +61,7 @@ export const AccountProvider = ({
   const [pathname] = useHashLocation();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const searchParams = useSearchParams();
+  const [history, setTxHistory] = useState<TxHistory[]>([]);
 
   const updateAccount = async () => {
     if (loading) {
@@ -92,6 +99,17 @@ export const AccountProvider = ({
     chainId
   );
 
+  const updateHistory = () => {
+    elytroTxHistoryEventManager.subscribTxHistory((his: string) => {
+      console.log('update his in context', his);
+      setTxHistory(JSON.parse(his));
+    });
+  };
+  useEffect(() => {
+    updateHistory();
+    wallet.broadcastHistoy();
+  }, []);
+
   useEffect(() => {
     if (!loading && !accountInfo.address) {
       updateAccount();
@@ -125,6 +143,7 @@ export const AccountProvider = ({
           loadingActivities,
           activities,
         },
+        history,
         loading,
       }}
     >

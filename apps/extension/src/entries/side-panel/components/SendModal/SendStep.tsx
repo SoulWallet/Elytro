@@ -3,23 +3,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectContent } from '@/components/ui/select';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import ETHIcon from '@/assets/icons/ether.svg';
 import { TxData } from '.';
+import { TokenDTO } from '@/hooks/use-tokens';
+import { formatEther, hexToBigInt } from 'viem';
 export interface TokenProps {
   name: string;
   balance: string | number;
   icon: string;
 }
 
-function SelectedToken({ token }: { token?: TokenProps }) {
+function SelectedToken({ token }: { token?: TokenDTO }) {
   if (!token)
     return <div className="text-gray-400 text-lg">Select a token</div>;
   return (
     <div className="flex items-center">
-      <img className="h-10 w-10" src={token.icon} alt={token.name} />
+      <img className="h-10 w-10" src={token.logoURI} alt={token.name} />
       <div className="text-left ml-2">
         <div className="text-lg">{token.name}</div>
-        <div className="text-gray-400">{token.balance} Avail.</div>
+        <div className="text-gray-400">
+          {formatEther(hexToBigInt(token.tokenBalance))} Avail.
+        </div>
       </div>
     </div>
   );
@@ -28,37 +31,22 @@ function SelectedToken({ token }: { token?: TokenProps }) {
 export default function SendStep({
   checkIsValid,
   updateTxData,
+  tokens,
 }: {
   checkIsValid?: (valid: boolean) => void;
   updateTxData: Dispatch<SetStateAction<TxData | undefined>>;
+  tokens: TokenDTO[];
 }) {
-  const [token, setToken] = useState<TokenProps | undefined>();
+  const [token, setToken] = useState<TokenDTO | undefined>();
   const [amount, setAmount] = useState('');
   const [open, setOpen] = useState(false);
-  const tokens = [
-    {
-      name: 'ETH',
-      balance: 12.123123,
-      icon: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png?1696501425',
-    },
-    {
-      name: 'USDC',
-      balance: 2.123123,
-      icon: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png?1696506694',
-    },
-    {
-      name: 'USDT',
-      balance: 0.123123,
-      icon: ETHIcon,
-    },
-  ];
-  const handleSelect = (item: TokenProps) => {
+  const handleSelect = (item: TokenDTO) => {
     setToken(item);
     setOpen(false);
   };
   const handleFillMax = () => {
     if (token) {
-      setAmount(token.balance.toString());
+      setAmount(formatEther(hexToBigInt(token.tokenBalance)).toString());
     }
   };
   useEffect(() => {
@@ -100,11 +88,13 @@ export default function SendStep({
               >
                 <img
                   className="h-10 w-10 mr-4"
-                  src={item.icon}
+                  src={item.logoURI}
                   alt={item.name}
                 />
                 <div className="flex-1 text-lg">{item.name}</div>
-                <div className="text-gray-400 text-lg">{item.balance}</div>
+                <div className="text-gray-400 text-lg">
+                  {formatEther(hexToBigInt(item.tokenBalance))}
+                </div>
               </div>
             ))}
           </SelectContent>

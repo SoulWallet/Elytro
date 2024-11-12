@@ -8,6 +8,7 @@ import { hashEarlyTypedData, hashSignTypedData } from '@/utils/hash';
 import { ethErrors } from 'eth-rpc-errors';
 import sessionManager from './services/session';
 import { deformatUserOperation } from '@/utils/format';
+import txHistoryManager from './services/txHistory';
 
 // ! DO NOT use getter. They can not be proxied.
 class WalletController {
@@ -100,6 +101,10 @@ class WalletController {
     } catch (error) {
       throw ethErrors.rpc.internal((error as Error)?.message);
     }
+  }
+
+  public broadcastHistoy() {
+    txHistoryManager.broadcast();
   }
 }
 

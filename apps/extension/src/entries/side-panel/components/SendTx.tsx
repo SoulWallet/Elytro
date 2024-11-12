@@ -19,6 +19,8 @@ import { DecodeResult } from '@soulwallet/decoder';
 import { toast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
 import { formatUserOperation } from '@/utils/format';
+import { Hex } from 'viem';
+import { elytroTxHistoryEventManager } from '@/background/services/txHistory';
 
 interface ISendTxProps {
   txParams: TTransactionInfo;
@@ -92,22 +94,30 @@ export default function SendTx({
         await elytroSDK.estimateGas(userOpRef.current!);
       }
 
-      const { signature } = await wallet.signUserOperation(
+      const { signature, opHash } = await wallet.signUserOperation(
         formatUserOperation(userOpRef.current!)
       );
 
       userOpRef.current!.signature = signature;
 
       await elytroSDK.sendUserOperation(userOpRef.current!);
-      onConfirm();
+      console.log('decodedDetail', decodedDetail);
+      elytroTxHistoryEventManager.emitAddTxHistory({
+        hash: opHash as Hex,
+        from: decodedDetail[0].from,
+        to: decodedDetail[0].to,
+        method: decodedDetail[0].method,
+        value: decodedDetail[0].value.toString(),
+      });
 
-      toast({
+      await toast({
         title: 'Transaction sent successfully',
         description: 'User operation hash: ',
       });
 
       // TODO: do sth with the hash (leave it for activity to check?)
       // await elytroSDK.getUserOperationReceipt(opHash);
+      onConfirm();
     } catch (error) {
       toast({
         title: 'Failed to send transaction',
