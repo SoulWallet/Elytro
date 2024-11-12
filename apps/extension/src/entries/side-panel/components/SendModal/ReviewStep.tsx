@@ -10,7 +10,7 @@ import questionIcon from '@/assets/icons/question.svg';
 import { TxData } from '.';
 import { ChevronRight } from 'lucide-react';
 import SplitedGrayAddress from '@/components/SplitedGrayAddress';
-import { Address } from 'viem';
+import { Address, formatEther, Hex, hexToBigInt } from 'viem';
 
 export default function ReviewStep({ txData }: { txData?: TxData }) {
   const {
@@ -18,7 +18,7 @@ export default function ReviewStep({ txData }: { txData?: TxData }) {
   } = useAccount();
   return (
     <div className="space-y-4">
-      <h3 className="text-3xl">Recipient</h3>
+      <h3 className="text-3xl">Review</h3>
       <div className="space-y-2">
         {txData ? (
           <>
@@ -26,10 +26,13 @@ export default function ReviewStep({ txData }: { txData?: TxData }) {
             <div className="py-3 flex flex-row items-center font-medium text-lg">
               <img
                 className="h-10 w-10 mr-4"
-                src={txData.token?.icon}
+                src={txData.token?.logoURI}
                 alt={txData.token?.name}
               />
-              <div className="text-2xl">{txData.token?.balance} ETH</div>
+              <div className="text-2xl">
+                {formatEther(hexToBigInt(txData.token?.tokenBalance as Hex))}{' '}
+                ETH
+              </div>
             </div>
           </>
         ) : null}

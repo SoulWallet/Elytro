@@ -10,9 +10,11 @@ import {
   createWalletClient,
   formatEther,
   GetBlockParameters,
+  Hex,
   http,
   publicActions,
   PublicClient,
+  ReadContractParameters,
   toHex,
   WalletClient,
 } from 'viem';
@@ -139,6 +141,14 @@ class ElytroWalletClient {
         ...formatBlockParam(block),
       })
     );
+  }
+
+  public async readContract(param: ReadContractParameters) {
+    return await this._client.readContract(param);
+  }
+
+  public async getTransaction(hash: Hex) {
+    return await this._client.getTransaction({ hash });
   }
 
   // public async signTypedDataV4(params: unknown) {

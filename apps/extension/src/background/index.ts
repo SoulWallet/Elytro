@@ -7,6 +7,7 @@ import rpcFlow, { TProviderRequest } from '@/background/provider/rpcFlow';
 import { getDAppInfoFromSender } from '@/utils/url';
 import sessionManager from './services/session';
 import keyring from './services/keyring';
+import txHistoryManager, { ADD_TX } from './services/txHistory';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -43,6 +44,10 @@ const initApp = async () => {
   chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
     if (msg.type === RUNTIME_MESSAGE_TYPE.DOM_READY) {
       sendResponse(true);
+    }
+    if (msg.type === ADD_TX) {
+      console.log(msg);
+      txHistoryManager.addHistory(msg.data);
     }
   });
 };
