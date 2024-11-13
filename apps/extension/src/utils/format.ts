@@ -170,3 +170,53 @@ export function formatBlockParam(blockParam: BlockTag | bigint) {
     ? { blockTag: blockParam as BlockTag }
     : { blockNumber: BigInt(blockParam) };
 }
+
+/**
+ * A Data value (for example, byte arrays, account addresses, hashes, and bytecode arrays) must:
+ * - Be hex-encoded.
+ * - Be "0x"-prefixed.
+ * - Be expressed using two hex digits per byte.
+ */
+export function formatToData(value: SafeAny): string {
+  let hexString: string;
+
+  if (typeof value === 'string') {
+    hexString = value.startsWith('0x') ? value.slice(2) : value;
+  } else if (typeof value === 'number' || typeof value === 'bigint') {
+    hexString = value.toString(16);
+  } else if (value instanceof Uint8Array) {
+    hexString = Array.from(value)
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('');
+  } else {
+    throw new Error('Unsupported data type');
+  }
+
+  if (hexString.length % 2 !== 0) {
+    hexString = '0' + hexString;
+  }
+
+  return '0x' + hexString;
+}
+
+/**
+ * A Quantity (integer, number) must:
+ * - Be hex-encoded.
+ * - Be "0x"-prefixed.
+ * - Be expressed using the fewest possible hex digits per byte.
+ * - Express zero as "0x0".
+ */
+export function formatQuantity(value: SafeAny): string {
+  let hexString: string;
+
+  if (typeof value === 'string') {
+    hexString = BigInt(value).toString(16);
+  } else if (typeof value === 'number' || typeof value === 'bigint') {
+    hexString = value.toString(16);
+  } else {
+    throw new Error('Unsupported data type');
+  }
+
+  // Ensure the hex string is prefixed with '0x'
+  return '0x' + (hexString === '0' ? '0' : hexString);
+}

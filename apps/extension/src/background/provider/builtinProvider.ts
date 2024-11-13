@@ -59,18 +59,13 @@ class BuiltinProvider extends SafeEventEmitter {
         return await walletClient.getCode(
           ...(params as [Address, BlockTag | bigint])
         );
-      case 'eth_call':
-        this._validateArrayParams(params);
-        return await walletClient.call(
-          ...(params as [SafeAny, BlockTag | bigint])
-        );
       case 'eth_estimateGas':
         this._validateArrayParams(params);
         return await walletClient.estimateGas(
           ...(params as [SafeAny, BlockTag | bigint])
         );
       default:
-        throw ethErrors.rpc.methodNotFound(method);
+        return await walletClient.rpcRequest(method, params);
     }
   }
 }

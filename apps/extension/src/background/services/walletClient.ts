@@ -126,17 +126,10 @@ class ElytroWalletClient {
     }
   }
 
-  public async call(tx: SafeAny, block: BlockTag | bigint = 'latest') {
-    // TODO: differentiate call type (eip / legacy) using params
-    try {
-      return await this._client.call({
-        ...tx,
-        account: tx.from,
-        ...formatBlockParam(block),
-      });
-    } catch {
-      throw ethErrors.rpc.invalidParams();
-    }
+  public async rpcRequest(method: ProviderMethodType, params: SafeAny) {
+    // TODO: methods will be as same as viem's request method eventually
+    // TODO: maybe change all 'from' to local account?
+    return await this._client.request({ method: method as SafeAny, params });
   }
 
   public async estimateGas(tx: SafeAny, block: BlockTag | bigint = 'latest') {
