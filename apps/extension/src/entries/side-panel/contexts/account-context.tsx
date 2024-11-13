@@ -101,8 +101,11 @@ export const AccountProvider = ({
 
   const updateHistory = () => {
     elytroTxHistoryEventManager.subscribTxHistory((his: string) => {
-      console.log('update his in context', his);
-      setTxHistory(JSON.parse(his));
+      const history = JSON.parse(his);
+      if (history.length) {
+        const reversedHistory = history.reverse();
+        setTxHistory(reversedHistory);
+      }
     });
   };
   useEffect(() => {

@@ -2,6 +2,7 @@ import { elytroSDK } from './sdk';
 import { localStorage } from '@/utils/storage/local';
 import { Method } from '@soulwallet/decoder';
 import { formatEther, Hex, Transaction } from 'viem';
+import { ElytroTxHistoryEventManager } from './txHistoryEventManager';
 export const TX_HISTORY_UPDATE_EVENT = 'txHistoryUpdate';
 export const TX_HISTORY_STORAGE_KEY = 'elytroTxHistoryState';
 export const ADD_TX = 'addTx';
@@ -14,28 +15,12 @@ export type ElytroTxHistoryEventData = {
   value: string;
 };
 
-class ElytroTxHistoryEventManager {
-  emitAddTxHistory(data: ElytroTxHistoryEventData) {
-    chrome.runtime.sendMessage({ type: ADD_TX, data });
-  }
-  subscribTxHistory(handler: (data: string) => void) {
-    chrome.runtime.onMessage.addListener(({ type, data }) => {
-      if (type === TX_HISTORY_UPDATE_EVENT) {
-        handler(data);
-      }
-    });
-  }
-  broadcast(data: string) {
-    chrome.runtime.sendMessage({ type: TX_HISTORY_UPDATE_EVENT, data });
-  }
-}
-
-export const elytroTxHistoryEventManager = new ElytroTxHistoryEventManager();
-
 export class TxHistoryManager {
   private _store: TxHistory[] = [];
   private _initialized = false;
-  constructor() {
+  txHistoryEventManager: ElytroTxHistoryEventManager;
+  constructor(txHistoryEventManager: ElytroTxHistoryEventManager) {
+    this.txHistoryEventManager = txHistoryEventManager;
     this._initialize();
   }
   private async _initialize() {
@@ -76,7 +61,7 @@ export class TxHistoryManager {
     this.saveInLocalStorage();
   }
   broadcast() {
-    elytroTxHistoryEventManager.broadcast(JSON.stringify(this._store));
+    this.txHistoryEventManager.broadcast(JSON.stringify(this._store));
   }
 }
 
@@ -96,10 +81,10 @@ export class TxHistory {
   constructor(historyDetail: ElytroTxHistoryEventData) {
     this.id = historyDetail.hash;
     this.timestamp = new Date().getTime();
-    this.waitForUserOpTxHash();
+    this._waitForUserOpTxHash();
     this.historyDetail = historyDetail;
   }
-  private async waitForUserOpTxHash() {
+  private async _waitForUserOpTxHash() {
     const tx = await elytroSDK.waitForUserOperationTransaction({
       hash: this.id,
     });
@@ -122,5 +107,6 @@ export class TxHistory {
   }
 }
 
-const txHistoryManager = new TxHistoryManager();
+export const elytroTxHistoryEventManager = new ElytroTxHistoryEventManager();
+const txHistoryManager = new TxHistoryManager(elytroTxHistoryEventManager);
 export default txHistoryManager;

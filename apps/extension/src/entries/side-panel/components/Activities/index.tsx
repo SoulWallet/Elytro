@@ -4,6 +4,7 @@ import { useAccount } from '../../contexts/account-context';
 import { HistoryStatus, TxHistory } from '@/background/services/txHistory';
 import { formatAddressToShort } from '@/utils/format';
 import { formatEther } from 'viem';
+import dayjs from 'dayjs';
 
 const History = ({ his }: { his: TxHistory }) => {
   const StatusMap = {
@@ -39,7 +40,12 @@ const History = ({ his }: { his: TxHistory }) => {
           )}
         </div>
       </div>
-      {StatusMap[his.status]}
+      <div className="flex justify-between">
+        {StatusMap[his.status]}
+        <div className="text-gray-400">
+          {dayjs(his.timestamp).format('YYYY/MM/DD HH:mm:ss')}
+        </div>
+      </div>
     </div>
   );
 };
