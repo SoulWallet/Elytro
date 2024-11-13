@@ -6,12 +6,10 @@ import { formatAddressToShort } from '@/utils/format';
 import { formatEther } from 'viem';
 
 const History = ({ his }: { his: TxHistory }) => {
-  const genStatus = () => {
-    if (his.status === HistoryStatus.SUCCESS)
-      return <div className="text-green-800">Confirmed</div>;
-    if (his.status === HistoryStatus.DONE)
-      return <div className="text-red-800">UnConfirmed</div>;
-    return <div className="text-yellow-600">Pending</div>;
+  const StatusMap = {
+    [HistoryStatus.SUCCESS]: <div className="text-green-800">Confirmed</div>,
+    [HistoryStatus.DONE]: <div className="text-red-800">UnConfirmed</div>,
+    [HistoryStatus.PENDING]: <div className="text-yellow-600">Pending</div>,
   };
   return (
     <div className="py-2">
@@ -41,7 +39,7 @@ const History = ({ his }: { his: TxHistory }) => {
           )}
         </div>
       </div>
-      {genStatus()}
+      {StatusMap[his.status]}
     </div>
   );
 };
