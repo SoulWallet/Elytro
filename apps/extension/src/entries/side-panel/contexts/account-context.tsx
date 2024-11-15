@@ -4,7 +4,6 @@ import { useWallet } from '@/contexts/wallet';
 import { useHashLocation } from 'wouter/use-hash-location';
 import useSearchParams from '@/hooks/use-search-params';
 import { Address, toHex } from 'viem';
-import useActivities, { AggregatedTransaction } from '@/hooks/use-activities';
 import useTokens, { TokenDTO } from '@/hooks/use-tokens';
 import {
   elytroTxHistoryEventManager,
@@ -27,10 +26,6 @@ type IAccountContext = {
     tokens: TokenDTO[];
     loadingTokens: boolean;
   };
-  activityInfo: {
-    loadingActivities: boolean;
-    activities: AggregatedTransaction[];
-  };
   history: TxHistory[];
 };
 
@@ -41,10 +36,6 @@ const AccountContext = createContext<IAccountContext>({
   tokenInfo: {
     tokens: [],
     loadingTokens: false,
-  },
-  activityInfo: {
-    loadingActivities: false,
-    activities: [],
   },
   history: [],
 });
@@ -89,12 +80,7 @@ export const AccountProvider = ({
     ].id
   );
 
-  const { loadingActivities, activities } = useActivities(
-    accountInfo.address as Address,
-    chainId
-  );
-
-  const { tokens, loadingTokens } = useTokens(
+  const { tokens, loadingTokens, refetchTokens } = useTokens(
     accountInfo.address as Address,
     chainId
   );
@@ -105,6 +91,7 @@ export const AccountProvider = ({
       if (history.length) {
         const reversedHistory = history.reverse();
         setTxHistory(reversedHistory);
+        refetchTokens();
       }
     });
   };
@@ -141,10 +128,6 @@ export const AccountProvider = ({
         tokenInfo: {
           tokens,
           loadingTokens,
-        },
-        activityInfo: {
-          loadingActivities,
-          activities,
         },
         history,
         loading,
