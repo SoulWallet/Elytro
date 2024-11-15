@@ -1,6 +1,4 @@
-import { query } from '@/requests';
-import { gql } from '@apollo/client';
-import { useEffect, useState } from 'react';
+import { gql, useQuery } from '@apollo/client';
 import { Address, Hex } from 'viem';
 
 export interface TokenDTO {
@@ -17,8 +15,6 @@ interface TokenQueryDTO {
 }
 
 export default function useTokens(address?: Address, chainId?: Hex) {
-  const [loadingTokens, setLoadingTokens] = useState(false);
-  const [tokens, setTokens] = useState<TokenDTO[]>([]);
   const tokens_query = gql`
     query TokensQuery($address: String!, $chainId: String!) {
       tokens(address: $address, chainID: $chainId) {
@@ -32,23 +28,13 @@ export default function useTokens(address?: Address, chainId?: Hex) {
     }
   `;
 
-  const getTokens = async (address: Address, chainId: Hex) => {
-    setLoadingTokens(true);
-    const data = await query<TokenQueryDTO>(tokens_query, { address, chainId });
-    if (data?.tokens) {
-      setTokens(data.tokens);
-    }
-    setLoadingTokens(false);
-  };
-
-  useEffect(() => {
-    if (address && chainId) {
-      getTokens(address as Address, chainId);
-    }
-  }, [address, chainId]);
+  const { loading, data, refetch } = useQuery<TokenQueryDTO>(tokens_query, {
+    variables: { address, chainId },
+  });
 
   return {
-    tokens,
-    loadingTokens,
+    tokens: data?.tokens || [],
+    loadingTokens: loading,
+    refetchTokens: refetch,
   };
 }
