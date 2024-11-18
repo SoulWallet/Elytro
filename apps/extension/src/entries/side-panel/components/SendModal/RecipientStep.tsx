@@ -1,48 +1,69 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
-
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import questionIcon from '@/assets/icons/question.svg';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { TxData } from '.';
 import { isAddress } from 'viem';
 import { useAccount } from '../../contexts/account-context';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { useElytroStep } from '@/components/steps/StepProvider';
+import { TxData } from '.';
 
-export default function RecipientStep({
-  checkIsValid,
-  updateTxData,
-}: {
-  checkIsValid?: (isValid: boolean) => void;
-  updateTxData: Dispatch<SetStateAction<TxData | undefined>>;
-}) {
-  const [address, setAddress] = useState('');
+export default function RecipientStep() {
   const {
     accountInfo: { chainType },
   } = useAccount();
-  useEffect(() => {
-    if (checkIsValid) {
-      checkIsValid(isAddress(address, { strict: false }));
-      updateTxData((prev: TxData | undefined) => ({ ...prev, to: address }));
-    }
-  }, [address]);
+  const { handleContinue } = useElytroStep();
+  const formResolverConfig = z.object({
+    address: z.string().refine((address) => isAddress(address), {
+      message: 'Pleaase give a valid address.',
+    }),
+  });
+  const form = useForm<z.infer<typeof formResolverConfig>>({
+    resolver: zodResolver(formResolverConfig),
+    mode: 'onChange',
+  });
+  const handleComfirm = () => {
+    const { address } = form.getValues();
+    handleContinue<TxData>({ to: address });
+  };
   return (
     <div className="space-y-4">
       <h3 className="text-3xl">Recipient</h3>
       <div className="space-y-2">
-        <Label className="text-gray-400 font-normal">To</Label>
-        <div className="bg-gray-200 py-3 rounded-md border-none flex flex-row items-center font-medium text-lg">
-          <Input
-            className="text-lg"
-            placeholder="Input address"
-            value={address}
-            onChange={(event) => setAddress(event.target.value)}
+        <Form {...form}>
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-gray-400 font-normal">To</Label>
+                <FormControl className="bg-gray-200 px-4 py-8 rounded-lg">
+                  <Input
+                    className="text-lg"
+                    placeholder="Input address"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
+        </Form>
       </div>
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">Network</Label>
@@ -66,6 +87,15 @@ export default function RecipientStep({
             </TooltipContent>
           </Tooltip>
         </div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0">
+        <Button
+          onClick={handleComfirm}
+          disabled={!form.formState.isValid}
+          className={`w-full p-8 rounded-full ${form.formState.isValid ? 'bg-[#0E2D50]' : 'bg-[#F2F3F5] text-[#676B75]'}`}
+        >
+          Continue
+        </Button>
       </div>
     </div>
   );

@@ -10,28 +10,29 @@ import questionIcon from '@/assets/icons/question.svg';
 import { TxData } from '.';
 import { ChevronRight } from 'lucide-react';
 import SplitedGrayAddress from '@/components/SplitedGrayAddress';
-import { Address, formatEther, Hex, hexToBigInt } from 'viem';
+import { Address, formatEther, Hex } from 'viem';
+import { useElytroStep } from '@/components/steps/StepProvider';
 
-export default function ReviewStep({ txData }: { txData?: TxData }) {
+export default function ReviewStep() {
   const {
     accountInfo: { chainType },
   } = useAccount();
+  const { stepData } = useElytroStep() as { stepData: TxData };
   return (
     <div className="space-y-4">
       <h3 className="text-3xl">Review</h3>
       <div className="space-y-2">
-        {txData ? (
+        {stepData ? (
           <>
             <Label className="text-gray-400 font-normal">Token</Label>
             <div className="py-3 flex flex-row items-center font-medium text-lg">
               <img
                 className="h-10 w-10 mr-4"
-                src={txData.token?.logoURI}
-                alt={txData.token?.name}
+                src={stepData.token?.logoURI}
+                alt={stepData.token?.name}
               />
               <div className="text-2xl">
-                {formatEther(hexToBigInt(txData.token?.tokenBalance as Hex))}{' '}
-                ETH
+                {formatEther(BigInt(stepData.token?.tokenBalance as Hex))} ETH
               </div>
             </div>
           </>
@@ -41,7 +42,7 @@ export default function ReviewStep({ txData }: { txData?: TxData }) {
         <Label className="text-gray-400 font-normal">To</Label>
         <SplitedGrayAddress
           className="text-2xl font-medium"
-          address={txData?.to as Address}
+          address={stepData?.to as Address}
         />
       </div>
       <div className="space-y-2">
