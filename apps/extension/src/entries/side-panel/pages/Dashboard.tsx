@@ -26,7 +26,7 @@ export default function Dashboard() {
               <TabsContent value="assets">
                 <Assets />
               </TabsContent>
-              <TabsContent value="activities">
+              <TabsContent className="flex-1" value="activities">
                 <Activities />
               </TabsContent>
             </div>

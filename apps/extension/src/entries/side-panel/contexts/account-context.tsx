@@ -5,10 +5,8 @@ import { useHashLocation } from 'wouter/use-hash-location';
 import useSearchParams from '@/hooks/use-search-params';
 import { Address, toHex } from 'viem';
 import useTokens, { TokenDTO } from '@/hooks/use-tokens';
-import {
-  elytroTxHistoryEventManager,
-  TxHistory,
-} from '@/background/services/txHistory';
+import { UserOperationHistory } from '@/constants/operations';
+import RuntimeMessage from '@/utils/message/runtimeMessage';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
@@ -26,7 +24,8 @@ type IAccountContext = {
     tokens: TokenDTO[];
     loadingTokens: boolean;
   };
-  history: TxHistory[];
+  history: UserOperationHistory[];
+  updateHistory: () => Promise<void>;
 };
 
 const AccountContext = createContext<IAccountContext>({
@@ -38,6 +37,7 @@ const AccountContext = createContext<IAccountContext>({
     loadingTokens: false,
   },
   history: [],
+  updateHistory: async () => {},
 });
 
 export const AccountProvider = ({
@@ -52,7 +52,7 @@ export const AccountProvider = ({
   const [pathname] = useHashLocation();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const searchParams = useSearchParams();
-  const [history, setTxHistory] = useState<TxHistory[]>([]);
+  const [history, setHistory] = useState<UserOperationHistory[]>([]);
 
   const updateAccount = async () => {
     if (loading) {
@@ -80,24 +80,23 @@ export const AccountProvider = ({
     ].id
   );
 
-  const { tokens, loadingTokens, refetchTokens } = useTokens(
+  const { tokens, loadingTokens } = useTokens(
     accountInfo.address as Address,
     chainId
   );
 
-  const updateHistory = () => {
-    elytroTxHistoryEventManager.subscribTxHistory((his: string) => {
-      const history = JSON.parse(his);
-      if (history.length) {
-        const reversedHistory = history.reverse();
-        setTxHistory(reversedHistory);
-        refetchTokens();
-      }
-    });
+  // TODO: check this logic
+  const updateHistory = async () => {
+    const res = await wallet.getLatestHistories();
+    setHistory(res);
   };
+
   useEffect(() => {
-    updateHistory();
-    wallet.broadcastHistoy();
+    if (!history) {
+      updateHistory();
+    }
+
+    RuntimeMessage.onMessage('HISTORY_UPDATED', updateHistory);
   }, []);
 
   useEffect(() => {
@@ -130,6 +129,7 @@ export const AccountProvider = ({
           loadingTokens,
         },
         history,
+        updateHistory,
         loading,
       }}
     >

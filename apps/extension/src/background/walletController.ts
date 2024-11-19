@@ -8,7 +8,8 @@ import { hashEarlyTypedData, hashSignTypedData } from '@/utils/hash';
 import { ethErrors } from 'eth-rpc-errors';
 import sessionManager from './services/session';
 import { deformatUserOperation } from '@/utils/format';
-import txHistoryManager from './services/txHistory';
+import historyManager from './services/history';
+import { UserOperationHistory } from '@/constants/operations';
 
 // ! DO NOT use getter. They can not be proxied.
 class WalletController {
@@ -103,8 +104,17 @@ class WalletController {
     }
   }
 
-  public broadcastHistoy() {
-    txHistoryManager.broadcast();
+  public async addNewHistory(data: UserOperationHistory) {
+    historyManager.add(data);
+  }
+
+  public getLatestHistories() {
+    const res = historyManager.histories.map((item) => ({
+      ...item.data,
+      status: item.status,
+    }));
+
+    return res;
   }
 }
 

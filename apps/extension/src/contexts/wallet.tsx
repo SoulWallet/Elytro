@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 import { PortMessageManager } from '@/utils/message/portMessageManager';
 import { WalletController } from '@/background/walletController';
 
-const portMessageManager = new PortMessageManager('elytro-ui');
+export const portMessageManager = new PortMessageManager('elytro-ui');
 portMessageManager.connect();
 
 const walletControllerProxy = new Proxy(

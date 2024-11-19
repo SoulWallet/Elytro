@@ -19,8 +19,6 @@ import { DecodeResult } from '@soulwallet/decoder';
 import { toast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
 import { formatUserOperation } from '@/utils/format';
-import { Hex } from 'viem';
-import { elytroTxHistoryEventManager } from '@/background/services/txHistory';
 
 interface ISendTxProps {
   txParams: TTransactionInfo;
@@ -101,9 +99,11 @@ export default function SendTx({
       userOpRef.current!.signature = signature;
 
       await elytroSDK.sendUserOperation(userOpRef.current!);
-      console.log('decodedDetail', decodedDetail);
-      elytroTxHistoryEventManager.emitAddTxHistory({
-        hash: opHash as Hex,
+
+      // TODO: what to do if op is a batch of txs?
+      wallet.addNewHistory({
+        opHash,
+        timestamp: Date.now(),
         from: decodedDetail[0].from,
         to: decodedDetail[0].to,
         method: decodedDetail[0].method,
