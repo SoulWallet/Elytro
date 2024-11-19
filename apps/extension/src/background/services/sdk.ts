@@ -200,15 +200,17 @@ class ElytroSDK {
         throw res.ERR;
       } else if (res?.OK) {
         if (res.OK.success) {
-          return res.OK.receipt;
+          // TODO: maybe return all fields, not just status?
+          return UserOperationStatusEn.confirmedSuccess; //  res.OK.receipt;
         }
+
         return UserOperationStatusEn.confirmedFailed;
-      } else {
-        return UserOperationStatusEn.pending;
       }
+
+      return UserOperationStatusEn.pending;
     } catch (error) {
       console.error('Elytro: Failed to get user operation receipt.', error);
-      return UserOperationStatusEn.error;
+      return UserOperationStatusEn.pending; // maybe error?
     }
   }
 

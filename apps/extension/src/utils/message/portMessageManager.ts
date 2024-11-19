@@ -1,4 +1,7 @@
-type MessageHandler = (message: SafeAny, port: chrome.runtime.Port) => void;
+export type MessageHandler = (
+  message: SafeAny,
+  port: chrome.runtime.Port
+) => void;
 
 export class PortMessageManager {
   private ports: Map<string, chrome.runtime.Port> = new Map();

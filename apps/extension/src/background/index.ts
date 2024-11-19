@@ -7,7 +7,8 @@ import rpcFlow, { TProviderRequest } from '@/background/provider/rpcFlow';
 import { getDAppInfoFromSender } from '@/utils/url';
 import sessionManager from './services/session';
 import keyring from './services/keyring';
-import txHistoryManager, { ADD_TX } from './services/txHistory';
+import eventBus from '@/utils/eventBus';
+import RuntimeMessage from '@/utils/message/runtimeMessage';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -44,10 +45,6 @@ const initApp = async () => {
   chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
     if (msg.type === RUNTIME_MESSAGE_TYPE.DOM_READY) {
       sendResponse(true);
-    }
-    if (msg.type === ADD_TX) {
-      console.log(msg);
-      txHistoryManager.addHistory(msg.data);
     }
   });
 };
@@ -137,6 +134,7 @@ const initUIMessage = (port: chrome.runtime.Port) => {
   const UIPortManager = new PortMessageManager('elytro-ui');
   UIPortManager.connect(port);
 
+  // WalletController handles UI request
   async function handleUIRequest(request: {
     method: keyof WalletController;
     params: unknown[];
@@ -154,6 +152,7 @@ const initUIMessage = (port: chrome.runtime.Port) => {
     throw new Error(`Method ${method} not found on ElytroWalletClient`);
   }
 
+  // Wallet Requests
   UIPortManager.onMessage('UI_REQUEST', async (data, port) => {
     const msgKey = `UI_RESPONSE_${data.method}`;
     try {
@@ -177,9 +176,19 @@ const initUIMessage = (port: chrome.runtime.Port) => {
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name === 'elytro-ui') {
     initUIMessage(port);
-
     return;
   }
 
   initContentScriptAndPageProviderMessage(port);
+});
+
+eventBus.on('HISTORY_UPDATED', () => {
+  RuntimeMessage.sendMessage('HISTORY_UPDATED');
+});
+
+eventBus.on('historyItemStatusUpdated', (userOpHash, status) => {
+  console.log('elytro test on historyItemStatusUpdated', userOpHash, status);
+  RuntimeMessage.sendMessage(`HISTORY_ITEM_STATUS_UPDATED_${userOpHash}`, {
+    status,
+  });
 });
