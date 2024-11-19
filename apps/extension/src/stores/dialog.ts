@@ -7,8 +7,10 @@ import { create } from 'zustand';
 
 interface DialogState {
   isSignTxDialogOpen: boolean;
+  isSendTxDialogOpen: boolean;
   signTxDetail: Nullable<TSignTxDetail>;
   userOp: Nullable<ElytroUserOperation>;
+  txDetail: Nullable<TTransactionInfo>;
   openSignTxDialog: (
     userOp: ElytroUserOperation,
     onSuccess?: () => void,
@@ -20,15 +22,24 @@ interface DialogState {
   loading: boolean;
   confirmTx: () => Promise<void>;
   successCallback: Nullable<() => void>;
+  closeSendTxDialog: () => void;
+  openSendTxDialog: (
+    txDetail: TTransactionInfo,
+    afterSendTxConfirm: () => void
+  ) => void;
+  afterSendTxConfirm: () => void;
 }
 
 const useDialogStore = create<DialogState>((set, get) => ({
   loading: false,
   isSignTxDialogOpen: false,
+  isSendTxDialogOpen: false,
   userOp: null,
   successCallback: null,
   // todo: remove this
   signTxDetail: null,
+  txDetail: null,
+  afterSendTxConfirm: () => {},
   openSignTxDialog: async (
     userOp: ElytroUserOperation,
     onSuccess?: () => void,
@@ -106,6 +117,20 @@ const useDialogStore = create<DialogState>((set, get) => ({
     } finally {
       set({ loading: false });
     }
+  },
+  openSendTxDialog: (txDetail, afterSendTxConfirm) => {
+    set({
+      isSendTxDialogOpen: true,
+      txDetail,
+      afterSendTxConfirm,
+    });
+  },
+  closeSendTxDialog: () => {
+    set({
+      isSendTxDialogOpen: false,
+      txDetail: null,
+      afterSendTxConfirm: () => {},
+    });
   },
 }));
 

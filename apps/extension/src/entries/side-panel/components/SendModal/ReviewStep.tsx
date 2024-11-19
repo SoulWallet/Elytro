@@ -10,14 +10,34 @@ import questionIcon from '@/assets/icons/question.svg';
 import { TxData } from '.';
 import { ChevronRight } from 'lucide-react';
 import SplitedGrayAddress from '@/components/SplitedGrayAddress';
-import { Address, formatEther, Hex } from 'viem';
+import { Address, formatEther, Hex, parseEther, toHex } from 'viem';
 import { useElytroStep } from '@/components/steps/StepProvider';
+import { Button } from '@/components/ui/button';
+import useDialogStore from '@/stores/dialog';
 
-export default function ReviewStep() {
+export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
   const {
-    accountInfo: { chainType },
+    accountInfo: { chainType, address },
   } = useAccount();
   const { stepData } = useElytroStep() as { stepData: TxData };
+  const { openSendTxDialog, closeSendTxDialog } = useDialogStore();
+  const afterConfirm = () => {
+    closeSendTxDialog();
+    onConfirm();
+  };
+  const handleComfirm = () => {
+    if (!address) {
+      console.error('Address is undefined');
+      return;
+    }
+    const txParams = {
+      from: address,
+      to: stepData.to,
+      value: toHex(parseEther(stepData.amount ?? '0')),
+      gasPrice: '0x0',
+    };
+    openSendTxDialog(txParams, afterConfirm);
+  };
   return (
     <div className="space-y-4">
       <h3 className="text-3xl">Review</h3>
@@ -79,6 +99,14 @@ export default function ReviewStep() {
             Sponsored by Soul Wallet
           </div>
         </div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0">
+        <Button
+          onClick={handleComfirm}
+          className="w-full p-8 rounded-full bg-[#0E2D50]"
+        >
+          Confirm
+        </Button>
       </div>
     </div>
   );

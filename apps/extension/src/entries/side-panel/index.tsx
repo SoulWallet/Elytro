@@ -10,6 +10,7 @@ import { ApolloProvider } from '@apollo/client';
 import { routes } from './routes';
 import SignTxModal from '@/entries/side-panel/components/SignTxModal';
 import { client } from '@/requests';
+import SendTxModal from './components/SendTxModal';
 
 const main = () => {
   const SidePanelApp: React.FC = () => (
@@ -20,6 +21,7 @@ const main = () => {
             <TooltipProvider>
               <HashRouter routes={routes} />
               <SignTxModal />
+              <SendTxModal />
             </TooltipProvider>
           </PageContainer>
         </ApprovalProvider>

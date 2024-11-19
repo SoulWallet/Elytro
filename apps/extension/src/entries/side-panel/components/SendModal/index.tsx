@@ -22,13 +22,16 @@ export default function SendModal({ open, onOpenChange }: IProps) {
   };
   return (
     <Dialog open={open} onOpenChange={handleOnOpenChange}>
-      <DialogContent className="h-screen">
+      <DialogContent
+        className="h-screen"
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <div className="h-full relative">
           <div className="mt-10">
             <Steps>
               <SendStep />
               <RecipientStep />
-              <ReviewStep />
+              <ReviewStep onConfirm={handleOnOpenChange} />
             </Steps>
           </div>
         </div>
