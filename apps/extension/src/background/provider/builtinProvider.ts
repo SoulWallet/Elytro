@@ -3,6 +3,7 @@ import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 import { Address, BlockTag, toHex } from 'viem';
 import walletClient from '../services/walletClient';
 import { ethErrors } from 'eth-rpc-errors';
+import { rpcCacheManager } from './rpcCache';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
@@ -35,7 +36,7 @@ class BuiltinProvider extends SafeEventEmitter {
     }
   }
 
-  public async request({ method, params }: RequestArguments) {
+  private async _request({ method, params }: RequestArguments) {
     switch (method) {
       case 'net_version':
         return walletClient.chain.id ? walletClient.chain.id.toString() : '0';
@@ -67,6 +68,29 @@ class BuiltinProvider extends SafeEventEmitter {
       default:
         return await walletClient.rpcRequest(method, params);
     }
+  }
+
+  public async request({ method, params }: RequestArguments) {
+    const cacheResult = rpcCacheManager.get(
+      walletClient.chainType,
+      walletClient.address ?? '0x',
+      { method, params }
+    );
+
+    if (cacheResult) {
+      return cacheResult;
+    }
+
+    const result = await this._request({ method, params });
+
+    rpcCacheManager.set(
+      walletClient.chainType,
+      walletClient.address ?? '0x',
+      { method, params },
+      result
+    );
+
+    return result;
   }
 }
 

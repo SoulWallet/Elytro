@@ -10,6 +10,7 @@ import keyring from './services/keyring';
 import eventBus from '@/utils/eventBus';
 import RuntimeMessage from '@/utils/message/runtimeMessage';
 import { EVENT_TYPES } from '@/constants/events';
+import { rpcCacheManager } from './provider/rpcCache';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -21,15 +22,15 @@ chrome.runtime.onInstalled.addListener((details) => {
         });
       }, 200);
       break;
-    case chrome.runtime.OnInstalledReason.UPDATE:
-      // TODO: do something
-      break;
-    case chrome.runtime.OnInstalledReason.CHROME_UPDATE:
-      // TODO: do something
-      break;
-    case chrome.runtime.OnInstalledReason.SHARED_MODULE_UPDATE:
-      // TODO: do something
-      break;
+    // case chrome.runtime.OnInstalledReason.UPDATE:
+    //   // TODO: do something
+    //   break;
+    // case chrome.runtime.OnInstalledReason.CHROME_UPDATE:
+    //   // TODO: do something
+    //   break;
+    // case chrome.runtime.OnInstalledReason.SHARED_MODULE_UPDATE:
+    //   // TODO: do something
+    //   break;
   }
 });
 
@@ -43,6 +44,9 @@ const initApp = async () => {
   await connectionManager.restore();
   await sendReadyMessageToTabs();
 
+  rpcCacheManager.init();
+
+  // TODO: replace with RuntimeMessage
   chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
     if (msg.type === RUNTIME_MESSAGE_TYPE.DOM_READY) {
       sendResponse(true);
