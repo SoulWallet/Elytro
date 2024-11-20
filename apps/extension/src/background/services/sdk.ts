@@ -30,11 +30,9 @@ import {
   parseEther,
   PublicClient,
   toHex,
-  Transaction as ViemTransaction,
 } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
 import { ethErrors } from 'eth-rpc-errors';
-import walletClient from './walletClient';
 
 class ElytroSDK {
   private _sdk!: SoulWallet;
@@ -496,52 +494,13 @@ class ElytroSDK {
   //   }
   // }
 
-  public async waitForUserOperationTransaction(
-    args: WaitForUserOperationTxParameters
-  ): Promise<ViemTransaction | null> {
-    const {
-      hash,
-      retries = {
-        maxRetries: 5,
-        intervalMs: 2000,
-        multiplier: 1.5,
-      },
-    } = args;
-
-    for (let i = 0; i < retries.maxRetries; i++) {
-      const jitter = Math.random() * 100;
-      const interval =
-        retries.intervalMs * Math.pow(retries.multiplier, i) + jitter;
-
-      await this._delay(interval);
-
-      const receipt = await this.getUserOperationReceipt(hash as `0x${string}`);
-
-      if (this._isReceiptValid(receipt)) {
-        return await walletClient.getTransaction(
-          receipt.transactionHash as Hex
-        );
-      }
-    }
-
-    console.error(
-      'Elytro: User operation transaction not found after retries.'
-    );
-    return null; // or throw an error if that's more appropriate
-  }
-
-  // Helper methods for better readability
-  private _delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  private _isReceiptValid(receipt: unknown): boolean {
-    return (
-      receipt &&
-      receipt !== UserOperationStatusEn.pending &&
-      receipt.transactionHash
-    );
-  }
+  // private _isReceiptValid(receipt: unknown): boolean {
+  //   return (
+  //     receipt &&
+  //     receipt !== UserOperationStatusEn.pending &&
+  //     receipt.transactionHash
+  //   );
+  // }
 }
 
 export const elytroSDK = new ElytroSDK();
