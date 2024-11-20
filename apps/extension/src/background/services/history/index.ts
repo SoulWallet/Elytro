@@ -4,20 +4,21 @@ import UniqueQueue from '@/utils/UniqueQueue';
 import { UserOperationHistory } from '@/constants/operations';
 import { localStorage } from '@/utils/storage/local';
 import eventBus from '@/utils/eventBus';
+import { EVENT_TYPES } from '@/constants/events';
 
 const HISTORY_STORAGE_KEY = 'elytroHistory';
 
-type TxHistoryState = {
+type HistoryState = {
   [key: string]: UserOperationHistory;
 };
 
 class HistoryManager {
   private _historyQueue: UniqueQueue<HistoryItem>;
-  private _store: SubscribableStore<TxHistoryState>;
+  private _store: SubscribableStore<HistoryState>;
 
   constructor() {
     this._historyQueue = new UniqueQueue<HistoryItem>();
-    this._store = new SubscribableStore({} as TxHistoryState);
+    this._store = new SubscribableStore({} as HistoryState);
     this._initialize();
   }
 
@@ -30,7 +31,7 @@ class HistoryManager {
     this._store.subscribe((state) => {
       localStorage.save({ [HISTORY_STORAGE_KEY]: state });
 
-      eventBus.emit('HISTORY_UPDATED');
+      eventBus.emit(EVENT_TYPES.HISTORY.ITEMS_UPDATED);
     });
 
     const { [HISTORY_STORAGE_KEY]: prevState } = await localStorage.get([
@@ -39,9 +40,9 @@ class HistoryManager {
 
     // sync local storage with _store
     if (prevState) {
-      this._store.setState(prevState as TxHistoryState);
+      this._store.setState(prevState as HistoryState);
 
-      Object.entries(prevState as TxHistoryState).forEach(([_, data]) => {
+      Object.entries(prevState as HistoryState).forEach(([_, data]) => {
         this._historyQueue.enqueue(new HistoryItem(data));
       });
     }

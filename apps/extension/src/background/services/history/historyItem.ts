@@ -5,14 +5,7 @@ import {
 import { elytroSDK } from '../sdk';
 import eventBus from '@/utils/eventBus';
 
-// // TODO: check if these fields are enough
-// type HistoryItemData = {
-//   amount: string;
-//   from: string;
-//   to: string;
-// };
-
-const FETCH_INTERVAL = 2000;
+const FETCH_INTERVAL = 1000;
 
 class HistoryItem {
   private _data: UserOperationHistory;
@@ -54,7 +47,6 @@ class HistoryItem {
 
   private _broadcastToUI() {
     // todo: test broadcast to ui
-    console.log('elytro test broadcast to ui', this._data.opHash, this.status);
     eventBus.emit('historyItemStatusUpdated', this._data.opHash, this.status);
   }
 
