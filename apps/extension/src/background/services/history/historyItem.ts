@@ -18,7 +18,6 @@ class HistoryItem {
     this._data = {
       ...data,
     };
-    this.fetchStatus();
     this._initWatcher();
   }
 
@@ -41,6 +40,12 @@ class HistoryItem {
     if (this._status === status) {
       return;
     }
+
+    if (status !== UserOperationStatusEn.pending && this._watcher) {
+      clearInterval(this._watcher);
+      this._watcher = null;
+    }
+
     this._status = status;
     this._broadcastToUI();
   }
@@ -51,15 +56,7 @@ class HistoryItem {
   }
 
   private _initWatcher() {
-    if (this.status !== UserOperationStatusEn.pending) {
-      if (this._watcher) {
-        clearInterval(this._watcher);
-        this._watcher = null;
-      }
-      return;
-    }
-
-    if (!this._watcher) {
+    if (!this._watcher && this._status === UserOperationStatusEn.pending) {
       this._watcher = setInterval(() => this.fetchStatus(), FETCH_INTERVAL);
     }
   }
@@ -68,6 +65,7 @@ class HistoryItem {
     if (this._fetching) {
       return;
     }
+
     try {
       this._fetching = true;
       const opStatus = await elytroSDK.getUserOperationReceipt(

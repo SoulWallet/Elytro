@@ -10,7 +10,7 @@ class RuntimeMessage {
     params?: SafeObject,
     onResponse?: (response: SafeAny) => void
   ): Promise<SafeAny> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
           type,
@@ -18,7 +18,11 @@ class RuntimeMessage {
         },
         (response) => {
           if (chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError);
+            // reject(chrome.runtime.lastError);
+            console.error(
+              'Elytro: Runtime message error',
+              chrome.runtime.lastError
+            );
           } else {
             onResponse?.(response);
             resolve(response);

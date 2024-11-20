@@ -37,7 +37,8 @@ export const SDK_INIT_CONFIG_BY_CHAIN_MAP: Record<
   },
   [SupportedChainTypeEn.ETH_SEPOLIA]: {
     endpoint:
-      'https://eth-sepolia.g.alchemy.com/v2/Gp8ptWCctltOyYxWVlQMI_eg8Uj44o64',
+      // 'https://eth-sepolia.g.alchemy.com/v2/Gp8ptWCctltOyYxWVlQMI_eg8Uj44o64',
+      'https://ethereum-sepolia-rpc.publicnode.com',
     bundler:
       'https://api.pimlico.io/v2/11155111/rpc?apikey=pim_7KhEvjRKpLviLbtDBuHySr',
     factory: '0x70B616f23bDDB18c5c412dB367568Dc360e224Bb',

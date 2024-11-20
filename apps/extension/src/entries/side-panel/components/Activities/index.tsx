@@ -24,7 +24,6 @@ const History = ({
   const [latestStatus, setLatestStatus] = useState(status);
 
   const updateStatusFromMessage = (response: SafeObject) => {
-    console.log('elytro  test updateStatusFromMessage', opHash, response);
     setLatestStatus(response?.status || UserOperationStatusEn.pending);
   };
 
