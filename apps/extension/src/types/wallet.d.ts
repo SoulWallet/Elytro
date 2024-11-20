@@ -70,26 +70,3 @@ type TApprovalInfo = {
   reject: (data?: unknown) => void;
   winId?: number;
 };
-
-type WaitForUserOperationTxParameters = {
-  hash: Hex;
-  /**
-   * Exponential backoff paramters that can be used to override
-   * the configuration on the client. If not provided, this method
-   * will use the paramters passed via the `opts` parameter on the
-   * smart account client.
-   */
-  retries?: {
-    /**
-     * the base retry interval or delay between requests
-     */
-    intervalMs: number;
-    /**
-     * the multiplier to exponentiate based on the number retries
-     * setting this to one will result in a linear backoff
-     */
-    multiplier: number;
-    /** the maximum number of retries before failing */
-    maxRetries: number;
-  };
-};
