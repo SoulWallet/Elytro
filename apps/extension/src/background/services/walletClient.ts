@@ -7,16 +7,14 @@ import {
 import {
   Address,
   BlockTag,
-  createWalletClient,
+  createPublicClient,
   formatEther,
   GetBlockParameters,
   Hex,
   http,
-  publicActions,
   PublicClient,
   ReadContractParameters,
   toHex,
-  WalletClient,
 } from 'viem';
 import keyring from './keyring';
 import { elytroSDK } from './sdk';
@@ -29,7 +27,7 @@ class ElytroWalletClient {
   private _chainType: SupportedChainTypeEn = DEFAULT_CHAIN_TYPE;
   private _balance: Nullable<string> = null;
 
-  private _client!: WalletClient & PublicClient;
+  private _client!: PublicClient;
 
   constructor() {
     // default to ETH Sepolia
@@ -60,10 +58,10 @@ class ElytroWalletClient {
     if (!this._client || chainType !== this._chainType) {
       this._chainType = chainType;
 
-      this._client = createWalletClient({
+      this._client = createPublicClient({
         chain: SUPPORTED_CHAIN_MAP[this._chainType],
         transport: http(SUPPORTED_CHAIN_RPC_URL_MAP[this._chainType]),
-      }).extend(publicActions);
+      });
     }
   }
 
