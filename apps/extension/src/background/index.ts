@@ -9,6 +9,7 @@ import sessionManager from './services/session';
 import keyring from './services/keyring';
 import eventBus from '@/utils/eventBus';
 import RuntimeMessage from '@/utils/message/runtimeMessage';
+import { EVENT_TYPES } from '@/constants/events';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -182,13 +183,19 @@ chrome.runtime.onConnect.addListener((port) => {
   initContentScriptAndPageProviderMessage(port);
 });
 
-eventBus.on('HISTORY_UPDATED', () => {
-  RuntimeMessage.sendMessage('HISTORY_UPDATED');
-});
-
-eventBus.on('historyItemStatusUpdated', (userOpHash, status) => {
-  console.log('elytro test on historyItemStatusUpdated', userOpHash, status);
-  RuntimeMessage.sendMessage(`HISTORY_ITEM_STATUS_UPDATED_${userOpHash}`, {
-    status,
+const initBackgroundMessage = () => {
+  eventBus.on(EVENT_TYPES.HISTORY.ITEMS_UPDATED, () => {
+    RuntimeMessage.sendMessage(EVENT_TYPES.HISTORY.ITEMS_UPDATED);
   });
-});
+
+  eventBus.on(EVENT_TYPES.HISTORY.ITEM_STATUS_UPDATED, (userOpHash, status) => {
+    RuntimeMessage.sendMessage(
+      `${EVENT_TYPES.HISTORY.ITEM_STATUS_UPDATED}_${userOpHash}`,
+      {
+        status,
+      }
+    );
+  });
+};
+
+initBackgroundMessage();

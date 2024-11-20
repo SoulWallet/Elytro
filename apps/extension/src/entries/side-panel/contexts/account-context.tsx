@@ -7,6 +7,7 @@ import { Address, toHex } from 'viem';
 import useTokens, { TokenDTO } from '@/hooks/use-tokens';
 import { UserOperationHistory } from '@/constants/operations';
 import RuntimeMessage from '@/utils/message/runtimeMessage';
+import { EVENT_TYPES } from '@/constants/events';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
@@ -96,7 +97,7 @@ export const AccountProvider = ({
       updateHistory();
     }
 
-    RuntimeMessage.onMessage('HISTORY_UPDATED', updateHistory);
+    RuntimeMessage.onMessage(EVENT_TYPES.HISTORY.ITEMS_UPDATED, updateHistory);
   }, []);
 
   useEffect(() => {

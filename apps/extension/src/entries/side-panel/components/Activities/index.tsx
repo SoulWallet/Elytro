@@ -10,6 +10,7 @@ import {
 } from '@/constants/operations';
 import { useEffect, useState } from 'react';
 import RuntimeMessage from '@/utils/message/runtimeMessage';
+import { EVENT_TYPES } from '@/constants/events';
 
 const History = ({
   opHash,
@@ -28,9 +29,8 @@ const History = ({
   };
 
   useEffect(() => {
-    console.log('elytro test useEffect', opHash);
     RuntimeMessage.onMessage(
-      `HISTORY_ITEM_STATUS_UPDATED_${opHash}`,
+      `${EVENT_TYPES.HISTORY.ITEM_STATUS_UPDATED}_${opHash}`,
       updateStatusFromMessage
     );
 
