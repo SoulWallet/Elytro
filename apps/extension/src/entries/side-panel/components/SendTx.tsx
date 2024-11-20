@@ -115,8 +115,6 @@ export default function SendTx({
         description: 'User operation hash: ',
       });
 
-      // TODO: do sth with the hash (leave it for activity to check?)
-      // await elytroSDK.getUserOperationReceipt(opHash);
       onConfirm();
     } catch (error) {
       toast({
