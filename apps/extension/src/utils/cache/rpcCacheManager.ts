@@ -1,21 +1,26 @@
 import { SupportedChainTypeEn } from '@/constants/chains';
-
-type TCacheValue = {
-  value: SafeAny;
-  expireTime: number;
-  timeoutId: NodeJS.Timeout; // ! Need to clear cache value when the cache is expired
-};
+import CacheManager from '@/utils/cache/cacheManager';
 
 const DEFAULT_BLOCK_NUMBER_CACHE_EXPIRE_TIME = 10_000; // ms
 const DEFAULT_RPC_CACHE_EXPIRE_TIME = 30_000; //ms
 
-const SAFE_CACHE_METHODS = ['eth_getCode'];
+// TODO: check if it's safe to cache these methods. And add more if needed.
+const SAFE_CACHE_METHODS = [
+  'eth_getCode',
+  'eth_estimateGas',
+  'eth_chainId',
+  'eth_blockNumber',
+  'eth_accounts',
+  'eth_requestAccounts',
+  'eth_getBlockByNumber',
+  'eth_gasPrice',
+  'eth_call',
+];
 
-class RPCCacheManager {
-  private _cache: Map<string, TCacheValue> = new Map();
+class RPCCacheManager extends CacheManager {
   private _latestBlockNumberByChain: Record<string, string> = {}; // key is SupportedChainTypeEn
 
-  init() {
+  public init() {
     this._refreshLatestBlockNumber();
 
     setInterval(() => {
@@ -36,27 +41,13 @@ class RPCCacheManager {
     return this._latestBlockNumberByChain[chain] ?? 0;
   }
 
-  private _getCacheKey(
+  protected _getCacheKey(
     chainId: SupportedChainTypeEn,
     address: string,
     method: string,
     params: SafeAny
   ): string {
     return `${chainId}-${this._getLatestBlockNumber(chainId)}-${address}-${method}-${JSON.stringify(params)}`;
-  }
-
-  private _set(
-    key: string,
-    value: SafeAny,
-    expireTime = DEFAULT_RPC_CACHE_EXPIRE_TIME
-  ): void {
-    this._cache.set(key, {
-      value,
-      expireTime: Date.now() + expireTime,
-      timeoutId: setTimeout(() => {
-        this._cache.delete(key);
-      }, expireTime),
-    });
   }
 
   public set(
@@ -102,11 +93,7 @@ class RPCCacheManager {
       request.params
     );
 
-    return this._cache.has(key) ? this._cache.get(key)?.value : null;
-  }
-
-  public clear(): void {
-    this._cache.clear();
+    return super._get(key);
   }
 }
 

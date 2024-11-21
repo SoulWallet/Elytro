@@ -3,7 +3,7 @@ import { SafeEventEmitter } from '@/utils/safeEventEmitter';
 import { Address, BlockTag, toHex } from 'viem';
 import walletClient from '../services/walletClient';
 import { ethErrors } from 'eth-rpc-errors';
-import { rpcCacheManager } from './rpcCache';
+import { rpcCacheManager } from '@/utils/cache/rpcCacheManager';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193

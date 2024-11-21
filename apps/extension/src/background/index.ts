@@ -10,7 +10,8 @@ import keyring from './services/keyring';
 import eventBus from '@/utils/eventBus';
 import RuntimeMessage from '@/utils/message/runtimeMessage';
 import { EVENT_TYPES } from '@/constants/events';
-import { rpcCacheManager } from './provider/rpcCache';
+import uiReqCacheManager from '@/utils/cache/uiReqCacheManager';
+import { rpcCacheManager } from '@/utils/cache/rpcCacheManager';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -135,15 +136,17 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
   );
 };
 
+type TUIRequest = {
+  method: keyof WalletController;
+  params: unknown[];
+};
+
 const initUIMessage = (port: chrome.runtime.Port) => {
   const UIPortManager = new PortMessageManager('elytro-ui');
   UIPortManager.connect(port);
 
   // WalletController handles UI request
-  async function handleUIRequest(request: {
-    method: keyof WalletController;
-    params: unknown[];
-  }) {
+  async function handleUIRequest(request: TUIRequest) {
     const { method, params } = request;
 
     if (typeof walletController[method] === 'function') {
@@ -151,22 +154,29 @@ const initUIMessage = (port: chrome.runtime.Port) => {
         walletController[method] as (...args: unknown[]) => unknown
       )(...params);
 
+      uiReqCacheManager.set(method, params, res);
       return res;
     }
 
     throw new Error(`Method ${method} not found on ElytroWalletClient`);
   }
 
+  async function handleUIRequestWithCache({ method, params }: TUIRequest) {
+    const cache = uiReqCacheManager.get(method, params);
+    if (cache) {
+      handleUIRequest({ method, params });
+      return cache;
+    } else {
+      return await handleUIRequest({ method, params });
+    }
+  }
+
   // Wallet Requests
   UIPortManager.onMessage('UI_REQUEST', async (data, port) => {
     const msgKey = `UI_RESPONSE_${data.method}`;
     try {
-      const result = await handleUIRequest(
-        data as {
-          method: keyof WalletController;
-          params: unknown[];
-        }
-      );
+      const result = await handleUIRequestWithCache(data as TUIRequest);
+
       UIPortManager.sendMessage(msgKey, { result }, port.sender?.id);
     } catch (error) {
       UIPortManager.sendMessage(
