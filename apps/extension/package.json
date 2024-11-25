@@ -55,6 +55,7 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "2.0.0-beta.26",
     "@eslint/js": "^9.9.0",
+    "@types/archiver": "^6.0.3",
     "@types/chrome": "^0.0.270",
     "@types/koa-compose": "^3.2.8",
     "@types/node": "^22.5.4",
@@ -63,6 +64,8 @@
     "@types/readable-stream": "^4.0.15",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "archiver": "^7.0.1",
+    "date-fns": "^4.1.0",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
