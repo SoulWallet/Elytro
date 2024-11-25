@@ -63,10 +63,6 @@ class PageProvider extends SafeEventEmitter {
     this._message.addListener('event_message', (payload) => {
       this.emit(payload.event, payload.data);
     });
-
-    // this.on('connected', () => {
-    //   console.log('Elytro Provider received connected event');
-    // });
   };
 
   send = async () => {
@@ -112,8 +108,15 @@ class PageProvider extends SafeEventEmitter {
   };
 
   // @ts-ignore
-  emit = (eventName: ProviderEvent, ...args: any[]) => {
+  emit = (eventName: ProviderEvent, ...args: SafeAny[]) => {
     switch (eventName) {
+      case 'connect':
+        this._currentChainId = args[0];
+        return super.emit(eventName, ...args);
+      case 'disconnect':
+        this._currentAddress = null;
+        this._currentChainId = null;
+        return super.emit(eventName, ...args);
       case 'accountsChanged':
         if (args[0] && args[0] !== this._currentAddress) {
           this._currentAddress = args[0];

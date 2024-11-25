@@ -12,6 +12,8 @@ import RuntimeMessage from '@/utils/message/runtimeMessage';
 import { EVENT_TYPES } from '@/constants/events';
 import uiReqCacheManager from '@/utils/cache/uiReqCacheManager';
 import { rpcCacheManager } from '@/utils/cache/rpcCacheManager';
+import { SUPPORTED_CHAIN_MAP } from '@/constants/chains';
+import walletClient from './services/walletClient';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -82,11 +84,9 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
 
     if (connectionManager.isConnected(origin)) {
       await keyring.tryUnlock();
-      sessionManager.broadcastMessageToDApp(
-        origin,
-        'accountsChanged',
-        keyring.smartAccountAddress ? [keyring.smartAccountAddress] : []
-      );
+      sessionManager.broadcastMessageToDApp(origin, 'connect', {
+        chainId: SUPPORTED_CHAIN_MAP[walletClient.chainType].id,
+      });
     }
   });
 

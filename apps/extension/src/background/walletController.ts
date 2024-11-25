@@ -1,4 +1,4 @@
-import { SupportedChainTypeEn } from '@/constants/chains';
+import { SUPPORTED_CHAIN_MAP, SupportedChainTypeEn } from '@/constants/chains';
 import { approvalService } from './services/approval';
 import connectionManager from './services/connection';
 import keyring from './services/keyring';
@@ -72,9 +72,14 @@ class WalletController {
 
   public async connectWallet(dApp: TDAppInfo, chainType: SupportedChainTypeEn) {
     connectionManager.connect(dApp, chainType);
-    sessionManager.broadcastMessageToDApp(dApp.origin!, 'accountsChanged', [
-      keyring.smartAccountAddress,
-    ]);
+
+    sessionManager.broadcastMessageToDApp(dApp.origin!, 'connect', {
+      chainId: SUPPORTED_CHAIN_MAP[chainType].id,
+    });
+  }
+
+  public async disconnectWallet(dApp: TDAppInfo) {
+    connectionManager.disconnect(dApp.origin!);
   }
 
   public async signUserOperation(userOp: ElytroUserOperation) {

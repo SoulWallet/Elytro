@@ -15,6 +15,7 @@ type TConnectionManagerState = {
 
 const CONNECTION_STORAGE_KEY = 'elytroConnectionState';
 
+// ! TODO: maintain connection based on origin AND chain? now, it's based on origin only.
 /**
  * Manage connected sites
  * Support EIP-2255
@@ -80,7 +81,9 @@ class ConnectionManager {
   public disconnect(origin: string) {
     this.connectedSites.delete(String(origin));
     this.syncToStorage();
-    sessionManager.broadcastMessageToDApp(origin, 'accountsChanged', []);
+    sessionManager.broadcastMessageToDApp(origin, 'disconnect', {
+      error: 'User disconnected',
+    });
   }
 
   public getSite(origin: string) {
@@ -148,6 +151,10 @@ class ConnectionManager {
     this._store.setState({
       sites: [...this.connectedSites.values()],
     });
+  }
+
+  public getConnectedSites() {
+    return [...this.connectedSites.values()];
   }
 }
 
