@@ -4,6 +4,7 @@ import { crx } from '@crxjs/vite-plugin';
 import manifest from './public/manifest.json';
 import { resolve } from 'path';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import renameAndPackOutputPlugin from './output-pack-vite-plugin';
 
 export default defineConfig({
   // define: {
@@ -23,6 +24,7 @@ export default defineConfig({
     nodePolyfills({
       include: ['process', 'util'],
     }),
+    renameAndPackOutputPlugin(),
   ],
   resolve: {
     alias: {

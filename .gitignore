@@ -132,3 +132,7 @@ build
 
 .vite
 .DS_Store
+
+# build output
+**/*.zip
+elytro-*
