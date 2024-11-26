@@ -35,6 +35,7 @@ import {
 } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
 import { ethErrors } from 'eth-rpc-errors';
+import { ABI_SoulWallet } from '@soulwallet/abi';
 
 class ElytroSDK {
   private _sdk!: SoulWallet;
@@ -234,6 +235,28 @@ class ElytroSDK {
   //   }
   // }
 
+  private async _isSignatureValid(
+    address: Hex,
+    messageHash: Hex,
+    signature: Hex
+  ) {
+    const _client = createPublicClient({
+      chain: this.chain,
+      transport: http(this._config.endpoint),
+    });
+
+    const magicValue = await _client.readContract({
+      address,
+      abi: ABI_SoulWallet,
+      functionName: 'isValidSignature',
+      args: [messageHash, signature],
+    });
+
+    if (magicValue !== '0x1626ba7e') {
+      throw new Error('Elytro: Invalid signature.');
+    }
+  }
+
   private async _getSignature(
     messageHash: string,
     validStartTime?: number,
@@ -430,13 +453,17 @@ class ElytroSDK {
   }
 
   public async signMessage(message: Hex, saAddress: Address) {
-    const hashedMessage = hashMessage(message);
+    const hashedMessage = hashMessage({ raw: message });
 
     const encode1271MessageHash = getEncoded1271MessageHash(hashedMessage);
     const domainSeparator = getDomainSeparator(toHex(this.chain.id), saAddress);
     const encodedSHA = getEncodedSHA(domainSeparator, encode1271MessageHash);
 
     const signature = await this._getSignature(encodedSHA);
+
+    // todo: test use only. remove later.
+    await this._isSignatureValid(saAddress, hashedMessage, signature as Hex);
+
     return signature;
   }
 
