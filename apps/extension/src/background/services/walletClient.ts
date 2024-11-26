@@ -12,6 +12,7 @@ import {
   GetBlockParameters,
   Hex,
   http,
+  isHex,
   PublicClient,
   ReadContractParameters,
   toHex,
@@ -107,7 +108,7 @@ class ElytroWalletClient {
       throw ethErrors.rpc.internal();
     }
 
-    if (typeof message !== 'string') {
+    if (!isHex(message)) {
       throw ethErrors.rpc.invalidParams();
     }
 

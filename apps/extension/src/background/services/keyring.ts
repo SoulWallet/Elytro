@@ -10,6 +10,7 @@ import {
 import { elytroSDK } from './sdk';
 import sessionManager from './session';
 import { sessionStorage } from '@/utils/storage/session';
+import { SigningKey } from '@ethersproject/signing-key';
 
 type EncryptedData = {
   key: Hex;
@@ -25,7 +26,7 @@ const KEYRING_STORAGE_KEY = 'elytroKeyringState';
 class KeyringService {
   private _initialized = false;
   private _locked = true;
-  private _key: Nullable<Hex> = null;
+  private _signingKey: Nullable<SigningKey> = null;
   private _owner: Nullable<PrivateKeyAccount> = null;
   private _sa: Nullable<Address> = null;
   private _store!: SubscribableStore<KeyringServiceState>;
@@ -62,6 +63,10 @@ class KeyringService {
 
   public get owner() {
     return this._owner;
+  }
+
+  public get signingKey() {
+    return this._signingKey;
   }
 
   public get smartAccountAddress() {
@@ -102,7 +107,6 @@ class KeyringService {
     }
     this._owner = null;
     this._locked = true;
-    this._key = null;
     this._store?.setState({});
     this._sa = null;
     sessionStorage.clear(); // clear local password encrypted data
@@ -116,13 +120,14 @@ class KeyringService {
     }
 
     try {
-      this._key = generatePrivateKey();
-      this._owner = privateKeyToAccount(this._key);
+      const key = generatePrivateKey();
+      this._signingKey = new SigningKey(key);
+      this._owner = privateKeyToAccount(key);
       this._sa = await elytroSDK.createWalletAddress(this._owner.address);
 
       const encryptedData = await encrypt(
         {
-          key: this._key,
+          key,
           sa: this._sa,
         },
         password
@@ -147,8 +152,8 @@ class KeyringService {
   }
 
   private async _updateOwnerByKey(key: Hex) {
-    this._key = key;
-    this._owner = privateKeyToAccount(this._key);
+    this._signingKey = new SigningKey(key);
+    this._owner = privateKeyToAccount(key);
   }
 
   private async _verifyPassword(password?: string) {
@@ -175,8 +180,8 @@ class KeyringService {
   public async reset() {
     this._store?.setState({});
     this._owner = null;
+    this._signingKey = null;
     this._locked = true;
-    this._key = null;
     this._sa = null;
   }
 

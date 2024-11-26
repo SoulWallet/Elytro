@@ -15,7 +15,7 @@ import {
   DEFAULT_GUARDIAN_SAFE_PERIOD,
   TEMP_ENTRY_POINT,
 } from '@/constants/temp';
-import { formatHex, getHexString, paddingZero } from '@/utils/format';
+import { formatHex, paddingZero } from '@/utils/format';
 import { Bundler, SignkeyType, SoulWallet, Transaction } from '@soulwallet/sdk';
 import { DecodeUserOp } from '@soulwallet/decoder';
 import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
@@ -25,10 +25,12 @@ import { UserOperationStatusEn } from '@/constants/operations';
 import {
   Address,
   createPublicClient,
+  hashMessage,
   Hex,
   http,
   parseEther,
   PublicClient,
+  serializeSignature,
   toHex,
 } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
@@ -251,17 +253,27 @@ class ElytroSDK {
     await keyring.tryUnlock();
 
     // raw sign -> personal sign
-    const _eoaSignature = await keyring.owner?.signMessage({
-      message: { raw: rawHashRes.OK.packedHash as Hex },
-    });
+    // const _eoaSignature = await keyring.owner?.signMessage({
+    //   message: { raw: rawHashRes.OK.packedHash as Hex },
+    // });
+
+    const _eoaSignature = keyring.signingKey?.signDigest(
+      rawHashRes.OK.packedHash
+    );
 
     if (!_eoaSignature) {
       throw new Error('Elytro: Failed to sign message.');
     }
 
+    const _eoaSignatureHex = serializeSignature({
+      r: _eoaSignature.r as Hex,
+      s: _eoaSignature.s as Hex,
+      v: BigInt(_eoaSignature.v),
+    });
+
     const signRes = await this._sdk.packUserOpEOASignature(
       this._config.validator,
-      _eoaSignature,
+      _eoaSignatureHex,
       rawHashRes.OK.validationData
     );
 
@@ -417,13 +429,10 @@ class ElytroSDK {
     }
   }
 
-  public async signMessage(
-    message: Uint8Array | string | bigint | number | boolean | Hex,
-    saAddress: Address
-  ) {
-    const rawMessage = getHexString(message, 32);
+  public async signMessage(message: Hex, saAddress: Address) {
+    const hashedMessage = hashMessage(message);
 
-    const encode1271MessageHash = getEncoded1271MessageHash(rawMessage);
+    const encode1271MessageHash = getEncoded1271MessageHash(hashedMessage);
     const domainSeparator = getDomainSeparator(toHex(this.chain.id), saAddress);
     const encodedSHA = getEncodedSHA(domainSeparator, encode1271MessageHash);
 
