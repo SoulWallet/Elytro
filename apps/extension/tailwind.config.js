@@ -5,11 +5,26 @@ module.exports = {
   content: ['./src/**/*.{tsx,html}'],
   theme: {
     extend: {
+      spacing: {
+        '4xs': '1px',
+        '3xs': '2px',
+        '2xs': '4px',
+        xs: '6px',
+        sm: '8px',
+        md: '12px',
+        lg: '16px',
+        xl: '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        '4xl': '40px',
+        '5xl': '64px',
+      },
       borderRadius: {
-        super: 'calc(var(--radius) * 3)', // 24px
-        lg: 'var(--radius)', // 0.5rem = 8px
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        pill: '9999px',
+        lg: '24px',
+        md: '16px',
+        sm: '12px',
+        xs: '4px',
       },
       borderWidth: {
         1: '1px',
@@ -28,6 +43,28 @@ module.exports = {
         'elytro-btn-bg': 'var(--elytro-btn-bg)',
       },
       colors: {
+        // Elytro Theme Overrides
+        gray: {
+          900: '#3C3F45',
+          750: '#676B75',
+          600: '#95979C',
+          450: '#BDC0C7',
+          300: '#E2E2E2',
+          150: '#F2F3F5',
+          0: '#FFFFFF',
+        },
+        'black-blue': '#161F36',
+        'dark-blue': '#234759',
+        blue: '#64ACD0',
+        'light-blue': '#CEE2EB',
+        'dark-green': '#97B59C',
+        green: '#209D7F',
+        'light-green': '#D4F4C1',
+        'dark-red': '#61203F',
+        red: '#FF7066',
+        'light-red': '#FCE9EA',
+        purple: '#ECE6F7',
+
         // Start of Selection
         background: 'var(--background)',
         foreground: 'hsl(var(--foreground))',
