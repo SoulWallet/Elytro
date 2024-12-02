@@ -92,7 +92,10 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
 
   providerPortManager.onMessage(
     'CONTENT_SCRIPT_REQUEST',
-    async (data: RequestArguments, port) => {
+    async (
+      { uuid, payload }: { uuid: string; payload: RequestArguments },
+      port
+    ) => {
       const tabId = port.sender?.tab?.id;
 
       if (!tabId || !port.sender?.origin) {
@@ -107,7 +110,7 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
 
       const dAppInfo = await getDAppInfoFromSender(port.sender!);
       const providerReq: TProviderRequest = {
-        rpcReq: data,
+        rpcReq: payload,
         dApp: dAppInfo,
       };
 
@@ -117,8 +120,9 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
         providerPortManager.sendMessage(
           'BUILTIN_PROVIDER_RESPONSE',
           {
-            method: data.method,
+            method: payload.method,
             data: result,
+            uuid,
           },
           port.sender?.id
         );
@@ -126,8 +130,9 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
         providerPortManager.sendMessage(
           'BUILTIN_PROVIDER_RESPONSE',
           {
-            method: data.method,
+            method: payload.method,
             error: (error as Error).message,
+            uuid,
           },
           port.sender?.id
         );

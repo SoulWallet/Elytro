@@ -9,7 +9,7 @@ function renameAndPackOutputPlugin(): Plugin {
     apply: 'build',
     enforce: 'post',
     closeBundle() {
-      const timestamp = format(new Date(), 'yyMMdd-HH:mm');
+      const timestamp = format(new Date(), 'MMdd-HH:mm');
       const newDirName = `elytro-${timestamp}`;
       const oldDirName = 'build'; // Assuming the default output directory is 'build'
 

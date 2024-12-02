@@ -20,6 +20,7 @@ type ElytroMessageData =
     }
   | {
       type: ElytroMessageTypeEn.RESPONSE_TO_PAGE_PROVIDER;
+      uuid: string;
       payload: {
         method: ProviderMethodType;
         response: unknown;
@@ -27,6 +28,7 @@ type ElytroMessageData =
     }
   | {
       type: ElytroMessageTypeEn.REQUEST_FROM_PAGE_PROVIDER;
+      uuid: string;
       payload: RequestArguments;
     }
   | {
@@ -34,18 +36,19 @@ type ElytroMessageData =
       payload: ElytroEventMessage;
     };
 
-type ElytroMessageHandler = (payload: unknown) => unknown;
+type ElytroMessageHandler = (payload: SafeAny) => unknown;
 
 class ElytroDuplexMessage extends SafeEventEmitter {
   private _stream: WindowPostMessageStream;
   private _isConnected: boolean = false;
 
   // request handlers (Multiple, used by pageProvider's request method)
-  private _requestHandlers: Map<ProviderMethodType, ElytroMessageHandler> =
-    new Map();
+  private _requestHandlers: Map<string, ElytroMessageHandler> = new Map();
 
   // response handler (Only one, used by content-script)
-  private _responseHandler: ((data: RequestArguments) => void) | null = null;
+  private _responseHandler:
+    | ((response: { payload: RequestArguments; uuid: string }) => void)
+    | null = null;
 
   constructor(name: string, target: string) {
     super();
@@ -75,10 +78,13 @@ class ElytroDuplexMessage extends SafeEventEmitter {
         case ElytroMessageTypeEn.REQUEST_FROM_PAGE_PROVIDER:
           // todo:  we don't need to handle the request here.
           // this._handleRequest(data.payload);//
-          this._responseHandler?.(data.payload);
+          this._responseHandler?.({
+            uuid: data.uuid,
+            payload: data.payload,
+          });
           break;
         case ElytroMessageTypeEn.RESPONSE_TO_PAGE_PROVIDER:
-          this._handleResponse(data.payload);
+          this._handleResponse(data.uuid, data.payload);
           break;
         case ElytroMessageTypeEn.MESSAGE:
           this.emit('event_message', data.payload);
@@ -89,19 +95,14 @@ class ElytroDuplexMessage extends SafeEventEmitter {
     });
   }
 
-  private _handleResponse({
-    method,
-    response,
-  }: {
-    method: ProviderMethodType;
-    response: unknown;
-  }) {
+  private _handleResponse(uuid: string, response: unknown) {
     if (this._isConnected) {
-      const handler = this._requestHandlers.get(method);
-
+      const handler = this._requestHandlers.get(uuid);
       if (handler) {
-        this._requestHandlers.delete(method);
-        return handler(response);
+        handler(response);
+        this._requestHandlers.delete(uuid);
+      } else {
+        throw ethErrors.rpc.limitExceeded();
       }
     }
   }
@@ -124,21 +125,20 @@ class ElytroDuplexMessage extends SafeEventEmitter {
     this._stream.write(data);
   }
 
-  public onceMessage(type: ProviderMethodType, handler: ElytroMessageHandler) {
+  public onceMessage(uuid: string, handler: ElytroMessageHandler) {
     if (this._isConnected) {
-      const prev = this._requestHandlers.get(type);
-
-      if (prev) {
-        throw ethErrors.rpc.limitExceeded();
-      }
-
-      this._requestHandlers.set(type, handler);
+      this._requestHandlers.set(uuid, handler);
     } else {
       throw ethErrors.rpc.internal();
     }
   }
 
-  public listen(responseHandler: (data: RequestArguments) => void) {
+  public listen(
+    responseHandler: (response: {
+      payload: RequestArguments;
+      uuid: string;
+    }) => void
+  ) {
     this._responseHandler = responseHandler;
   }
 
