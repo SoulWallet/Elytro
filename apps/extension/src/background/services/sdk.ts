@@ -33,6 +33,7 @@ import {
 } from 'viem';
 import { createAccount } from '@/utils/ethRpc/create-account';
 import { ethErrors } from 'eth-rpc-errors';
+import { ABI_SocialRecoveryModule, ABI_SoulWallet } from '@soulwallet/abi';
 
 class ElytroSDK {
   private _sdk!: SoulWallet;
@@ -288,7 +289,11 @@ class ElytroSDK {
   }
 
   public async simulateUserOperation(userOp: ElytroUserOperation) {
-    return await simulateSendUserOp(userOp, TEMP_ENTRY_POINT, this.chain.id);
+    return await simulateSendUserOp(
+      userOp,
+      this._config.entryPoint,
+      this.chain.id
+    );
   }
 
   private async _getFeeDataFromSDKProvider() {
@@ -459,39 +464,56 @@ class ElytroSDK {
     }
   }
 
-  // public async getPreFund(
-  //   userOp: ElytroUserOperation,
-  //   transferValue: bigint,
-  //   isValidForSponsor: boolean
-  // ) {
-  //   const res = await this._sdk.preFund(userOp);
+  public async getRecoveryInfoIfIsElytroWallet(
+    address: Address,
+    client: PublicClient
+  ) {
+    try {
+      const modules = (await client.readContract({
+        address,
+        abi: ABI_SoulWallet,
+        functionName: 'listModule',
+      })) as SafeAny;
 
-  //   if (res.isErr()) {
-  //     throw res.ERR;
-  //   } else {
-  //     const preFund = res.OK;
-  //     const _balance = await this._sdk.provider.getBalance(userOp.sender);
-  //     const missFund = BigInt(preFund.missfund);
+      // the length of modules should be 2
+      if (modules?.length !== 2) {
+        return false;
+      }
 
-  //     if (!isValidForSponsor || transferValue > 0) {
-  //       const maxMissFoundEth = '0.001';
-  //       const maxMissFund = parseEther(maxMissFoundEth);
+      const hasSocialRecoveryModule = modules?.[0]?.some(
+        (module: string) =>
+          module.toLowerCase() === this._config.recovery.toLowerCase()
+      );
 
-  //       const fundRequest = isValidForSponsor
-  //         ? transferValue
-  //         : transferValue + missFund;
+      // the wallet should have social recovery module
+      if (!hasSocialRecoveryModule) {
+        return false;
+      }
 
-  //       if (fundRequest > maxMissFund) {
-  //         throw new Error(
-  //           'Elytro: We may encounter fund issues. Please try again.'
-  //         );
-  //       }
+      const socialRecoveryInfo = (await client.readContract({
+        address: this._config.recovery,
+        abi: ABI_SocialRecoveryModule,
+        functionName: 'getSocialRecoveryInfo',
+        args: [address],
+      })) as SafeAny;
 
-  //       if (fundRequest > _balance) {
-  //         throw new Error('Elytro: Insufficient balance.');
-  //       }
-  //     }
-  //   }
+      // the social recovery info should have 3 elements
+      if (socialRecoveryInfo?.length !== 3) {
+        return false;
+      }
+
+      return {
+        guardianHash: socialRecoveryInfo[0],
+        nonce: socialRecoveryInfo[1],
+        safePeriod: socialRecoveryInfo[2],
+      };
+    } catch {
+      return false;
+    }
+  }
+
+  // private _calculateGuardianHash(address: Address) {
+  //   return keccak256(toHex(address));
   // }
 
   // private _isReceiptValid(receipt: unknown): boolean {

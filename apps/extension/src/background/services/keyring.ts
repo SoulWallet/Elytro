@@ -110,15 +110,18 @@ class KeyringService {
     sessionManager.broadcastMessage('accountsChanged', []);
   }
 
-  public async createNewOwner(password: string) {
+  public async createNewOwner(password: string, sa?: Address) {
     if (this._owner) {
-      throw new Error('Cannot create new owner if owner is already set');
+      throw new Error(
+        "Elytro: You can't create new owner if owner is already set"
+      );
     }
 
     try {
       this._key = generatePrivateKey();
       this._owner = privateKeyToAccount(this._key);
-      this._sa = await elytroSDK.createWalletAddress(this._owner.address);
+      this._sa =
+        sa ?? (await elytroSDK.createWalletAddress(this._owner.address));
 
       const encryptedData = await encrypt(
         {

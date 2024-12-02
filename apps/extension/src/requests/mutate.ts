@@ -50,3 +50,23 @@ export const mutate_sponsor_op = gql`
     }
   }
 `;
+
+export const mutate_create_recovery_record = gql`
+  mutation CreateRecoveryRecord($input: CreateRecoveryRecordInput!) {
+    createRecoveryRecord(input: $input) {
+      recoveryRecordID
+      onchainID
+      address
+      chainID
+      createTimestamp
+      nonce
+      newOwners
+      guardianInfo {
+        salt
+        threshold
+        guardians
+      }
+      status
+    }
+  }
+`;

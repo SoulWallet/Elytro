@@ -10,7 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { navigateTo } from '@/utils/navigation';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 
-type IKeyringContext = {
+type TKeyringContext = {
   isLocked?: boolean;
   lock: () => Promise<void>;
   unlock: (
@@ -21,7 +21,7 @@ type IKeyringContext = {
   createNewOwner: (password: string) => Promise<void>;
 };
 
-const KeyringContext = createContext<IKeyringContext>({
+const KeyringContext = createContext<TKeyringContext>({
   isLocked: undefined,
   lock: async () => {},
   unlock: async () => {},
