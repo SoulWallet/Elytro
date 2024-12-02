@@ -24,8 +24,6 @@ const UN_SUPPORTED_METHODS: UnSupportedMethod[] = [
 export const checkMethodExist: TFlowMiddleWareFn = async (ctx, next) => {
   const { rpcReq, dApp } = ctx.request;
 
-  console.log('Elytro:', dApp.name, 'is requesting:', rpcReq.method);
-
   const unSupportedMethod = UN_SUPPORTED_METHODS.find(
     (method) => method.name === rpcReq.method
   );
