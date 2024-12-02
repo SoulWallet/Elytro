@@ -21,41 +21,23 @@ class PageProvider extends SafeEventEmitter {
     this.initialize();
   }
 
-  // TODO: looks like we don't need this check?
-  // private _checkReady() {
-  //   if (this._isDomReady && this._isDomVisible) {
-  //     return true;
-  //   }
+  private _onDocumentReadyAndVisible(callback: () => void) {
+    return new Promise((resolve) => {
+      const onReadyAndVisible = () => {
+        if (
+          document.readyState === 'complete' &&
+          document.visibilityState === 'visible'
+        ) {
+          return resolve(callback());
+        }
+      };
 
-  //   if (document.readyState === 'complete') {
-  //     this._isDomReady = true;
-  //   } else {
-  //     const domContentLoadedHandler = () => {
-  //       this._isDomReady = true;
-  //       document.removeEventListener(
-  //         'DOMContentLoaded',
-  //         domContentLoadedHandler
-  //       );
-  //     };
-  //     document.addEventListener('DOMContentLoaded', domContentLoadedHandler);
-  //   }
+      onReadyAndVisible();
 
-  //   this._isDomVisible = document.visibilityState === 'visible';
-
-  //   const visibilityChangeHandler = () => {
-  //     this._isDomVisible = document.visibilityState === 'visible';
-
-  //     if (this._isDomVisible) {
-  //       document.removeEventListener(
-  //         'visibilitychange',
-  //         visibilityChangeHandler
-  //       );
-  //     }
-  //   };
-  //   document.addEventListener('visibilitychange', visibilityChangeHandler);
-
-  //   return this._isDomReady && this._isDomVisible;
-  // }
+      document.addEventListener('readystatechange', onReadyAndVisible);
+      document.addEventListener('visibilitychange', onReadyAndVisible);
+    });
+  }
 
   initialize = async () => {
     this._message.connect();
@@ -63,10 +45,6 @@ class PageProvider extends SafeEventEmitter {
     this._message.addListener(ElytroMessageTypeEn.MESSAGE, (payload) => {
       this.emit(payload.event, payload.data);
     });
-
-    // this.on('connected', () => {
-    //   console.log('Elytro Provider received connected event');
-    // });
   };
 
   send = async () => {
@@ -90,24 +68,21 @@ class PageProvider extends SafeEventEmitter {
       throw ethErrors.rpc.invalidRequest();
     }
 
-    // if (this._checkReady()) {
-    // post message to background, let the builtin provider handle it
-    const uuid = UUIDv4();
+    return this._onDocumentReadyAndVisible(() => {
+      const uuid = UUIDv4();
 
-    this._message.send({
-      type: ElytroMessageTypeEn.REQUEST_FROM_PAGE_PROVIDER,
-      uuid,
-      payload: data,
-    });
+      this._message.send({
+        type: ElytroMessageTypeEn.REQUEST_FROM_PAGE_PROVIDER,
+        uuid,
+        payload: data,
+      });
 
-    return new Promise((resolve) => {
-      this._message.onceMessage(uuid, (response) => {
-        resolve(response?.response);
+      return new Promise((resolve) => {
+        this._message.onceMessage(uuid, (response) => {
+          resolve(response?.response);
+        });
       });
     });
-    // }
-
-    // return Promise.reject(ethErrors.rpc.resourceUnavailable());
   };
 
   // TODO: listen dapp's 'connected' event

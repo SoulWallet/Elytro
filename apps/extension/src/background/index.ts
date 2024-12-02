@@ -72,12 +72,10 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
   providerPortManager.connect(port);
 
   port.onDisconnect.addListener(() => {
-    console.log('tab disconnected', tabId);
     sessionManager.removeSession(tabId, origin);
   });
 
   providerPortManager.onMessage('NEW_PAGE_LOADED', async () => {
-    console.log('new page loaded', tabId);
     sessionManager.createSession(tabId, origin, providerPortManager);
 
     if (connectionManager.isConnected(origin)) {
