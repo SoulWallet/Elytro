@@ -1,6 +1,3 @@
-// TODO: use this temporarily. Replace to user config later.
-export const TEMP_RPC_URL = 'https://optimism-rpc.publicnode.com';
-
 import {
   Chain,
   mainnet,

@@ -1,6 +1,7 @@
 import { ethErrors } from 'eth-rpc-errors';
 import { ElytroDuplexMessage, ElytroMessageTypeEn } from '@/utils/message';
 import { SafeEventEmitter } from '@/utils/safeEventEmitter';
+import { v4 as UUIDv4 } from 'uuid';
 
 /**
  * Elytro Page Provider: injects Elytro into the page
@@ -10,8 +11,6 @@ class PageProvider extends SafeEventEmitter {
   private _currentAddress: string | null = null;
   private _currentChainId: number | null = null;
 
-  private _isDomVisible: boolean = false;
-  private _isDomReady: boolean = false;
   private _message = new ElytroDuplexMessage(
     'elytro-page-provider',
     'elytro-content-script'
@@ -22,45 +21,46 @@ class PageProvider extends SafeEventEmitter {
     this.initialize();
   }
 
-  private _checkReady() {
-    if (this._isDomReady && this._isDomVisible) {
-      return true;
-    }
+  // TODO: looks like we don't need this check?
+  // private _checkReady() {
+  //   if (this._isDomReady && this._isDomVisible) {
+  //     return true;
+  //   }
 
-    if (document.readyState === 'complete') {
-      this._isDomReady = true;
-    } else {
-      const domContentLoadedHandler = () => {
-        this._isDomReady = true;
-        document.removeEventListener(
-          'DOMContentLoaded',
-          domContentLoadedHandler
-        );
-      };
-      document.addEventListener('DOMContentLoaded', domContentLoadedHandler);
-    }
+  //   if (document.readyState === 'complete') {
+  //     this._isDomReady = true;
+  //   } else {
+  //     const domContentLoadedHandler = () => {
+  //       this._isDomReady = true;
+  //       document.removeEventListener(
+  //         'DOMContentLoaded',
+  //         domContentLoadedHandler
+  //       );
+  //     };
+  //     document.addEventListener('DOMContentLoaded', domContentLoadedHandler);
+  //   }
 
-    this._isDomVisible = document.visibilityState === 'visible';
+  //   this._isDomVisible = document.visibilityState === 'visible';
 
-    const visibilityChangeHandler = () => {
-      this._isDomVisible = document.visibilityState === 'visible';
+  //   const visibilityChangeHandler = () => {
+  //     this._isDomVisible = document.visibilityState === 'visible';
 
-      if (this._isDomVisible) {
-        document.removeEventListener(
-          'visibilitychange',
-          visibilityChangeHandler
-        );
-      }
-    };
-    document.addEventListener('visibilitychange', visibilityChangeHandler);
+  //     if (this._isDomVisible) {
+  //       document.removeEventListener(
+  //         'visibilitychange',
+  //         visibilityChangeHandler
+  //       );
+  //     }
+  //   };
+  //   document.addEventListener('visibilitychange', visibilityChangeHandler);
 
-    return this._isDomReady && this._isDomVisible;
-  }
+  //   return this._isDomReady && this._isDomVisible;
+  // }
 
   initialize = async () => {
     this._message.connect();
 
-    this._message.addListener('event_message', (payload) => {
+    this._message.addListener(ElytroMessageTypeEn.MESSAGE, (payload) => {
       this.emit(payload.event, payload.data);
     });
 
@@ -90,20 +90,24 @@ class PageProvider extends SafeEventEmitter {
       throw ethErrors.rpc.invalidRequest();
     }
 
-    if (this._checkReady()) {
-      // post message to background, let the builtin provider handle it
+    // if (this._checkReady()) {
+    // post message to background, let the builtin provider handle it
+    const uuid = UUIDv4();
 
-      this._message.send({
-        type: ElytroMessageTypeEn.REQUEST_FROM_PAGE_PROVIDER,
-        payload: data,
-      });
-    }
+    this._message.send({
+      type: ElytroMessageTypeEn.REQUEST_FROM_PAGE_PROVIDER,
+      uuid,
+      payload: data,
+    });
 
     return new Promise((resolve) => {
-      this._message.onceMessage(data.method, (response) => {
-        resolve(response);
+      this._message.onceMessage(uuid, (response) => {
+        resolve(response?.response);
       });
     });
+    // }
+
+    // return Promise.reject(ethErrors.rpc.resourceUnavailable());
   };
 
   // TODO: listen dapp's 'connected' event
@@ -112,7 +116,7 @@ class PageProvider extends SafeEventEmitter {
   };
 
   // @ts-ignore
-  emit = (eventName: ProviderEvent, ...args: any[]) => {
+  emit = (eventName: ProviderEvent, ...args: SafeAny[]) => {
     switch (eventName) {
       case 'accountsChanged':
         if (args[0] && args[0] !== this._currentAddress) {

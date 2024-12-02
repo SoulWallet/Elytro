@@ -12,21 +12,11 @@ const dAppMessage = new ElytroDuplexMessage(
 const initDuplexMessageBetweenContentScriptAndPageProvider = () => {
   dAppMessage.connect();
 
-  dAppMessage.listen(async (data: RequestArguments) => {
-    portManager?.sendMessage('CONTENT_SCRIPT_REQUEST', data);
-
-    await new Promise((resolve) =>
-      portManager.onMessage('BUILTIN_PROVIDER_RESPONSE', (response) => {
-        dAppMessage.send({
-          type: ElytroMessageTypeEn.RESPONSE_TO_PAGE_PROVIDER,
-          payload: {
-            method: response.method,
-            response: response.data,
-          },
-        });
-        resolve(true);
-      })
-    );
+  dAppMessage.listen(async ({ uuid, payload }) => {
+    portManager?.sendMessage('CONTENT_SCRIPT_REQUEST', {
+      uuid,
+      payload,
+    });
   });
 };
 
@@ -36,10 +26,21 @@ const initRuntimeMessage = () => {
   portManager = new PortMessageManager('elytro-bg');
   portManager.connect();
 
-  portManager.onMessage('event_message', (data) => {
+  portManager.onMessage(ElytroMessageTypeEn.MESSAGE, (data) => {
     dAppMessage.send({
       type: ElytroMessageTypeEn.MESSAGE,
       payload: data,
+    });
+  });
+
+  portManager.onMessage('BUILTIN_PROVIDER_RESPONSE', (response) => {
+    dAppMessage.send({
+      type: ElytroMessageTypeEn.RESPONSE_TO_PAGE_PROVIDER,
+      uuid: response.uuid,
+      payload: {
+        method: response.method,
+        response: response.data,
+      },
     });
   });
 };
