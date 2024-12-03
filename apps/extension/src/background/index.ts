@@ -12,6 +12,7 @@ import RuntimeMessage from '@/utils/message/runtimeMessage';
 import { EVENT_TYPES } from '@/constants/events';
 import uiReqCacheManager from '@/utils/cache/uiReqCacheManager';
 import { rpcCacheManager } from '@/utils/cache/rpcCacheManager';
+import accountManager from './services/accountManager';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
@@ -89,14 +90,13 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
 
     if (connectionManager.isConnected(origin)) {
       await keyring.tryUnlock();
-      // wait for 300ms to ensure the session is created
-      setTimeout(() => {
-        sessionManager.broadcastMessageToDApp(
-          origin,
-          'accountsChanged',
-          keyring.smartAccountAddress ? [keyring.smartAccountAddress] : []
-        );
-      }, 300);
+      sessionManager.broadcastMessageToDApp(
+        origin,
+        'accountsChanged',
+        accountManager?.currentAccount?.address
+          ? [accountManager.currentAccount.address]
+          : []
+      );
     }
   });
 
@@ -224,17 +224,6 @@ const initBackgroundMessage = () => {
         status,
       }
     );
-  });
-
-  eventBus.on(EVENT_TYPES.NETWORK.ITEMS_UPDATED, (currentChain, chains) => {
-    RuntimeMessage.sendMessage(EVENT_TYPES.NETWORK.ITEMS_UPDATED, {
-      chains,
-      currentChain,
-    });
-  });
-
-  eventBus.on(EVENT_TYPES.ACCOUNT.ITEMS_UPDATED, () => {
-    RuntimeMessage.sendMessage(EVENT_TYPES.ACCOUNT.ITEMS_UPDATED);
   });
 };
 
