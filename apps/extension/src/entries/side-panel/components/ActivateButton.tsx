@@ -28,11 +28,7 @@ export default function ActivateButton() {
   };
 
   return (
-    <Button
-      className="bg-elytro-btn-bg text-gray-900 hover:bg-blue-200 h-12"
-      onClick={onClickActivate}
-      disabled={loading || !ownerAddress}
-    >
+    <Button onClick={onClickActivate} disabled={loading || !ownerAddress}>
       {loading ? 'Activating...' : 'Activate account'}
     </Button>
   );

@@ -107,6 +107,7 @@ export function PasswordSetter({ onSubmit, loading }: PasswordSetterProps) {
           type="submit"
           className="w-full rounded-full h-14"
           disabled={loading}
+          size="large"
         >
           {loading ? 'Creating...' : 'Submit'}
         </Button>
