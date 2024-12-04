@@ -57,6 +57,8 @@ const initApp = async () => {
 
 initApp();
 
+const providerPortManager = new PortMessageManager('elytro-bg');
+
 /**
  * Init the message between background and (content script / page provider)
  * @param port
@@ -68,10 +70,19 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
     return;
   }
 
-  const providerPortManager = new PortMessageManager('elytro-bg');
   providerPortManager.connect(port);
 
+  const heartbeat = setInterval(() => {
+    if (port) {
+      port.postMessage({ type: 'HEARTBEAT', data: '{}' });
+      console.log('elytro heartbeat');
+    }
+  }, 6_000);
+
   port.onDisconnect.addListener(() => {
+    console.log('elytro port disconnected', origin);
+
+    clearInterval(heartbeat);
     sessionManager.removeSession(tabId, origin);
   });
 
@@ -80,11 +91,14 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
 
     if (connectionManager.isConnected(origin)) {
       await keyring.tryUnlock();
-      sessionManager.broadcastMessageToDApp(
-        origin,
-        'accountsChanged',
-        keyring.smartAccountAddress ? [keyring.smartAccountAddress] : []
-      );
+      // wait for 300ms to ensure the session is created
+      setTimeout(() => {
+        sessionManager.broadcastMessageToDApp(
+          origin,
+          'accountsChanged',
+          keyring.smartAccountAddress ? [keyring.smartAccountAddress] : []
+        );
+      }, 300);
     }
   });
 

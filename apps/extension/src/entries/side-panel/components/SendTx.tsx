@@ -51,7 +51,7 @@ export default function SendTx({
     setIsLoading(true);
     try {
       const res = await elytroSDK.createUserOpFromTxs(address!, [
-        { ...txParams, data: undefined } as Transaction,
+        { ...txParams } as Transaction,
       ]);
 
       const decodeRes = await elytroSDK.getDecodedUserOperation(res);

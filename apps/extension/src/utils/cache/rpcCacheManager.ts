@@ -57,7 +57,11 @@ class RPCCacheManager extends CacheManager {
     result: SafeAny,
     expireTime = DEFAULT_RPC_CACHE_EXPIRE_TIME
   ): void {
-    if (!SAFE_CACHE_METHODS.includes(request.method)) {
+    if (
+      result === null ||
+      result === undefined ||
+      !SAFE_CACHE_METHODS.includes(request.method)
+    ) {
       return;
     }
 
