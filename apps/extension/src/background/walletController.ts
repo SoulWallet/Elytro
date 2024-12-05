@@ -11,7 +11,7 @@ import { deformatUserOperation } from '@/utils/format';
 import historyManager from './services/history';
 import { UserOperationHistory } from '@/constants/operations';
 import networkService from './services/networks';
-import accountManager, { Account } from './services/accountManager';
+import accountManager from './services/accountManager';
 import { Address, formatEther } from 'viem';
 
 // ! DO NOT use getter. They can not be proxied.
@@ -43,18 +43,21 @@ class WalletController {
    * Get Smart Account Info
    */
   public async getSmartAccountInfo() {
-    const account = accountManager.currentAccount;
-    if (account) {
-      const balance = await walletClient.getBalance(account.address as Address);
-      return {
-        address: account.address,
-        ownerAddress: account.ownerAddress,
-        isActivated: account.isActivated,
-        balance: formatEther(balance),
-      };
+    try {
+      const ac = await accountManager.currentAccount;
+      const balance = await this.getBalance(ac?.address as Address);
+      if (ac) {
+        const res = {
+          ...ac,
+          balance,
+        };
+        return res;
+      }
+    } catch (error) {
+      console.error(error);
+      throw new Error('Elytro: Failed to get smart account info');
     }
-    return null;
-    // const res = await walletClient.initSmartAccount();
+    // return await walletClient.initSmartAccount();
 
     // if (res) {
     //   sessionManager.broadcastMessage('accountsChanged', [res.address]);
@@ -175,9 +178,15 @@ class WalletController {
       networkService.switchNetwork(networkId);
       walletClient.resetClient(Number(networkId));
       elytroSDK.resetSDK(Number(networkId));
+      return true;
     } else {
-      throw new Error('Elytro: Account not found');
+      return false;
     }
+  }
+
+  public async getBalance(address: Address) {
+    const res = await walletClient.getBalance(address);
+    return formatEther(res);
   }
 }
 

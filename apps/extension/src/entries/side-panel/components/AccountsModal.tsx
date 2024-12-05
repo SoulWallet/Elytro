@@ -18,8 +18,14 @@ interface IProps {
 }
 
 export default function AccountsModal({ open, onOpenChange }: IProps) {
-  const { chains, accounts, currentChain, getAccounts, updateChains } =
-    useAccount();
+  const {
+    chains,
+    accounts,
+    currentChain,
+    getAccounts,
+    updateChains,
+    updateAccount,
+  } = useAccount();
   const wallet = useWallet();
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [networkId, setNetworkId] = useState<string>('');
@@ -42,6 +48,7 @@ export default function AccountsModal({ open, onOpenChange }: IProps) {
       await wallet.switchAccount(networkId);
       getAccounts();
       updateChains();
+      updateAccount();
     } catch (error) {
       console.error(error);
     }
