@@ -4,13 +4,6 @@ import { elytroSDK } from './sdk';
 import keyring from './keyring';
 import networkService from './networks';
 
-export interface Account {
-  ownerAddress: string;
-  address: string;
-  networkId: string | number;
-  isActivated: boolean;
-}
-
 interface AccountState {
   currentAccount: Account | null;
   accounts: { [key: string]: Account } | null;
@@ -100,7 +93,12 @@ class AccountManager {
   }
 
   public updateAccount(account: Account) {
+    const isCurrentAccount =
+      this._currentAccount?.networkId === account.networkId;
     this._accounts.set(account.networkId.toString(), account);
+    if (isCurrentAccount) {
+      this._currentAccount = account;
+    }
     this._saveStore();
   }
 

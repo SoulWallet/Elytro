@@ -7,13 +7,13 @@ import useTokens, { TokenDTO } from '@/hooks/use-tokens';
 import { UserOperationHistory } from '@/constants/operations';
 import RuntimeMessage from '@/utils/message/runtimeMessage';
 import { EVENT_TYPES } from '@/constants/events';
-import { Account } from '@/background/services/accountManager';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
   isActivated: false,
   balance: '0',
   ownerAddress: '',
+  networkId: '',
 };
 
 type IAccountContext = {
@@ -67,6 +67,24 @@ export const AccountProvider = ({
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [currentChain, setCurrentChain] = useState<Chain | null>(null);
 
+  const updateAccount1 = async () => {
+    console.log('updateAccount1');
+    setLoading(true);
+    const res = (await wallet.getSmartAccountInfo()) ?? DEFAULT_ACCOUNT_INFO;
+    setAccountInfo({ ...res });
+    console.log('updateAccount1', res);
+    setLoading(false);
+  };
+  // const getBalance = async () => {
+  //   const balance = await wallet.getBalance(accountInfo.address as Address);
+  //   setAccountInfo((prev) => ({ ...prev, balance }));
+  // };
+  // useEffect(() => {
+  //   if (accountInfo.address) {
+  //     getBalance();
+  //   }
+  // }, [accountInfo.address])
+
   const updateAccount = async () => {
     if (loading) {
       return;
@@ -74,7 +92,7 @@ export const AccountProvider = ({
     try {
       setLoading(true);
       const res = (await wallet.getSmartAccountInfo()) ?? DEFAULT_ACCOUNT_INFO;
-      setAccountInfo(res);
+      setAccountInfo({ ...res });
 
       if (intervalRef.current && res.isActivated) {
         clearInterval(intervalRef.current);
@@ -162,7 +180,7 @@ export const AccountProvider = ({
     <AccountContext.Provider
       value={{
         accountInfo,
-        updateAccount,
+        updateAccount: updateAccount1,
         tokenInfo: {
           tokens,
           loadingTokens,
