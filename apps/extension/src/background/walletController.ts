@@ -1,4 +1,3 @@
-import { SupportedChainTypeEn } from '@/constants/chains';
 import { approvalService } from './services/approval';
 import connectionManager from './services/connection';
 import keyring from './services/keyring';
@@ -86,8 +85,8 @@ class WalletController {
     return approvalService.rejectApproval(id);
   }
 
-  public async connectWallet(dApp: TDAppInfo, chainType: SupportedChainTypeEn) {
-    connectionManager.connect(dApp, chainType);
+  public async connectWallet(dApp: TDAppInfo, chainId: number) {
+    connectionManager.connect(dApp, chainId);
     sessionManager.broadcastMessageToDApp(dApp.origin!, 'accountsChanged', [
       accountManager?.currentAccount?.address as string,
     ]);
