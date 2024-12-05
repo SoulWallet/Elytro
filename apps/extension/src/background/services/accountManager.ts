@@ -15,14 +15,13 @@ class AccountManager {
   private _accounts: Map<string, Account> = new Map();
   private _accountStore: SubscribableStore<AccountState>;
   private _currentAccount: Account | null = null;
-  isInitialized: boolean = false;
 
   constructor() {
     this._accountStore = new SubscribableStore<AccountState>({
       currentAccount: null,
       accounts: {},
     });
-    // localStorage.remove([ACCOUNTS_STORAGE_KEY])
+
     this._accountStore.subscribe((state) => {
       localStorage.save({ [ACCOUNTS_STORAGE_KEY]: state });
     });
@@ -59,21 +58,14 @@ class AccountManager {
 
   public async createNewSmartAccount(networkId?: number, setAsCurrent = false) {
     try {
-      let smartAccounAdress = '';
-      if (networkId) {
-        smartAccounAdress = await elytroSDK.createWalletAddress(
-          keyring.owner?.address as string,
-          networkId
-        );
-      } else {
-        smartAccounAdress = await elytroSDK.createWalletAddress(
-          keyring.owner?.address as string
-        );
-      }
+      const smartAccountAddress = await elytroSDK.createWalletAddress(
+        keyring.owner?.address as string,
+        networkId
+      );
 
       const account: Account = {
         ownerAddress: keyring.owner?.address as string,
-        address: smartAccounAdress,
+        address: smartAccountAddress,
         networkId: networkId || networkService.currentChain.id,
         isActivated: false,
       };
@@ -102,7 +94,7 @@ class AccountManager {
     this._saveStore();
   }
 
-  public switchAccout(address: string) {
+  public switchAccount(address: string) {
     const account = this._accounts.get(address);
     if (account) {
       this._currentAccount = account;

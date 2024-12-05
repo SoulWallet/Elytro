@@ -175,7 +175,7 @@ class WalletController {
   }
 
   public switchAccount(networkId: string) {
-    const newAccount = accountManager.switchAccout(networkId);
+    const newAccount = accountManager.switchAccount(networkId);
     if (newAccount) {
       networkService.switchNetwork(networkId);
       walletClient.resetClient(Number(networkId));
