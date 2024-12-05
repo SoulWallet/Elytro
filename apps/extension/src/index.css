@@ -102,12 +102,12 @@
     @apply elytro-text-body font-medium;
   }
 
-  .elytro-text-small-body {
+  .elytro-text-small {
     @apply text-[16px] font-normal leading-[130%] text-black-blue;
   }
 
-  .elytro-text-small-bold-body {
-    @apply elytro-text-small-body font-medium;
+  .elytro-text-small-bold {
+    @apply elytro-text-small font-medium;
   }
 
   .elytro-text-smaller-body {
@@ -124,5 +124,9 @@
 
   .elytro-text-tiny-bold-body {
     @apply elytro-text-tiny-body font-medium;
+  }
+
+  .elytro-clickable-icon {
+    @apply w-6 h-6 text-dark-blue cursor-pointer hover:text-gray-500;
   }
 }

@@ -31,7 +31,7 @@ const buttonVariants = cva(
 
         large: 'px-3xl py-xl elytro-text-bold-body',
         medium: 'px-2xl py-lg elytro-text-bold-body',
-        small: 'px-xl py-md elytro-text-small-body',
+        small: 'px-xl py-md elytro-text-small',
         tiny: 'px-lg py-sm elytro-text-tiny-body',
       },
     },

@@ -17,7 +17,7 @@ const main = () => {
     <ApolloProvider client={client}>
       <AccountProvider>
         <ApprovalProvider>
-          <PageContainer className="min-w-96">
+          <PageContainer className="bg-gray-150">
             <TooltipProvider>
               <HashRouter routes={routes} />
               <SignTxModal />

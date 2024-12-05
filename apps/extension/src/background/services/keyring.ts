@@ -166,8 +166,7 @@ class KeyringService {
       this._updateOwnerByKey(key as Hex);
       this._sa = sa as Address;
       this._locked = false;
-    } catch (error) {
-      console.log('Elytro: Failed to verify password.', error);
+    } catch {
       this._locked = true;
     }
   }

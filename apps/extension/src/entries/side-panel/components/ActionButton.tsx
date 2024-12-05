@@ -12,7 +12,7 @@ export default function ActionButton({
   ...props
 }: ActionButtonProps) {
   return (
-    <Button key={label} {...props} variant="secondary">
+    <Button key={label} {...props} variant="secondary" size="small">
       {icon}
       {label}
     </Button>

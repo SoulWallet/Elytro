@@ -11,7 +11,7 @@ function TabLayout({ children, footer, className }: TabLayoutProps) {
   return (
     <div className="w-full h-full bg-elytro-background flex flex-col items-center justify-center">
       <header className="fixed top-4 left-4">Elytro</header>
-      <main className={cn('rounded-super p-6 bg-white', className)}>
+      <main className={cn('rounded-lg p-6 bg-white', className)}>
         {children}
       </main>
       {footer && (
