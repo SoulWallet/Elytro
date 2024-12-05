@@ -90,13 +90,17 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
 
     if (connectionManager.isConnected(origin)) {
       await keyring.tryUnlock();
-      sessionManager.broadcastMessageToDApp(
-        origin,
-        'accountsChanged',
-        accountManager?.currentAccount?.address
-          ? [accountManager.currentAccount.address]
-          : []
-      );
+
+      // wait 300ms to ensure the session is ready
+      setTimeout(() => {
+        sessionManager.broadcastMessageToDApp(
+          origin,
+          'accountsChanged',
+          accountManager?.currentAccount?.address
+            ? [accountManager.currentAccount.address]
+            : []
+        );
+      }, 300);
     }
   });
 

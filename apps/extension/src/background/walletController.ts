@@ -43,15 +43,18 @@ class WalletController {
    */
   public async getSmartAccountInfo() {
     try {
-      const ac = await accountManager.currentAccount;
-      const balance = await this.getBalance(ac?.address as Address);
-      if (ac) {
+      if (accountManager.currentAccount) {
+        const balance = await this.getBalance(
+          accountManager.currentAccount.address as Address
+        );
         const res = {
-          ...ac,
+          ...accountManager.currentAccount,
           balance,
         };
         return res;
       }
+
+      throw new Error('Elytro: No current account');
     } catch (error) {
       console.error(error);
       throw new Error('Elytro: Failed to get smart account info');
