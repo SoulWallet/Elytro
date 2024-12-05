@@ -30,21 +30,7 @@ export class PortMessageManager {
       type: 'NEW_PAGE_LOADED',
       data: '{}', // !DO NOT REMOVE THIS LINE, a workaround for crx message channel
     });
-
-    // TODO: check if we need this?
-    // port.onDisconnect.addListener(() => {
-    //   this.ports.delete(port.sender?.id || 'default');
-    // });
   }
-
-  // public listen(onConnect: (port: chrome.runtime.Port) => void) {
-  //   chrome.runtime.onConnect.addListener((port) => {
-  //     if (port.name === this.name) {
-  //       this._setupPort(port);
-  //       onConnect(port);
-  //     }
-  //   });
-  // }
 
   // @ts-ignore
   public sendMessage(type: string, data: SafeAny, portId: string = 'default') {

@@ -4,6 +4,7 @@ import { Address, BlockTag, toHex } from 'viem';
 import walletClient from '../services/walletClient';
 import { ethErrors } from 'eth-rpc-errors';
 import { rpcCacheManager } from '@/utils/cache/rpcCacheManager';
+import keyring from '../services/keyring';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
@@ -46,7 +47,8 @@ class BuiltinProvider extends SafeEventEmitter {
         return await walletClient.getBlockNumber();
       case 'eth_accounts':
       case 'eth_requestAccounts':
-        return walletClient.address ? [walletClient.address] : [];
+        // TODO: 替换为 account manager
+        return keyring.smartAccountAddress ? [keyring.smartAccountAddress] : [];
       case 'eth_getBlockByNumber':
         return await walletClient.getBlockByNumber({
           blockTag: (params as [BlockTag])?.[0] ?? 'latest',
