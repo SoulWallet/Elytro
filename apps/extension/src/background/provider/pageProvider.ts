@@ -28,6 +28,8 @@ class PageProvider extends SafeEventEmitter {
           document.readyState === 'complete' &&
           document.visibilityState === 'visible'
         ) {
+          document.removeEventListener('readystatechange', onReadyAndVisible);
+          document.removeEventListener('visibilitychange', onReadyAndVisible);
           return resolve(callback());
         }
       };
@@ -68,7 +70,14 @@ class PageProvider extends SafeEventEmitter {
       throw ethErrors.rpc.invalidRequest();
     }
 
+    let resolved = false;
+
     return this._onDocumentReadyAndVisible(() => {
+      if (resolved) {
+        return;
+      }
+      resolved = true;
+
       const uuid = UUIDv4();
 
       this._message.send({
