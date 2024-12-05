@@ -80,8 +80,6 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
   }, 6_000);
 
   port.onDisconnect.addListener(() => {
-    console.log('elytro port disconnected', origin);
-
     clearInterval(heartbeat);
     sessionManager.removeSession(tabId, origin);
   });
