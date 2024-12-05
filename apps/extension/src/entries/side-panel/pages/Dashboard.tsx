@@ -4,6 +4,8 @@ import Spin from '@/components/Spin';
 import Activities from '../components/Activities';
 import { useAccount } from '../contexts/account-context';
 import Assets from '../components/Assets';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 export default function Dashboard() {
   const { loading } = useAccount();
@@ -33,6 +35,15 @@ export default function Dashboard() {
           </Tabs>
         </div>
       </div>
+
+      <Button
+        variant="secondary"
+        size="tiny"
+        className="fixed bottom-4 left-1/2 transform -translate-x-1/2"
+      >
+        <Plus className="w-3 h-3" />
+        Import token
+      </Button>
     </div>
   );
 }

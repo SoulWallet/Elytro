@@ -4,7 +4,7 @@ import GuardianIcon from '@/assets/icons/guardian.svg';
 import NetworkIcon from '@/assets/icons/network.svg';
 import LockIcon from '@/assets/icons/lock.svg';
 import { BackArrow } from '@/assets/icons/BackArrow';
-import ReceiveAddress from '../ReceiveAddress';
+import ReceiveAddress from '../ReceiveAddressBadge';
 import { useAccount } from '../../contexts/account-context';
 import NetworkSetting from './NetworkSetting';
 import { useKeyring } from '@/contexts/keyring';

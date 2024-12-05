@@ -113,6 +113,8 @@ module.exports = {
         hover: {
           primary: 'hsl(var(--hover-primary))',
           primaryForeground: 'hsl(var(--hover-primary-foreground))',
+          secondary: 'hsl(var(--hover-secondary))',
+          secondaryForeground: 'hsl(var(--hover-secondary-foreground))',
         },
       },
     },

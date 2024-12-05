@@ -44,6 +44,8 @@
     --radius: 1rem;
     --hover-primary: 200 53% 60%;
     --hover-primary-foreground: 0 0% 100%;
+    --hover-secondary: 200 53% 60%;
+    --hover-secondary-foreground: 0 0% 100%;
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -75,6 +77,7 @@
 @layer base {
   * {
     @apply border-border;
+    @apply text-black-blue hover:text-dark-blue;
   }
   body {
     @apply bg-background text-foreground;
@@ -127,6 +130,6 @@
   }
 
   .elytro-clickable-icon {
-    @apply w-6 h-6 text-dark-blue cursor-pointer hover:text-gray-500;
+    @apply size-6 text-dark-blue cursor-pointer hover:text-gray-500;
   }
 }
