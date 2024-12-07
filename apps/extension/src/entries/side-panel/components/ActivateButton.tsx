@@ -1,18 +1,21 @@
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import useActivateStore from '@/stores/activate';
 import { useAccount } from '../contexts/account-context';
 import { toast } from '@/hooks/use-toast';
+import { useWallet } from '@/contexts/wallet';
 
 export default function ActivateButton() {
   const [loading, setLoading] = useState(false);
-  const { createDeployUserOp } = useActivateStore();
+  const wallet = useWallet();
   const { accountInfo } = useAccount();
 
   const onClickActivate = async () => {
     try {
       setLoading(true);
-      await createDeployUserOp(accountInfo!);
+      const userOp = await wallet.createDeployUserOp();
+
+      // TODO: send userOp to Send Tx Modal
+      console.log('TODO: send userOp to Send Tx Modal', userOp);
     } catch (error) {
       toast({
         title: 'Activate account failed',

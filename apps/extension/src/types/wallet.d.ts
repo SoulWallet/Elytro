@@ -7,10 +7,9 @@ type TUserOperationPreFundResult = {
 };
 
 type Account = {
-  ownerAddress: string;
-  address: string;
-  networkId: string | number;
-  isActivated: boolean;
+  address: Address;
+  chainId: number;
+  isDeployed: boolean;
 };
 
 type TAccountInfo = {

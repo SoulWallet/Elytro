@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import useDialogStore from './dialog';
 import { navigateTo } from '@/utils/navigation';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
-import accountManager from '@/background/services/accountManager';
+import accountManager from '@/background/services/account';
 import _omit from 'lodash/omit';
 
 interface ActivateState {

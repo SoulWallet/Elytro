@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
 import { Loader2 } from 'lucide-react';
+import { useChain } from '../contexts/chain-context';
 
 interface IProps {
   open: boolean;
@@ -18,22 +19,17 @@ interface IProps {
 }
 
 export default function AccountsModal({ open, onOpenChange }: IProps) {
-  const {
-    chains,
-    accounts,
-    currentChain,
-    getAccounts,
-    updateChains,
-    updateAccount,
-  } = useAccount();
+  const { accounts, getAccounts, updateAccount } = useAccount();
+  const { chains, currentChain, getCurrentChain } = useChain();
   const wallet = useWallet();
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [networkId, setNetworkId] = useState<string>('');
+
   const handleAdd = async () => {
     try {
       setIsAdding(true);
       if (networkId) {
-        await wallet.createNewSmartAccount(Number(networkId));
+        await wallet.createAccount(Number(networkId));
         getAccounts();
       }
     } catch (error) {
@@ -43,18 +39,22 @@ export default function AccountsModal({ open, onOpenChange }: IProps) {
     }
   };
 
-  const handleSwitch = async (networkId: string) => {
+  const handleSwitch = async (chainId: string) => {
     try {
-      await wallet.switchAccount(networkId);
+      await wallet.switchAccountByChain(Number(chainId));
+
       getAccounts();
-      updateChains();
       updateAccount();
     } catch (error) {
       console.error(error);
+    } finally {
+      getCurrentChain();
+      updateAccount();
     }
   };
 
   if (chains.length === 0) return;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-screen">
@@ -63,14 +63,14 @@ export default function AccountsModal({ open, onOpenChange }: IProps) {
           {accounts.map((account, index) => (
             <div key={index} className="flex justify-between items-center">
               <div>
-                {chains.find((chain) => chain.id === account.networkId)?.name ||
-                  'Unknown Network'}
+                {chains.find((chain) => chain.chainId === account.chainId)
+                  ?.chainName || 'Unknown Network'}
               </div>
               {account.address && <div>{account.address}</div>}
-              <div>{account.isActivated ? 'Activated' : 'Not Activated'}</div>
-              {account.networkId !== currentChain?.id && (
+              <div>{account.isDeployed ? 'Activated' : 'Not Activated'}</div>
+              {account.chainId !== currentChain?.chainId && (
                 <Button
-                  onClick={() => handleSwitch(account.networkId.toString())}
+                  onClick={() => handleSwitch(account.chainId.toString())}
                 >
                   Switch
                 </Button>
@@ -90,8 +90,11 @@ export default function AccountsModal({ open, onOpenChange }: IProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {chains.map((chain) => (
-                    <SelectItem key={chain.id} value={chain.id.toString()}>
-                      {chain.name}
+                    <SelectItem
+                      key={chain.chainId}
+                      value={chain.chainId.toString()}
+                    >
+                      {chain.chainName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -103,7 +106,9 @@ export default function AccountsModal({ open, onOpenChange }: IProps) {
             </div>
           </div>
           {currentChain ? (
-            <div className="text-3xl">currentChain: {currentChain.name}</div>
+            <div className="text-3xl">
+              currentChain: {currentChain.chainName}
+            </div>
           ) : null}
         </div>
       </DialogContent>

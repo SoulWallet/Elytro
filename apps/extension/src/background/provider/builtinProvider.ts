@@ -4,7 +4,8 @@ import { Address, BlockTag, toHex } from 'viem';
 import walletClient from '../services/walletClient';
 import { ethErrors } from 'eth-rpc-errors';
 import { rpcCacheManager } from '@/utils/cache/rpcCacheManager';
-import accountManager from '../services/accountManager';
+import accountManager from '../services/account';
+import chainService from '../services/chain';
 
 /**
  * Elytro Builtin Provider: based on EIP-1193
@@ -40,9 +41,9 @@ class BuiltinProvider extends SafeEventEmitter {
   private async _request({ method, params }: RequestArguments) {
     switch (method) {
       case 'net_version':
-        return walletClient.chain.id ? walletClient.chain.id.toString() : '0';
+        return chainService.currentChain?.chainId?.toString() ?? '0';
       case 'eth_chainId':
-        return toHex(walletClient.chain.id);
+        return toHex(chainService.currentChain?.chainId ?? 0);
       case 'eth_blockNumber':
         return await walletClient.getBlockNumber();
       case 'eth_accounts':
@@ -75,24 +76,20 @@ class BuiltinProvider extends SafeEventEmitter {
   }
 
   public async request({ method, params }: RequestArguments) {
-    const cacheResult = rpcCacheManager.get(
-      walletClient.chain.id,
-      walletClient.address ?? '0x',
-      { method, params }
-    );
+    const chainId = chainService.currentChain?.chainId ?? 0;
+    const address = accountManager.currentAccount?.address ?? '0x';
+
+    const cacheResult = rpcCacheManager.get(chainId, address, {
+      method,
+      params,
+    });
 
     if (cacheResult) {
       return cacheResult;
     }
 
     const result = await this._request({ method, params });
-
-    rpcCacheManager.set(
-      walletClient.chain.id,
-      walletClient.address ?? '0x',
-      { method, params },
-      result
-    );
+    rpcCacheManager.set(chainId, address, { method, params }, result);
 
     return result;
   }
