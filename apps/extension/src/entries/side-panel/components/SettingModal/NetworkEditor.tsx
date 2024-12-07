@@ -10,18 +10,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useState } from 'react';
-import { Chain } from 'viem';
 import { useToast } from '@/hooks/use-toast';
 import TickCircle from '@/assets/icons/tickCircle.svg';
+import { TChainConfigItem } from '@/constants/chains';
 
 export default function NetworkEditor({
   network,
   onCancel,
 }: {
-  network: Chain;
+  network: TChainConfigItem;
   onCancel: () => void;
 }) {
   const { toast } = useToast();
+
   const mockBundlers = [
     {
       name: 'Bundler 01',
@@ -30,6 +31,7 @@ export default function NetworkEditor({
       name: 'Bundler 02',
     },
   ];
+
   const onSave = () => {
     onCancel();
     toast({
@@ -52,7 +54,7 @@ export default function NetworkEditor({
           <Input
             className="text-lg"
             placeholder="Input address"
-            value={network.id}
+            value={network.chainId}
             disabled
           />
         </div>
@@ -63,7 +65,7 @@ export default function NetworkEditor({
           <Input
             className="text-lg"
             placeholder="Input address"
-            value={network.rpcUrls.default.http[0]}
+            value={network.rpcUrl}
           />
         </div>
       </div>
@@ -73,7 +75,7 @@ export default function NetworkEditor({
           <Input
             className="text-lg"
             placeholder="Input address"
-            value={network.nativeCurrency.symbol}
+            value={network.currencySymbol.symbol}
             disabled
           />
         </div>

@@ -2,11 +2,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { safeClipboard } from '@/utils/clipboard';
 import { Button } from '@/components/ui/button';
 import SplitedGrayAddress from '@/components/SplitedGrayAddress';
-import { Address, Chain } from 'viem';
+import { Address } from 'viem';
+import { TChainConfigItem } from '@/constants/chains';
 
 interface IReceiveProps {
   address: string;
-  currentChain: Chain;
+  currentChain: TChainConfigItem;
 }
 
 export default function ReceiveAddress({
@@ -18,9 +19,9 @@ export default function ReceiveAddress({
       {/* Chain info */}
       <div className="flex flex-row items-center gap-2 mb-10">
         <div className="flex flex-col">
-          <div className="text-lg font-medium">{currentChain.name}</div>
+          <div className="text-lg font-medium">{currentChain.chainName}</div>
           <div className="text-sm text-gray-500">
-            Only send {currentChain.name} assets to this address
+            Only send {currentChain.chainName} assets to this address
           </div>
         </div>
       </div>

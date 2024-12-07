@@ -1,4 +1,4 @@
-import { SupportedChainTypeEn } from '@/constants/chains';
+import { SUPPORTED_CHAIN_IDS } from '@/constants/chains';
 import CacheManager from '@/utils/cache/cacheManager';
 
 const DEFAULT_BLOCK_NUMBER_CACHE_EXPIRE_TIME = 10_000; // ms
@@ -29,12 +29,9 @@ class RPCCacheManager extends CacheManager {
   }
 
   private _refreshLatestBlockNumber() {
-    for (const chain in SupportedChainTypeEn) {
-      if (Object.prototype.hasOwnProperty.call(SupportedChainTypeEn, chain)) {
-        this._latestBlockNumberByChain[chain as SupportedChainTypeEn] =
-          Date.now().toString();
-      }
-    }
+    SUPPORTED_CHAIN_IDS.forEach((chainId) => {
+      this._latestBlockNumberByChain[chainId] = Date.now().toString();
+    });
   }
 
   private _getLatestBlockNumber(chain: number) {

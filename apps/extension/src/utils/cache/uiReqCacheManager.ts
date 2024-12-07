@@ -6,10 +6,7 @@ const DEFAULT_UI_REQ_CACHE_EXPIRE_TIME = 10_000; // ms
 type TUIRequestMethod = keyof WalletController;
 
 class ReqCacheManager extends CacheManager {
-  static allowedMethods: TUIRequestMethod[] = [
-    'getOwnerAddress',
-    'getSmartAccountInfo',
-  ];
+  static allowedMethods: TUIRequestMethod[] = ['getCurrentAccount'];
 
   protected _getCacheKey(method: string, params: unknown[]): string {
     // if params is empty, use timestamp as key

@@ -10,9 +10,11 @@ import SettingModal from './SettingModal';
 import AccountsModal from './AccountsModal';
 import Account from './Account';
 import { useAccount } from '../contexts/account-context';
+import { useChain } from '../contexts/chain-context';
 
 export default function BasicAccountInfo() {
-  const { currentChain, accountInfo } = useAccount();
+  const { accountInfo } = useAccount();
+  const { currentChain } = useChain();
   const [openSendModal, setOpenSendModal] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [openAccounts, setOpenAccounts] = useState(false);
@@ -60,7 +62,7 @@ export default function BasicAccountInfo() {
       </div>
 
       {/* Actions */}
-      {accountInfo?.isActivated ? (
+      {accountInfo?.isDeployed ? (
         <div className="grid grid-cols-2 gap-2 mt-2 ">
           <ActionButton
             icon={<ArrowDownLeft />}

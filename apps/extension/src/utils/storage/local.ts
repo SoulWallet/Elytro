@@ -2,6 +2,7 @@
  * Elytro Local Storage
  */
 const localStorage: StorageOperations = {
+  // TODO: add parse/stringify
   save: async <T>(items: Record<string, T>): Promise<void> => {
     try {
       await chrome.storage.local.set(items);
@@ -12,6 +13,7 @@ const localStorage: StorageOperations = {
     }
   },
 
+  // TODO: add parse/stringify
   get: async <T>(keys: string[]): Promise<Record<string, T>> => {
     try {
       const result = await chrome.storage.local.get(keys);

@@ -12,7 +12,7 @@ import RuntimeMessage from '@/utils/message/runtimeMessage';
 import { EVENT_TYPES } from '@/constants/events';
 import uiReqCacheManager from '@/utils/cache/uiReqCacheManager';
 import { rpcCacheManager } from '@/utils/cache/rpcCacheManager';
-import accountManager from './services/accountManager';
+import accountManager from './services/account';
 
 chrome.runtime.onInstalled.addListener((details) => {
   switch (details.reason) {
