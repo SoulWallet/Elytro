@@ -1,15 +1,12 @@
-import {
-  SUPPORTED_CHAIN_ICON_MAP,
-  SupportedChainTypeEn,
-} from '@/constants/chains';
+import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
 import { isAddress } from 'viem';
 
 interface IProps {
   address: string;
-  chainType: SupportedChainTypeEn;
+  chainId: number;
 }
 
-export default function FragmentedAddress({ address, chainType }: IProps) {
+export default function FragmentedAddress({ address, chainId }: IProps) {
   if (!isAddress(address)) {
     return null;
   }
@@ -20,8 +17,8 @@ export default function FragmentedAddress({ address, chainType }: IProps) {
   return (
     <div className="flex items-center gap-sm">
       <img
-        src={SUPPORTED_CHAIN_ICON_MAP[chainType]}
-        alt={chainType}
+        src={SUPPORTED_CHAIN_ICON_MAP[chainId]}
+        alt={chainId.toString()}
         className="size-8"
       />
       <div className="flex items-center gap-sm elytro-text-bold-body">
