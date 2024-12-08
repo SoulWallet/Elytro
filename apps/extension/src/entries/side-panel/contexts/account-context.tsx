@@ -24,7 +24,7 @@ type IAccountContext = {
     loadingTokens: boolean;
   };
   history: UserOperationHistory[];
-  accounts: Account[];
+  accounts: TAccountInfo[];
   updateHistory: () => Promise<void>;
   getAccounts: () => Promise<void>;
 };
@@ -57,7 +57,7 @@ export const AccountProvider = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const searchParams = useSearchParams();
   const [history, setHistory] = useState<UserOperationHistory[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accounts, setAccounts] = useState<TAccountInfo[]>([]);
 
   const updateAccount = async () => {
     if (loading) {
