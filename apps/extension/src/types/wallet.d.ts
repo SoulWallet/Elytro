@@ -6,14 +6,11 @@ type TUserOperationPreFundResult = {
   suspiciousOp: boolean;
 };
 
-type Account = {
+type TAccountInfo = {
   address: Address;
   chainId: number;
   isDeployed: boolean;
-};
-
-type TAccountInfo = {
-  balance: Nullable<string>;
+  balance?: Nullable<string>;
 } & Account;
 
 type TTransactionInfo = {
