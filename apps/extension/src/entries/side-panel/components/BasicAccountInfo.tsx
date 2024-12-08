@@ -15,6 +15,7 @@ import AccountsModal from './AccountsModal';
 import Account from './Account';
 import { useAccount } from '../contexts/account-context';
 import { useChain } from '../contexts/chain-context';
+import Spin from '@/components/Spin';
 
 export default function BasicAccountInfo() {
   const {
@@ -36,6 +37,10 @@ export default function BasicAccountInfo() {
   const onClickReceive = () => {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Receive);
   };
+
+  if (!currentChain || !address) {
+    return <Spin isLoading />;
+  }
 
   return (
     <div className="flex flex-col p-sm">
