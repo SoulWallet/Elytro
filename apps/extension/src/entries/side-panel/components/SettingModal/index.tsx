@@ -8,6 +8,7 @@ import ReceiveAddress from '../ReceiveAddressBadge';
 import { useAccount } from '../../contexts/account-context';
 import NetworkSetting from './NetworkSetting';
 import { useKeyring } from '@/contexts/keyring';
+import { useChain } from '../../contexts/chain-context';
 
 interface IProps {
   open: boolean;
@@ -15,9 +16,8 @@ interface IProps {
 }
 
 export default function SettingModal({ open, onOpenChange }: IProps) {
-  const {
-    accountInfo: { chainType, address },
-  } = useAccount();
+  const { currentChain } = useChain();
+  const { accountInfo } = useAccount();
   const [currentSetting, setCurrentSetting] = useState('');
   const { lock } = useKeyring();
   const handleOnOpenChange = () => {
@@ -60,8 +60,8 @@ export default function SettingModal({ open, onOpenChange }: IProps) {
             <h3 className="text-3xl mb-10">Setting</h3>
             <div className="flex justify-center">
               <ReceiveAddress
-                address={address as string}
-                chainType={chainType}
+                address={accountInfo.address}
+                currentChain={currentChain!}
               />
             </div>
           </>

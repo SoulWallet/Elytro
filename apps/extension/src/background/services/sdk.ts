@@ -1,7 +1,7 @@
 import {
-  DEFAULT_CHAIN_TYPE,
-  SUPPORTED_CHAIN_MAP,
-  SupportedChainTypeEn,
+  DEFAULT_CHAIN_CONFIG,
+  SUPPORTED_CHAIN_IDS,
+  TChainConfigItem,
 } from '@/constants/chains';
 import {
   getDomainSeparator,
@@ -37,22 +37,41 @@ import { ethErrors } from 'eth-rpc-errors';
 class ElytroSDK {
   private _sdk!: SoulWallet;
   private _bundler!: Bundler;
-  private _chainType!: SupportedChainTypeEn;
   private _config!: SDKInitConfig;
+  private _chainConfig!: TChainConfigItem;
   private _pimlicoRpc: Nullable<PublicClient> = null;
 
   constructor() {
-    this._initByChainType(DEFAULT_CHAIN_TYPE);
+    // TODO: maybe not init sdk until user select a chain.
+    this.resetSDK(DEFAULT_CHAIN_CONFIG);
   }
 
   get bundler() {
     return this._bundler;
   }
 
-  public resetSDK(chainType: SupportedChainTypeEn) {
-    if (chainType !== this._chainType) {
-      this._initByChainType(chainType);
+  public resetSDK(chainConfig: TChainConfigItem) {
+    const { chainId, bundlerUrl, rpcUrl } = chainConfig;
+
+    if (chainId === this._chainConfig?.chainId) {
+      console.log('Elytro::SDK: chainId is the same, no need to reset.');
+      return;
     }
+
+    if (!SUPPORTED_CHAIN_IDS.includes(chainId)) {
+      throw new Error(`Elytro: chain ${chainId} is not supported for now.`);
+    }
+
+    this._config = SDK_INIT_CONFIG_BY_CHAIN_MAP[chainId];
+
+    if (!this._config) {
+      throw new Error(`Elytro: chain ${chainId} is not supported for now.`);
+    }
+
+    const { factory, fallback, recovery } = this._config;
+    this._sdk = new SoulWallet(rpcUrl, bundlerUrl, factory, fallback, recovery);
+    this._bundler = new Bundler(bundlerUrl);
+    this._chainConfig = chainConfig;
   }
 
   // TODO: temp, make sure it's unique later.
@@ -60,18 +79,6 @@ class ElytroSDK {
   // also, make sure it keeps the same when it's a same SA address.
   private get _index() {
     return 0; // Math.floor(Math.random() * 100);
-  }
-
-  get chain() {
-    return SUPPORTED_CHAIN_MAP[this._chainType];
-  }
-
-  private _initByChainType(chainType: SupportedChainTypeEn) {
-    this._config = SDK_INIT_CONFIG_BY_CHAIN_MAP[chainType];
-    const { endpoint, bundler, factory, fallback, recovery } = this._config;
-    this._sdk = new SoulWallet(endpoint, bundler, factory, fallback, recovery);
-    this._bundler = new Bundler(bundler);
-    this._chainType = chainType;
   }
 
   /**
@@ -84,9 +91,9 @@ class ElytroSDK {
    */
   public async createWalletAddress(
     eoaAddress: string,
+    chainId: number,
     initialGuardianHash: string = DEFAULT_GUARDIAN_HASH,
-    initialGuardianSafePeriod: number = DEFAULT_GUARDIAN_SAFE_PERIOD,
-    chainId: number | string = this.chain.id
+    initialGuardianSafePeriod: number = DEFAULT_GUARDIAN_SAFE_PERIOD
   ) {
     const initialKeysStrArr = [paddingZero(eoaAddress, 32)];
 
@@ -101,9 +108,10 @@ class ElytroSDK {
     if (res.isErr()) {
       throw res.ERR;
     } else {
+      // no need await for createAccount request. it's not a blocking request.
       createAccount(
         res.OK,
-        this.chain.id,
+        chainId,
         this._index,
         initialKeysStrArr,
         initialGuardianHash,
@@ -142,7 +150,11 @@ class ElytroSDK {
   }
 
   public async canGetSponsored(userOp: ElytroUserOperation) {
-    return canUserOpGetSponsor(userOp, this.chain.id, TEMP_ENTRY_POINT);
+    return canUserOpGetSponsor(
+      userOp,
+      this._chainConfig.chainId,
+      TEMP_ENTRY_POINT
+    );
   }
 
   public async isSmartAccountDeployed(address: string) {
@@ -278,7 +290,11 @@ class ElytroSDK {
     }
 
     // todo: entrypoint should be dynamically changed with chainId?
-    const res = await DecodeUserOp(this.chain.id, TEMP_ENTRY_POINT, userOp);
+    const res = await DecodeUserOp(
+      this._chainConfig.chainId,
+      TEMP_ENTRY_POINT,
+      userOp
+    );
 
     if (res.isErr()) {
       throw res.ERR;
@@ -288,7 +304,11 @@ class ElytroSDK {
   }
 
   public async simulateUserOperation(userOp: ElytroUserOperation) {
-    return await simulateSendUserOp(userOp, TEMP_ENTRY_POINT, this.chain.id);
+    return await simulateSendUserOp(
+      userOp,
+      TEMP_ENTRY_POINT,
+      this._chainConfig.chainId
+    );
   }
 
   private async _getFeeDataFromSDKProvider() {
@@ -307,7 +327,6 @@ class ElytroSDK {
     this._pimlicoRpc = this._pimlicoRpc
       ? this._pimlicoRpc
       : createPublicClient({
-          chain: this.chain,
           transport: http(this._config.bundler),
         });
 
@@ -321,7 +340,7 @@ class ElytroSDK {
 
   private async _getFeeData() {
     let gasPrice;
-    if (this._config.bundler.includes('pimlico')) {
+    if (this._chainConfig.bundlerUrl.includes('pimlico')) {
       // pimlico uses different gas price
       gasPrice = await this._getPimlicoFeeData();
     } else {
@@ -424,7 +443,10 @@ class ElytroSDK {
     const rawMessage = getHexString(message, 32);
 
     const encode1271MessageHash = getEncoded1271MessageHash(rawMessage);
-    const domainSeparator = getDomainSeparator(toHex(this.chain.id), saAddress);
+    const domainSeparator = getDomainSeparator(
+      toHex(this._chainConfig.chainId),
+      saAddress
+    );
     const encodedSHA = getEncodedSHA(domainSeparator, encode1271MessageHash);
 
     const signature = await this._getSignature(encodedSHA);

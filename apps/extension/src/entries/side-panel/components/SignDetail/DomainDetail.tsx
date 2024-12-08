@@ -1,4 +1,3 @@
-import { chainIdToChainNameMap } from '@/constants/chains';
 import LabelValue from '../LabelValue';
 import { formatAddressToShort } from '@/utils/format';
 
@@ -11,7 +10,9 @@ const FieldRender = ({ label, value }: { label: string; value: string }) => {
 
   switch (label) {
     case 'chainId':
-      renderValue = chainIdToChainNameMap[Number(value)] || '--';
+      // renderValue = chainIdToChainNameMap[Number(value)] || '--';
+      // TODO: get chain name from chain config
+      renderValue = value || '--';
       break;
     case 'verifyingContract':
       renderValue = (

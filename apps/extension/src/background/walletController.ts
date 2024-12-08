@@ -1,4 +1,3 @@
-import { SupportedChainTypeEn } from '@/constants/chains';
 import { approvalService } from './services/approval';
 import connectionManager from './services/connection';
 import keyring from './services/keyring';
@@ -10,8 +9,13 @@ import sessionManager from './services/session';
 import { deformatUserOperation } from '@/utils/format';
 import historyManager from './services/history';
 import { UserOperationHistory } from '@/constants/operations';
+import { formatEther, toHex } from 'viem';
+import chainService from './services/chain';
+import accountManager from './services/account';
+import { TChainConfigItem } from '@/constants/chains';
 
 // ! DO NOT use getter. They can not be proxied.
+// ! Please declare all methods async.
 class WalletController {
   constructor() {
     // walletClient.init();
@@ -26,31 +30,14 @@ class WalletController {
    */
   public async getLockStatus() {
     await keyring.tryUnlock();
+
+    // TODO: account restore
+
     return keyring.locked;
   }
 
-  /**
-   * Get Smart Account Owner Address
-   */
-  public async getOwnerAddress() {
-    return keyring.owner?.address;
-  }
-
-  /**
-   * Get Smart Account Info
-   */
-  public async getSmartAccountInfo() {
-    return await walletClient.initSmartAccount();
-    // const res = await walletClient.initSmartAccount();
-
-    // if (res) {
-    //   sessionManager.broadcastMessage('accountsChanged', [res.address]);
-    // }
-
-    // return res;
-  }
-
   public async lock() {
+    // TODO: account reset?
     return await keyring.lock();
   }
 
@@ -70,10 +57,10 @@ class WalletController {
     return approvalService.rejectApproval(id);
   }
 
-  public async connectWallet(dApp: TDAppInfo, chainType: SupportedChainTypeEn) {
-    connectionManager.connect(dApp, chainType);
+  public async connectWallet(dApp: TDAppInfo, chainId: number) {
+    connectionManager.connect(dApp, chainId);
     sessionManager.broadcastMessageToDApp(dApp.origin!, 'accountsChanged', [
-      keyring.smartAccountAddress,
+      accountManager?.currentAccount?.address as string,
     ]);
   }
 
@@ -82,7 +69,19 @@ class WalletController {
   }
 
   public async signMessage(message: string) {
-    return await walletClient.signMessage(message);
+    if (!accountManager.currentAccount?.address) {
+      throw ethErrors.rpc.internal();
+    }
+
+    if (typeof message !== 'string') {
+      throw ethErrors.rpc.invalidParams();
+    }
+
+    // todo: maybe more params check?
+    return await elytroSDK.signMessage(
+      message,
+      accountManager.currentAccount.address
+    );
   }
 
   public async signTypedData(typedData: string | TTypedDataItem[]) {
@@ -95,7 +94,7 @@ class WalletController {
       }
 
       if (hash) {
-        return await walletClient.signMessage(hash);
+        return await this.signMessage(hash);
       }
 
       throw new Error('Elytro: Cannot generate hash for typed data');
@@ -115,6 +114,104 @@ class WalletController {
     }));
 
     return res;
+  }
+
+  private _onChainConfigChanged() {
+    const chainConfig = chainService.currentChain;
+
+    if (!chainConfig) {
+      throw new Error('Elytro: No current chain config');
+    }
+
+    elytroSDK.resetSDK(chainConfig);
+    walletClient.init(chainConfig);
+    accountManager.switchAccountByChainId(chainConfig.chainId);
+
+    sessionManager.broadcastMessage('accountsChanged', [
+      accountManager.currentAccount?.address as string,
+    ]);
+    sessionManager.broadcastMessage('chainChanged', toHex(chainConfig.chainId));
+  }
+
+  public async getCurrentChain() {
+    return chainService.currentChain;
+  }
+
+  public async getChains() {
+    return chainService.chains;
+  }
+
+  public async updateChainConfig(
+    chainId: number,
+    config: Partial<TChainConfigItem>
+  ) {
+    chainService.updateChain(chainId, config);
+
+    if (chainId === chainService.currentChain?.chainId) {
+      this._onChainConfigChanged();
+    }
+  }
+
+  public async addChain(chain: TChainConfigItem) {
+    chainService.addChain(chain);
+  }
+
+  public async deleteChain(chainId: number) {
+    chainService.deleteChain(chainId);
+  }
+
+  public async getAccounts() {
+    return accountManager.accounts;
+  }
+
+  public async getCurrentAccount() {
+    const basicInfo = accountManager.currentAccount;
+
+    if (!basicInfo) {
+      throw new Error('Elytro: No current account');
+    }
+
+    const balanceBn = await walletClient.getBalance(basicInfo.address);
+
+    return { ...basicInfo, balance: formatEther(balanceBn) };
+  }
+
+  public async createAccount(chainId: number, setAsCurrent = false) {
+    if (!keyring.owner?.address) {
+      throw new Error('Elytro: No owner address. Try create owner first.');
+    }
+
+    await accountManager.createAccount(keyring.owner.address, chainId);
+
+    if (setAsCurrent) {
+      this.switchAccountByChain(chainId);
+    }
+  }
+
+  public async activateCurrentAccount() {
+    accountManager.activateCurrentAccount();
+  }
+
+  public async switchAccountByChain(chainId: number) {
+    const newChainConfig = chainService.switchChain(chainId);
+
+    if (newChainConfig) {
+      this._onChainConfigChanged();
+    }
+  }
+
+  public async createDeployUserOp() {
+    if (!keyring.owner?.address) {
+      throw new Error('Elytro: No owner address. Try create owner first.');
+    }
+
+    const deployUserOp = await elytroSDK.createUnsignedDeployWalletUserOp(
+      keyring.owner.address as string
+    );
+
+    await elytroSDK.estimateGas(deployUserOp);
+
+    return deployUserOp;
   }
 }
 

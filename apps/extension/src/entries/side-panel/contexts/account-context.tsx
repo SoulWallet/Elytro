@@ -1,9 +1,8 @@
-import { DEFAULT_CHAIN_TYPE, SUPPORTED_CHAIN_MAP } from '@/constants/chains';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
 import { useHashLocation } from 'wouter/use-hash-location';
 import useSearchParams from '@/hooks/use-search-params';
-import { Address, toHex } from 'viem';
+import { Address } from 'viem';
 import useTokens, { TokenDTO } from '@/hooks/use-tokens';
 import { UserOperationHistory } from '@/constants/operations';
 import RuntimeMessage from '@/utils/message/runtimeMessage';
@@ -11,10 +10,9 @@ import { EVENT_TYPES } from '@/constants/events';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
-  isActivated: false,
-  chainType: DEFAULT_CHAIN_TYPE,
+  isDeployed: false,
   balance: '0',
-  ownerAddress: '',
+  chainId: 0,
 };
 
 type IAccountContext = {
@@ -26,9 +24,12 @@ type IAccountContext = {
     loadingTokens: boolean;
   };
   history: UserOperationHistory[];
+  accounts: TAccountInfo[];
   updateHistory: () => Promise<void>;
+  getAccounts: () => Promise<void>;
 };
 
+// TODO: extract HistoryContext
 const AccountContext = createContext<IAccountContext>({
   accountInfo: DEFAULT_ACCOUNT_INFO,
   updateAccount: async () => {},
@@ -39,6 +40,8 @@ const AccountContext = createContext<IAccountContext>({
   },
   history: [],
   updateHistory: async () => {},
+  accounts: [],
+  getAccounts: async () => {},
 });
 
 export const AccountProvider = ({
@@ -54,17 +57,20 @@ export const AccountProvider = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const searchParams = useSearchParams();
   const [history, setHistory] = useState<UserOperationHistory[]>([]);
+  const [accounts, setAccounts] = useState<TAccountInfo[]>([]);
 
   const updateAccount = async () => {
     if (loading) {
       return;
     }
+
     try {
       setLoading(true);
-      const res = (await wallet.getSmartAccountInfo()) ?? DEFAULT_ACCOUNT_INFO;
+
+      const res = (await wallet.getCurrentAccount()) ?? DEFAULT_ACCOUNT_INFO;
       setAccountInfo(res);
 
-      if (intervalRef.current && res.isActivated) {
+      if (intervalRef.current && res.isDeployed) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
@@ -75,16 +81,10 @@ export const AccountProvider = ({
     }
   };
 
-  const chainId = toHex(
-    SUPPORTED_CHAIN_MAP[
-      accountInfo.chainType as keyof typeof SUPPORTED_CHAIN_MAP
-    ].id
-  );
-
-  const { tokens, loadingTokens } = useTokens(
-    accountInfo.address as Address,
-    chainId
-  );
+  const { tokens, loadingTokens } = useTokens({
+    address: accountInfo.address as Address,
+    chainId: accountInfo.chainId,
+  });
 
   // TODO: check this logic
   const updateHistory = async () => {
@@ -120,6 +120,17 @@ export const AccountProvider = ({
     };
   }, [searchParams]);
 
+  const getAccounts = async () => {
+    const res = await wallet.getAccounts();
+    if (res) {
+      setAccounts(res);
+    }
+  };
+
+  useEffect(() => {
+    getAccounts();
+  }, []);
+
   return (
     <AccountContext.Provider
       value={{
@@ -132,6 +143,8 @@ export const AccountProvider = ({
         history,
         updateHistory,
         loading,
+        accounts,
+        getAccounts,
       }}
     >
       {children}

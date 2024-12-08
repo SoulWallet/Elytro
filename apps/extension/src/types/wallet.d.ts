@@ -7,12 +7,11 @@ type TUserOperationPreFundResult = {
 };
 
 type TAccountInfo = {
-  address: Nullable<string>;
-  ownerAddress: Nullable<string>;
-  balance: Nullable<string>;
-  isActivated: boolean;
-  chainType: SupportedChainTypeEn;
-};
+  address: Address;
+  chainId: number;
+  isDeployed: boolean;
+  balance?: Nullable<string>;
+} & Account;
 
 type TTransactionInfo = {
   from: string; // Address

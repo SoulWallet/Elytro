@@ -11,21 +11,24 @@ import { routes } from './routes';
 import SignTxModal from '@/entries/side-panel/components/SignTxModal';
 import { client } from '@/requests';
 import SendTxModal from './components/SendTxModal';
+import { ChainProvider } from './contexts/chain-context';
 
 const main = () => {
   const SidePanelApp: React.FC = () => (
     <ApolloProvider client={client}>
-      <AccountProvider>
-        <ApprovalProvider>
-          <PageContainer className="bg-gray-150">
-            <TooltipProvider>
-              <HashRouter routes={routes} />
-              <SignTxModal />
-              <SendTxModal />
-            </TooltipProvider>
-          </PageContainer>
-        </ApprovalProvider>
-      </AccountProvider>
+      <ChainProvider>
+        <AccountProvider>
+          <ApprovalProvider>
+            <PageContainer className="min-w-96">
+              <TooltipProvider>
+                <HashRouter routes={routes} />
+                <SignTxModal />
+                <SendTxModal />
+              </TooltipProvider>
+            </PageContainer>
+          </ApprovalProvider>
+        </AccountProvider>
+      </ChainProvider>
     </ApolloProvider>
   );
 

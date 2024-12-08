@@ -1,13 +1,16 @@
 import { BackArrow } from '@/assets/icons/BackArrow';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import { arbitrum, base, Chain, optimism } from 'viem/chains';
 import NetworkEditor from './NetworkEditor';
+import { useChain } from '../../contexts/chain-context';
+import { TChainConfigItem } from '@/constants/chains';
 
 export default function NetworkSetting({ onBack }: { onBack: () => void }) {
-  // TODO: change it to supported networks
-  const networks = [optimism, arbitrum, base];
-  const [editingNetwork, setEditingNetwork] = useState<Chain | null>(null);
+  const { chains } = useChain();
+  const [editingNetwork, setEditingNetwork] = useState<TChainConfigItem | null>(
+    null
+  );
+
   return (
     <>
       {editingNetwork ? null : (
@@ -16,7 +19,7 @@ export default function NetworkSetting({ onBack }: { onBack: () => void }) {
         </div>
       )}
       <h3 className="text-3xl mb-10">
-        {editingNetwork ? editingNetwork.name : 'Network'}
+        {editingNetwork ? editingNetwork.chainName : 'Network'}
       </h3>
       {editingNetwork ? (
         <NetworkEditor
@@ -25,13 +28,13 @@ export default function NetworkSetting({ onBack }: { onBack: () => void }) {
         />
       ) : (
         <ul className="space-y-2">
-          {networks.map((item) => (
+          {chains.map((chain) => (
             <li
-              key={item.id}
+              key={chain.id}
               className="bg-gray-50 rounded-md px-4 py-6 flex items-center justify-between cursor-pointer"
-              onClick={() => setEditingNetwork(item)}
+              onClick={() => setEditingNetwork(chain)}
             >
-              <div className="text-lg font-medium">{item.name}</div>
+              <div className="text-lg font-medium">{chain.chainName}</div>
               <ChevronRight />
             </li>
           ))}

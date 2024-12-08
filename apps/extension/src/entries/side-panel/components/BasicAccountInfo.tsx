@@ -14,16 +14,17 @@ import SettingModal from './SettingModal';
 import AccountsModal from './AccountsModal';
 import Account from './Account';
 import { useAccount } from '../contexts/account-context';
+import { useChain } from '../contexts/chain-context';
 
 export default function BasicAccountInfo() {
   const {
-    accountInfo: { isActivated, address, balance, chainType },
+    accountInfo: { isActivated, address, balance },
     updateAccount,
   } = useAccount();
+  const { currentChain } = useChain();
   const [openSendModal, setOpenSendModal] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [openAccounts, setOpenAccounts] = useState(false);
-
   const onClickMore = () => {
     setOpenSetting(true);
   };
@@ -40,7 +41,7 @@ export default function BasicAccountInfo() {
     <div className="flex flex-col p-sm">
       {/* Chain & Address */}
       <div className="flex flex-row gap-2 w-full items-center justify-between">
-        <Account chainType={chainType} address={address} />
+        <Account chain={currentChain!} address={address} />
         <div className="flex flex-row gap-lg">
           <Ellipsis className="elytro-clickable-icon" onClick={onClickMore} />
           <RefreshCcw

@@ -7,9 +7,12 @@ import { toast } from '@/hooks/use-toast';
 import { TAB_ROUTE_PATHS } from '../routes';
 import { useKeyring } from '@/contexts/keyring';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
+import { useWallet } from '@/contexts/wallet';
+import { DEFAULT_CHAIN_CONFIG } from '@/constants/chains';
 
 const Create: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const wallet = useWallet();
   const { createNewOwner } = useKeyring();
   const goBack = () => {
     history.back();
@@ -19,6 +22,9 @@ const Create: React.FC = () => {
     setLoading(true);
     try {
       await createNewOwner(pwd);
+
+      // TODO: move this to user select chain step.
+      await wallet.createAccount(DEFAULT_CHAIN_CONFIG.chainId, true);
 
       // open side panel here, cause sidePanel.open() only can be called in response to a user gesture.
       navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
