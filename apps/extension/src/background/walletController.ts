@@ -6,13 +6,17 @@ import { elytroSDK } from './services/sdk';
 import { hashEarlyTypedData, hashSignTypedData } from '@/utils/hash';
 import { ethErrors } from 'eth-rpc-errors';
 import sessionManager from './services/session';
-import { deformatUserOperation } from '@/utils/format';
+import {
+  deformatObjectWithBigInt,
+  formatObjectWithBigInt,
+} from '@/utils/format';
 import historyManager from './services/history';
 import { UserOperationHistory } from '@/constants/operations';
-import { formatEther, toHex } from 'viem';
+import { formatEther, Hex, toHex } from 'viem';
 import chainService from './services/chain';
 import accountManager from './services/account';
 import { TChainConfigItem } from '@/constants/chains';
+import type { Transaction } from '@soulwallet/sdk';
 
 // ! DO NOT use getter. They can not be proxied.
 // ! Please declare all methods async.
@@ -65,7 +69,7 @@ class WalletController {
   }
 
   public async signUserOperation(userOp: ElytroUserOperation) {
-    return await elytroSDK.signUserOperation(deformatUserOperation(userOp));
+    return await elytroSDK.signUserOperation(deformatObjectWithBigInt(userOp));
   }
 
   public async signMessage(message: string) {
@@ -211,7 +215,29 @@ class WalletController {
 
     await elytroSDK.estimateGas(deployUserOp);
 
-    return deployUserOp;
+    return formatObjectWithBigInt(deployUserOp);
+  }
+
+  public async createTxUserOp(txs: Transaction[]) {
+    const userOp = await elytroSDK.createUserOpFromTxs(
+      accountManager.currentAccount?.address as string,
+      txs
+    );
+
+    return formatObjectWithBigInt(userOp);
+  }
+
+  public async decodeUserOp(userOp: ElytroUserOperation) {
+    return await elytroSDK.getDecodedUserOperation(userOp);
+  }
+
+  public async packUserOp(userOp: ElytroUserOperation, amount: Hex) {
+    const res = await elytroSDK.getRechargeAmountForUserOp(
+      userOp,
+      BigInt(amount)
+    );
+
+    return formatObjectWithBigInt(res);
   }
 }
 

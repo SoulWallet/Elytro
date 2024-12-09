@@ -420,7 +420,6 @@ class ElytroSDK {
         missfund,
         //deposit, prefund
       } = res.OK;
-
       const balance = await this._sdk.provider.getBalance(userOp.sender);
       const missAmount = hasSponsored
         ? transferValue - balance // why transferValue is not accurate? missfund is wrong during preFund?

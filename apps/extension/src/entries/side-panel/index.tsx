@@ -12,6 +12,8 @@ import SignTxModal from '@/entries/side-panel/components/SignTxModal';
 import { client } from '@/requests';
 import SendTxModal from './components/SendTxModal';
 import { ChainProvider } from './contexts/chain-context';
+import { UserOpConfirmDialog } from './components/UserOpConfirmDialog';
+import { DialogProvider } from './contexts/dialog-context';
 
 const main = () => {
   const SidePanelApp: React.FC = () => (
@@ -19,13 +21,16 @@ const main = () => {
       <ChainProvider>
         <AccountProvider>
           <ApprovalProvider>
-            <PageContainer className="min-w-96">
-              <TooltipProvider>
-                <HashRouter routes={routes} />
-                <SignTxModal />
-                <SendTxModal />
-              </TooltipProvider>
-            </PageContainer>
+            <DialogProvider>
+              <PageContainer>
+                <TooltipProvider>
+                  <HashRouter routes={routes} />
+                  <SignTxModal />
+                  <SendTxModal />
+                  <UserOpConfirmDialog />
+                </TooltipProvider>
+              </PageContainer>
+            </DialogProvider>
           </ApprovalProvider>
         </AccountProvider>
       </ChainProvider>

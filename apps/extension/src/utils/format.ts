@@ -128,21 +128,66 @@ export function formatBlockInfo(block: Block) {
   };
 }
 
-// format bigint to hex string
-export function formatUserOperation(userOp: ElytroUserOperation) {
-  const formatBigIntToHex = (value: SafeAny) => {
-    return typeof value === 'bigint' ? toHex(value) : value;
-  };
+function checkType(value: SafeAny) {
+  const typeString = Object.prototype.toString.call(value);
 
-  const formattedUserOp = Object.fromEntries(
-    Object.entries(userOp).map(([key, value]) => [
-      key,
-      formatBigIntToHex(value),
-    ])
-  );
-
-  return formattedUserOp as ElytroUserOperation;
+  switch (typeString) {
+    case '[object String]':
+      return 'string';
+    case '[object Number]':
+      return 'number';
+    case '[object Boolean]':
+      return 'boolean';
+    case '[object Undefined]':
+      return 'undefined';
+    case '[object Null]':
+      return 'null';
+    case '[object Array]':
+      return 'array';
+    case '[object Object]':
+      return 'object';
+    case '[object Function]':
+      return 'function';
+    default:
+      return 'unknown'; // 处理其他类型
+  }
 }
+
+const formatBigIntToHex = (value: SafeAny) => {
+  return typeof value === 'bigint' ? toHex(value) : value;
+};
+
+export const formatObjectWithBigInt = (obj: SafeAny) => {
+  const type = checkType(obj);
+
+  if (type === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [key, formatBigIntToHex(value)])
+    );
+  } else if (type === 'array') {
+    return (obj as SafeAny[]).map((value) => formatBigIntToHex(value));
+  } else if (type === 'function') {
+    return obj;
+  }
+
+  return formatBigIntToHex(obj);
+};
+
+// format bigint to hex string
+// export function formatUserOperation(userOp: ElytroUserOperation) {
+//   const formatBigIntToHex = (value: SafeAny) => {
+//     return typeof value === 'bigint' ? toHex(value) : value;
+//   };
+
+//   const formattedUserOp = Object.fromEntries(
+//     Object.entries(userOp).map(([key, value]) => [
+//       key,
+//       formatBigIntToHex(value),
+//     ])
+//   );
+
+//   return formattedUserOp as ElytroUserOperation;
+// }
 
 const BIGINT_PARAM_KEY = [
   'callGasLimit',
@@ -152,7 +197,7 @@ const BIGINT_PARAM_KEY = [
   'preVerificationGas',
 ];
 
-export function deformatUserOperation(userOp: ElytroUserOperation) {
+export function deformatObjectWithBigInt(userOp: ElytroUserOperation) {
   const deformatUserOp = Object.fromEntries(
     Object.entries(userOp).map(([key, value]) => [
       key,

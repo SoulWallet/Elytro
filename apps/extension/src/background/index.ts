@@ -73,15 +73,15 @@ const initContentScriptAndPageProviderMessage = (port: chrome.runtime.Port) => {
 
   providerPortManager.connect(port);
 
-  const heartbeat = setInterval(() => {
-    if (port) {
-      port.postMessage({ type: 'HEARTBEAT', data: '{}' });
-      console.log('elytro heartbeat');
-    }
-  }, 6_000);
+  // const heartbeat = setInterval(() => {
+  //   if (port) {
+  //     port.postMessage({ type: 'HEARTBEAT', data: '{}' });
+  //     console.log('elytro heartbeat');
+  //   }
+  // }, 6_000);
 
   port.onDisconnect.addListener(() => {
-    clearInterval(heartbeat);
+    // clearInterval(heartbeat);
     sessionManager.removeSession(tabId, origin);
   });
 
