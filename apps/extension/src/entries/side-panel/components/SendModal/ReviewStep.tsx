@@ -13,12 +13,13 @@ import { Address, formatEther, Hex, parseEther, toHex } from 'viem';
 import { useElytroStep } from '@/components/steps/StepProvider';
 import { Button } from '@/components/ui/button';
 import useDialogStore from '@/stores/dialog';
+import { useChain } from '../../contexts/chain-context';
 
 export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
   const {
     accountInfo: { address },
-    currentChain,
   } = useAccount();
+  const { currentChain } = useChain();
   const { stepData } = useElytroStep() as { stepData: TxData };
   const { openSendTxDialog, closeSendTxDialog } = useDialogStore();
   const afterConfirm = () => {
@@ -68,7 +69,7 @@ export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">Network</Label>
         <div className="flex flex-row items-center font-medium text-lg space-x-2">
-          <div>{currentChain?.name}</div>
+          <div>{currentChain?.chainName}</div>
           <Tooltip>
             <TooltipTrigger>
               <img src={questionIcon} alt="question icon" />

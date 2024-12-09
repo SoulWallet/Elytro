@@ -47,13 +47,15 @@ export default function Receive() {
           <div className="flex flex-row items-center gap-2  ">
             <img
               src={SUPPORTED_CHAIN_ICON_MAP[currentChain?.chainId]}
-              alt={currentChain?.name}
+              alt={currentChain?.chainName}
               className="size-8 rounded-full border border-gray-50"
             />
             <div className="flex flex-col">
-              <div className="elytro-text-bold-body">{currentChain?.name}</div>
+              <div className="elytro-text-bold-body">
+                {currentChain?.chainName}
+              </div>
               <div className="elytro-text-tiny-body text-gray-600">
-                This address only accepts {currentChain?.name} assets.
+                This address only accepts {currentChain?.chainName} assets.
               </div>
             </div>
           </div>

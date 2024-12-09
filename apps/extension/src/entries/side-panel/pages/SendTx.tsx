@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import SendTxComponent from '../components/SendTx';
-import { useAccount } from '../contexts/account-context';
 import { useApproval } from '../contexts/approval-context';
 import Spin from '@/components/Spin';
 import { toast } from '@/hooks/use-toast';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
 import { navigateTo } from '@/utils/navigation';
+import { useChain } from '../contexts/chain-context';
 
 export default function SendTx() {
-  const { currentChain } = useAccount();
+  const { currentChain } = useChain();
   const { approval, reject, resolve } = useApproval();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function SendTx() {
         <SendTxComponent
           txParams={approval.data.tx[0]}
           dapp={approval.data.dApp}
-          chainName={currentChain?.name as string}
+          chainName={currentChain?.chainName as string}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
         />

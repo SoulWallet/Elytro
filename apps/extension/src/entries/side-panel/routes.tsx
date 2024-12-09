@@ -1,7 +1,6 @@
 import { TRoute } from '@/types/route';
 import Unlock from './pages/Unlock';
 import Dashboard from './pages/Dashboard';
-import Activate from './pages/Activate';
 import Receive from './pages/Receive';
 import Settings from './pages/Settings';
 import Connect from './pages/Connect';
@@ -40,10 +39,6 @@ export const routes: TRoute[] = [
     component: Unlock,
   },
 
-  {
-    path: SIDE_PANEL_ROUTE_PATHS.Activate,
-    component: Activate,
-  },
   {
     path: SIDE_PANEL_ROUTE_PATHS.Receive,
     component: Receive,

@@ -38,7 +38,7 @@ export default function NetworkEditor({
       description: (
         <div className="flex">
           <img className="mr-2" src={TickCircle} />
-          {network.name} Network updated
+          {network.chainName} Network updated
         </div>
       ),
       className: 'bg-green-900 border-none text-green-50 text-2xl py-8',

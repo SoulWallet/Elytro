@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { isAddress } from 'viem';
-import { useAccount } from '../../contexts/account-context';
+import { useChain } from '../../contexts/chain-context';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,7 +23,7 @@ import { useElytroStep } from '@/components/steps/StepProvider';
 import { TxData } from '.';
 
 export default function RecipientStep() {
-  const { currentChain } = useAccount();
+  const { currentChain } = useChain();
   const { handleContinue } = useElytroStep();
   const formResolverConfig = z.object({
     address: z.string().refine((address) => isAddress(address), {
@@ -65,7 +65,7 @@ export default function RecipientStep() {
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">Network</Label>
         <div className="flex flex-row items-center font-medium text-lg space-x-2">
-          <div>{currentChain?.name}</div>
+          <div>{currentChain?.chainName}</div>
           <Tooltip>
             <TooltipTrigger>
               <img src={questionIcon} alt="question icon" />

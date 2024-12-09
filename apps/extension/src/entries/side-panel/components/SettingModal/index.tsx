@@ -61,7 +61,7 @@ export default function SettingModal({ open, onOpenChange }: IProps) {
             <div className="flex justify-center">
               <ReceiveAddress
                 address={accountInfo.address}
-                currentChain={currentChain!}
+                chainId={currentChain?.chainId || 0}
               />
             </div>
           </>
