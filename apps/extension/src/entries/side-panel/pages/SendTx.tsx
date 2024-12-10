@@ -2,10 +2,8 @@ import { formatEther, Hex, hexToBigInt, isAddress } from 'viem';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useState } from 'react';
-import { ArrowRightLeftIcon, ChevronDown, CircleHelp } from 'lucide-react';
-import DefaultTokenIcon from '@/assets/icons/ether.svg';
-import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
+import { useMemo } from 'react';
+import { CircleHelp } from 'lucide-react';
 import { Transaction } from '@soulwallet/sdk';
 import { Button } from '@/components/ui/button';
 import { TokenDTO } from '@/hooks/use-tokens';
@@ -16,41 +14,13 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectTrigger, SelectContent } from '@/components/ui/select';
 import SecondaryPageWrapper from '../components/SecondaryPageWrapper';
 import { useAccount } from '../contexts/account-context';
 import { useChain } from '../contexts/chain-context';
 import FragmentedAddress from '../components/FragmentedAddress';
-
-function SelectedToken({ token }: { token?: TokenDTO }) {
-  if (!token)
-    return (
-      <div className="flex items-center">
-        <div className="text-lg w-full text-left">Select a token</div>
-        <ChevronDown className="text-gray-600" />
-      </div>
-    );
-  return (
-    <div className="flex items-center w-full">
-      <img
-        className="h-10 w-10"
-        src={token.logoURI || DefaultTokenIcon}
-        alt={token.name}
-      />
-      <div className="text-left ml-2">
-        <div className="flex items-center">
-          <div className="text-lg">{token.name}</div>
-          <ChevronDown className="text-gray-600" />
-        </div>
-
-        <div className="text-gray-600">
-          Balance: {formatEther(BigInt(token.tokenBalance))}
-        </div>
-      </div>
-    </div>
-  );
-}
+import AddressInput from '../components/AddressInput';
+import TokenSelector from '../components/TokenSelector';
+import AmountInput from '../components/AmountInput';
 
 export default function SendTx() {
   const {
@@ -58,7 +28,6 @@ export default function SendTx() {
     accountInfo: { address },
   } = useAccount();
   const { currentChain } = useChain();
-  const [open, setOpen] = useState(false);
   const formResolverConfig = z.object({
     token: z.object({
       name: z.string(),
@@ -105,17 +74,17 @@ export default function SendTx() {
       form.trigger('amount');
     }
   };
-  const handleSelect = (item: TokenDTO) => {
+  const handleTokenSelect = (item: TokenDTO) => {
     form.setValue('token', item);
     form.trigger('token');
-    setOpen(false);
   };
 
   const price = useMemo(() => {
     const token = form.getValues('token');
     const amount = form.getValues('amount');
     if (!token) return 0;
-    return (Number(amount) * token.price).toFixed(2);
+    const result = Number(amount) * token.price;
+    return result ? result.toFixed(2) : 0;
   }, [form.getValues('token'), form.getValues('amount')]);
 
   const handleContinue = () => {
@@ -156,20 +125,11 @@ export default function SendTx() {
               render={({ field }) => (
                 <FormItem className="mb-4">
                   <FormControl>
-                    <div className="bg-white px-3 py-4 rounded-md flex flex-row items-center">
-                      <Input
-                        className="text-5xl border-none"
-                        placeholder="0"
-                        disabled={!form.getValues('token')}
-                        {...field}
-                      />
-                      <div className="bg-gray-300 p-2 rounded-sm">
-                        <ArrowRightLeftIcon className="w-4 h-4" />
-                      </div>
-                      <div className="text-lg px-4 font-light text-gray-600">
-                        ${price}
-                      </div>
-                    </div>
+                    <AmountInput
+                      field={field}
+                      isDisabled={!form.getValues('token')}
+                      price={price}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -178,45 +138,14 @@ export default function SendTx() {
             <FormField
               control={form.control}
               name="token"
-              render={({ field }) => (
+              render={() => (
                 <div className="relative">
                   <FormItem>
                     <FormControl>
-                      <Select onValueChange={field.onChange} open={open}>
-                        <SelectTrigger
-                          needDropdown={false}
-                          onClick={() => setOpen(!open)}
-                          className="border-0"
-                        >
-                          <SelectedToken token={field.value as TokenDTO} />
-                        </SelectTrigger>
-                        <SelectContent
-                          className="rounded-3xl bg-white overflow-hidden w-full mt-4"
-                          onPointerDownOutside={() => setOpen(false)}
-                        >
-                          {tokens.map((item) => {
-                            return (
-                              <div
-                                key={item.name}
-                                onClick={() => handleSelect(item)}
-                                className="flex items-center justify-between cursor-pointer hover:bg-gray-200 py-4 px-4"
-                              >
-                                <img
-                                  className="h-10 w-10 mr-4"
-                                  src={item.logoURI || DefaultTokenIcon}
-                                  alt={item.name}
-                                />
-                                <div className="flex-1 text-lg">
-                                  {item.name}
-                                </div>
-                                <div className="text-gray-400 text-lg">
-                                  {formatEther(hexToBigInt(item.tokenBalance))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
+                      <TokenSelector
+                        tokens={tokens}
+                        onTokenChange={handleTokenSelect}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -240,25 +169,9 @@ export default function SendTx() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <div className="bg-white rounded-md pl-5 py-4 flex items-center mb-4">
-                      <img
-                        className="w-6 h-6"
-                        // TODO: config the chain icon in chain service
-                        src={
-                          currentChain?.chainId
-                            ? SUPPORTED_CHAIN_ICON_MAP[currentChain.chainId]
-                            : DefaultTokenIcon
-                        }
-                        alt={currentChain?.chainName}
-                      />
-                      <Input
-                        className="text-lg border-none"
-                        placeholder="Recipient address / ENS"
-                        {...field}
-                      />
-                    </div>
+                    <AddressInput field={field} currentChain={currentChain} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="pb-2" />
                 </FormItem>
               )}
             />
