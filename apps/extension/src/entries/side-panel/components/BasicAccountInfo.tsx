@@ -19,7 +19,7 @@ import Spin from '@/components/Spin';
 
 export default function BasicAccountInfo() {
   const {
-    accountInfo: { isActivated, address, balance },
+    accountInfo: { isDeployed, address, balance },
     updateAccount,
   } = useAccount();
   const { currentChain } = useChain();
@@ -66,7 +66,7 @@ export default function BasicAccountInfo() {
 
       {/* Actions */}
       <div>
-        {isActivated ? (
+        {isDeployed ? (
           <div className="flex flex-row gap-sm mt-sm ">
             <ActionButton
               className="bg-light-green"

@@ -181,6 +181,14 @@ class WalletController {
       throw new Error('Elytro: No current account');
     }
 
+    if (!basicInfo.isDeployed) {
+      basicInfo.isDeployed = await elytroSDK.isSmartAccountDeployed(
+        basicInfo.address
+      );
+
+      accountManager.activateCurrentAccount();
+    }
+
     const balanceBn = await walletClient.getBalance(basicInfo.address);
 
     return { ...basicInfo, balance: formatEther(balanceBn) };
@@ -196,10 +204,6 @@ class WalletController {
     if (setAsCurrent) {
       this.switchAccountByChain(chainId);
     }
-  }
-
-  public async activateCurrentAccount() {
-    accountManager.activateCurrentAccount();
   }
 
   public async switchAccountByChain(chainId: number) {
