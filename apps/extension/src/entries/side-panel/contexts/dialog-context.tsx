@@ -18,6 +18,8 @@ type IDialogContext = {
   isPacking: boolean;
   hasSufficientBalance: boolean;
   userOp: Nullable<ElytroUserOperation>;
+  calcResult: Nullable<TUserOperationPreFundResult>;
+  decodedDetail: Nullable<DecodeResult[]>;
   // TODO: params can be an array of transactions
   openUserOpConfirmDialog: (opType: UserOpType, params?: Transaction) => void;
   closeUserOpConfirmDialog: () => void;
@@ -29,6 +31,8 @@ const DialogContext = createContext<IDialogContext>({
   isPacking: false,
   hasSufficientBalance: false,
   userOp: null,
+  calcResult: null,
+  decodedDetail: null,
   openUserOpConfirmDialog: () => {},
   closeUserOpConfirmDialog: () => {},
 });
@@ -40,9 +44,12 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [opType, setOpType] = useState<Nullable<UserOpType>>(null);
   const [isPacking, setIsPacking] = useState(false);
-  const [decodedDetail, setDecodedDetail] = useState<DecodeResult[]>([]);
+  const [decodedDetail, setDecodedDetail] =
+    useState<Nullable<DecodeResult[]>>(null);
   const [hasSufficientBalance, setHasSufficientBalance] = useState(false);
   const [userOp, setUserOp] = useState<Nullable<ElytroUserOperation>>(null);
+  const [calcResult, setCalcResult] =
+    useState<Nullable<TUserOperationPreFundResult>>(null);
 
   const openUserOpConfirmDialog = async (
     type: UserOpType,
@@ -56,7 +63,7 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
   const closeUserOpConfirmDialog = () => {
     setIsUserOpConfirmDialogVisible(false);
     setOpType(null);
-    setDecodedDetail([]);
+    setDecodedDetail(null);
     setHasSufficientBalance(false);
     setIsPacking(false);
   };
@@ -81,24 +88,23 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
 
         transferAmount = decodeRes[0].value;
 
-        console.log(decodedDetail, '----todo: remove');
         setDecodedDetail(decodeRes);
       } else {
         throw new Error('Invalid user operation type');
       }
 
-      const { needDeposit = true } = await wallet.packUserOp(
-        currentUserOp,
-        toHex(transferAmount)
-      );
+      currentUserOp = await wallet.estimateGas(currentUserOp);
 
-      setUserOp(currentUserOp);
-      setHasSufficientBalance(!needDeposit);
+      const res = await wallet.packUserOp(currentUserOp, toHex(transferAmount));
+
+      setUserOp(res.userOp);
+      setCalcResult(res.calcResult);
+      setHasSufficientBalance(!res.calcResult.needDeposit);
     } catch (err: unknown) {
       toast({
         title: 'Failed to pack user operation',
         variant: 'destructive',
-        description: (err as Error)?.message,
+        description: (err as Error)?.message || String(err) || 'Unknown Error',
       });
     } finally {
       setIsPacking(false);
@@ -111,7 +117,9 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
         userOp,
         opType,
         isPacking,
+        calcResult,
         hasSufficientBalance,
+        decodedDetail,
         isUserOpConfirmDialogVisible,
         openUserOpConfirmDialog,
         closeUserOpConfirmDialog,

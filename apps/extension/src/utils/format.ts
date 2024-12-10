@@ -132,6 +132,8 @@ function checkType(value: SafeAny) {
   const typeString = Object.prototype.toString.call(value);
 
   switch (typeString) {
+    case '[object BigInt]':
+      return 'bigint';
     case '[object String]':
       return 'string';
     case '[object Number]':
@@ -148,29 +150,39 @@ function checkType(value: SafeAny) {
       return 'object';
     case '[object Function]':
       return 'function';
+
     default:
       return 'unknown'; // 处理其他类型
   }
 }
 
 const formatBigIntToHex = (value: SafeAny) => {
-  return typeof value === 'bigint' ? toHex(value) : value;
+  const type = checkType(value);
+
+  return type === 'bigint' ? toHex(value) : value;
 };
 
 export const formatObjectWithBigInt = (obj: SafeAny) => {
   const type = checkType(obj);
 
-  if (type === 'object') {
-    return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [key, formatBigIntToHex(value)])
-    );
-  } else if (type === 'array') {
-    return (obj as SafeAny[]).map((value) => formatBigIntToHex(value));
-  } else if (type === 'function') {
-    return obj;
+  switch (type) {
+    case 'object':
+      return Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => [
+          key,
+          formatBigIntToHex(value),
+        ])
+      );
+    case 'array':
+      return (obj as SafeAny[]).map((value) => formatBigIntToHex(value));
+    case 'function':
+    case 'undefined':
+    case 'null':
+    case 'bigint':
+      return obj;
+    default:
+      return formatBigIntToHex(obj);
   }
-
-  return formatBigIntToHex(obj);
 };
 
 // format bigint to hex string
@@ -195,13 +207,18 @@ const BIGINT_PARAM_KEY = [
   'paymasterVerificationGasLimit',
   'paymasterPostOpGasLimit',
   'preVerificationGas',
+  'maxFeePerGas',
+  'maxPriorityFeePerGas',
 ];
 
-export function deformatObjectWithBigInt(userOp: ElytroUserOperation) {
+export function deformatObjectWithBigInt(
+  userOp: ElytroUserOperation,
+  customBigIntKeys: string[] = BIGINT_PARAM_KEY
+) {
   const deformatUserOp = Object.fromEntries(
     Object.entries(userOp).map(([key, value]) => [
       key,
-      BIGINT_PARAM_KEY.includes(key) ? BigInt(value) : value,
+      customBigIntKeys.includes(key) && value !== null ? BigInt(value) : value,
     ])
   );
 
@@ -264,4 +281,13 @@ export function formatQuantity(value: SafeAny): string {
 
   // Ensure the hex string is prefixed with '0x'
   return '0x' + (hexString === '0' ? '0' : hexString);
+}
+
+export function getHostname(url: string) {
+  try {
+    const { hostname } = new URL(url);
+    return hostname;
+  } catch {
+    return url;
+  }
 }

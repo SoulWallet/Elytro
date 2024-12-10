@@ -3,7 +3,13 @@ import { useDialog } from '../../contexts/dialog-context';
 import { LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserOpDetail } from './UserOpDetail';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useChain } from '../../contexts/chain-context';
+import { useWallet } from '@/contexts/wallet';
+import { toast } from '@/hooks/use-toast';
+import { formatObjectWithBigInt } from '@/utils/format';
+import { navigateTo } from '@/utils/navigation';
+import { SIDE_PANEL_ROUTE_PATHS } from '../../routes';
 
 const PackingTip = () => {
   return (
@@ -31,16 +37,87 @@ export function UserOpConfirmDialog() {
     closeUserOpConfirmDialog,
     hasSufficientBalance,
     userOp,
+    calcResult,
+    decodedDetail,
   } = useDialog();
+  const { currentChain } = useChain();
+  const wallet = useWallet();
+  const [isSending, setIsSending] = useState(false);
 
   const renderContent = useMemo(() => {
     if (isPacking) return <PackingTip />;
 
     if (opType && userOp)
-      return <UserOpDetail opType={opType} userOp={userOp} />;
+      return (
+        <UserOpDetail
+          opType={opType}
+          userOp={userOp}
+          calcResult={calcResult}
+          chainId={currentChain!.chainId}
+        />
+      );
 
     return 'No user operation';
   }, [isPacking, opType, userOp]);
+
+  const handleConfirm = async () => {
+    try {
+      setIsSending(true);
+
+      let currentUserOp = userOp;
+
+      // TODO: check this logic
+      if (!currentUserOp?.paymaster) {
+        currentUserOp = await wallet.estimateGas(currentUserOp!);
+      }
+
+      const { signature, opHash } = await wallet.signUserOperation(
+        formatObjectWithBigInt(currentUserOp!)
+      );
+
+      currentUserOp!.signature = signature;
+
+      // const simulationResult =
+      //   await elytroSDK.simulateUserOperation(currentUserOp);
+      // const txDetail = formatSimulationResultToTxDetail(simulationResult);
+
+      await wallet.sendUserOperation(currentUserOp!);
+
+      // TODO: what to do if op is a batch of txs?
+      if (decodedDetail) {
+        wallet.addNewHistory({
+          opHash,
+          timestamp: Date.now(),
+          from: userOp!.sender,
+          to: decodedDetail[0].to,
+          method: decodedDetail[0].method,
+          value: decodedDetail[0].value.toString(),
+        });
+      }
+
+      await toast({
+        title: 'Transaction sent successfully',
+        description: 'User operation hash: ',
+      });
+
+      // TODO: change this
+      navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard, {
+        activating: '1',
+      });
+
+      closeUserOpConfirmDialog();
+    } catch (error) {
+      toast({
+        title: 'Failed to send transaction',
+        description:
+          (error as Error).message ||
+          String(error) ||
+          'Unknown error, please try again',
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <Dialog modal={false} open={isUserOpConfirmDialogVisible}>
@@ -57,11 +134,17 @@ export function UserOpConfirmDialog() {
               Cancel
             </Button>
             <Button
-              onClick={closeUserOpConfirmDialog}
+              onClick={handleConfirm}
               className="flex-1 rounded-md"
-              disabled={isPacking || !hasSufficientBalance}
+              disabled={isPacking || !hasSufficientBalance || isSending}
             >
-              Confirm
+              {isPacking
+                ? 'Packing...'
+                : hasSufficientBalance
+                  ? isSending
+                    ? 'Confirming...'
+                    : 'Confirm'
+                  : 'Insufficient balance'}
             </Button>
           </div>
         </DialogFooter>

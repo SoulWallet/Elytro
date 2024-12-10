@@ -4,6 +4,7 @@ type TUserOperationPreFundResult = {
   missAmount: bigint;
   needDeposit: boolean;
   suspiciousOp: boolean;
+  gasUsed: string;
 };
 
 type TAccountInfo = {

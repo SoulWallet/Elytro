@@ -393,6 +393,7 @@ class ElytroSDK {
       userOp.callGasLimit = BigInt(callGasLimit);
       userOp.preVerificationGas = BigInt(preVerificationGas);
       userOp.verificationGasLimit = BigInt(verificationGasLimit);
+
       if (
         userOp.paymaster !== null &&
         typeof paymasterPostOpGasLimit !== 'undefined' &&
@@ -403,6 +404,8 @@ class ElytroSDK {
           paymasterVerificationGasLimit
         );
       }
+
+      return userOp;
     }
   }
 
@@ -418,6 +421,7 @@ class ElytroSDK {
     } else {
       const {
         missfund,
+        prefund,
         //deposit, prefund
       } = res.OK;
       const balance = await this._sdk.provider.getBalance(userOp.sender);
@@ -426,12 +430,16 @@ class ElytroSDK {
         : BigInt(missfund) + transferValue - balance;
 
       return {
-        balance, // user balance
-        hasSponsored, // for this userOp, can get sponsored or not
-        missAmount, // for this userOp, how much it needs to deposit
-        needDeposit: missAmount > 0n, // need to deposit or not
-        suspiciousOp: missAmount > parseEther('0.001'), // if missAmount is too large, it may considered suspicious
-      } as TUserOperationPreFundResult;
+        userOp,
+        calcResult: {
+          balance, // user balance
+          gasUsed: prefund,
+          hasSponsored, // for this userOp, can get sponsored or not
+          missAmount, // for this userOp, how much it needs to deposit
+          needDeposit: missAmount > 0n, // need to deposit or not
+          suspiciousOp: missAmount > parseEther('0.001'), // if missAmount is too large, it may considered suspicious
+        } as TUserOperationPreFundResult,
+      };
     }
   }
 

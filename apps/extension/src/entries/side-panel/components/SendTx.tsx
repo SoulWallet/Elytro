@@ -59,14 +59,14 @@ export default function SendTx({
         throw new Error('Failed to decode user operation');
       }
 
-      const { needDeposit = true } = await elytroSDK.getRechargeAmountForUserOp(
+      const { calcResult } = await elytroSDK.getRechargeAmountForUserOp(
         res,
         decodeRes[0].value
       );
 
       setDecodedDetail(decodeRes);
       userOpRef.current = res;
-      setNeedDeposit(needDeposit);
+      setNeedDeposit(calcResult.needDeposit);
     } finally {
       setIsLoading(false);
     }

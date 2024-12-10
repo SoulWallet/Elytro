@@ -18,7 +18,7 @@ function InfoCardItem({ label, children }: IInfoCardItemProps) {
 
 function InfoCardWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col w-full px-lg py-md bg-gray-150 rounded-sm gapy-sm">
+    <div className="flex flex-col w-full px-lg py-md bg-gray-150 rounded-sm gap-y-sm">
       {children}
     </div>
   );

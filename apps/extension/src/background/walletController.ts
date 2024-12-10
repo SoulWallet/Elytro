@@ -72,6 +72,12 @@ class WalletController {
     return await elytroSDK.signUserOperation(deformatObjectWithBigInt(userOp));
   }
 
+  public async sendUserOperation(userOp: ElytroUserOperation) {
+    return await elytroSDK.sendUserOperation(
+      deformatObjectWithBigInt(userOp, ['maxFeePerGas', 'maxPriorityFeePerGas'])
+    );
+  }
+
   public async signMessage(message: string) {
     if (!accountManager.currentAccount?.address) {
       throw ethErrors.rpc.internal();
@@ -213,7 +219,7 @@ class WalletController {
       keyring.owner.address as string
     );
 
-    await elytroSDK.estimateGas(deployUserOp);
+    // await elytroSDK.estimateGas(deployUserOp);
 
     return formatObjectWithBigInt(deployUserOp);
   }
@@ -231,13 +237,18 @@ class WalletController {
     return await elytroSDK.getDecodedUserOperation(userOp);
   }
 
-  public async packUserOp(userOp: ElytroUserOperation, amount: Hex) {
-    const res = await elytroSDK.getRechargeAmountForUserOp(
-      userOp,
-      BigInt(amount)
-    );
+  public async estimateGas(userOp: ElytroUserOperation) {
+    return formatObjectWithBigInt(await elytroSDK.estimateGas(userOp, true));
+  }
 
-    return formatObjectWithBigInt(res);
+  public async packUserOp(userOp: ElytroUserOperation, amount: Hex) {
+    const { userOp: userOpRes, calcResult } =
+      await elytroSDK.getRechargeAmountForUserOp(userOp, BigInt(amount));
+
+    return {
+      userOp: formatObjectWithBigInt(userOpRes),
+      calcResult: formatObjectWithBigInt(calcResult),
+    };
   }
 }
 
