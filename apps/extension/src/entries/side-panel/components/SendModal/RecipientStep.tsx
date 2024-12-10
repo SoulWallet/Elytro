@@ -27,14 +27,14 @@ export default function RecipientStep() {
   const { handleContinue } = useElytroStep();
   const formResolverConfig = z.object({
     address: z.string().refine((address) => isAddress(address), {
-      message: 'Pleaase give a valid address.',
+      message: 'Please give a valid address.',
     }),
   });
   const form = useForm<z.infer<typeof formResolverConfig>>({
     resolver: zodResolver(formResolverConfig),
     mode: 'onChange',
   });
-  const handleComfirm = () => {
+  const handleConfirm = () => {
     const { address } = form.getValues();
     handleContinue<TxData>({ to: address });
   };
@@ -78,7 +78,7 @@ export default function RecipientStep() {
       </div>
       <div className="absolute bottom-0 left-0 right-0">
         <Button
-          onClick={handleComfirm}
+          onClick={handleConfirm}
           disabled={!form.formState.isValid}
           className={`w-full p-8 rounded-full ${form.formState.isValid ? 'bg-[#0E2D50]' : 'bg-[#F2F3F5] text-[#676B75]'}`}
         >

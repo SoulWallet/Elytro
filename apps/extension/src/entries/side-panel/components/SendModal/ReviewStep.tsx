@@ -26,7 +26,7 @@ export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
     closeSendTxDialog();
     onConfirm();
   };
-  const handleComfirm = () => {
+  const handleConfirm = () => {
     if (!address) {
       console.error('Address is undefined');
       return;
@@ -94,7 +94,7 @@ export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
       </div>
       <div className="absolute bottom-0 left-0 right-0">
         <Button
-          onClick={handleComfirm}
+          onClick={handleConfirm}
           className="w-full p-8 rounded-full bg-[#0E2D50]"
         >
           Confirm

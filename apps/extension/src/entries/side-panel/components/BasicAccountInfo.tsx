@@ -31,7 +31,7 @@ export default function BasicAccountInfo() {
   };
 
   const onClickSend = () => {
-    setOpenSendModal(true);
+    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.SendTx);
   };
 
   const onClickReceive = () => {
