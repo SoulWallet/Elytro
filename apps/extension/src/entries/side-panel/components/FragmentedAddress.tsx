@@ -1,3 +1,8 @@
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
 import { isAddress } from 'viem';
 
@@ -23,7 +28,14 @@ export default function FragmentedAddress({ address, chainId }: IProps) {
       />
       <div className="flex items-center gap-sm elytro-text-bold-body">
         <span>{prefix}</span>
-        <span className="px-1 bg-[#B5D6BA] rounded-xs"> … </span>
+        <Tooltip>
+          <TooltipTrigger>
+            <span className="px-1 bg-[#B5D6BA] rounded-xs"> … </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{address}</p>
+          </TooltipContent>
+        </Tooltip>
         <span>{suffix}</span>
       </div>
     </div>

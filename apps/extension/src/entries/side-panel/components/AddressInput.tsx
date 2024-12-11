@@ -1,8 +1,9 @@
-import DefaultTokenIcon from '@/assets/icons/ether.svg';
-import { SUPPORTED_CHAIN_ICON_MAP, TChainConfigItem } from '@/constants/chains';
+import { TChainConfigItem } from '@/constants/chains';
 import { Input } from '@/components/ui/input';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
+import { isAddress } from 'viem';
+import FragmentedAddress from './FragmentedAddress';
 
 export default function AddressInput({
   field,
@@ -11,23 +12,45 @@ export default function AddressInput({
   field: FieldValues;
   currentChain: TChainConfigItem | null;
 }>) {
+  const [displayLabel, setDisplayLabel] = useState<string>('');
+  const [value, setValue] = useState<string>('');
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const handleBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const isAddr = isAddress(value);
+    if (isAddr) {
+      setDisplayLabel(value);
+    } else {
+      setDisplayLabel('');
+    }
+    setIsFocused(false);
+    field.onChange(value);
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
   return (
-    <div className="bg-white rounded-md pl-5 py-4 flex items-center mb-4">
-      <img
-        className="w-6 h-6"
-        // TODO: config the chain icon in chain service
-        src={
-          currentChain?.chainId
-            ? SUPPORTED_CHAIN_ICON_MAP[currentChain.chainId]
-            : DefaultTokenIcon
-        }
-        alt={currentChain?.chainName}
-      />
+    <div className="bg-white rounded-md px-5 py-4 flex items-center mb-4">
       <Input
         className="text-lg border-none"
-        placeholder="Recipient address / ENS"
-        {...field}
+        placeholder={
+          !isFocused && !displayLabel ? 'Recipient address / ENS' : ''
+        }
+        value={isFocused ? value : displayLabel ? '' : value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
       />
+      {!isFocused && displayLabel && (
+        <div className="absolute bg-white">
+          <FragmentedAddress
+            address={displayLabel}
+            chainId={currentChain?.chainId as number}
+          />
+        </div>
+      )}
     </div>
   );
 }
