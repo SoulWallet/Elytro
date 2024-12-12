@@ -16,6 +16,7 @@ import Account from './Account';
 import { useAccount } from '../contexts/account-context';
 import { useChain } from '../contexts/chain-context';
 import Spin from '@/components/Spin';
+import { formatBalance } from '@/utils/format';
 
 export default function BasicAccountInfo() {
   const {
@@ -42,6 +43,11 @@ export default function BasicAccountInfo() {
     return <Spin isLoading />;
   }
 
+  const { integerPart, decimalPart } = formatBalance(balance, {
+    threshold: 0.001,
+    maxDecimalLength: 8,
+  });
+
   return (
     <div className="flex flex-col p-sm">
       {/* Chain & Address */}
@@ -58,10 +64,8 @@ export default function BasicAccountInfo() {
 
       {/* Balance: $XX.xx */}
       <div className="my-sm py-1 elytro-text-hero">
-        <span>${balance?.split?.('.')?.[0]}</span>
-        <span className=" text-gray-450">
-          .{balance?.split?.('.')?.[1]?.slice(0, 3) || '000'}
-        </span>
+        <span>{integerPart}</span>
+        <span className=" text-gray-450">.{decimalPart}</span> ETH
       </div>
 
       {/* Actions */}

@@ -291,3 +291,45 @@ export function getHostname(url: string) {
     return url;
   }
 }
+
+/**
+ * format balance to display
+ * @param value - balance value
+ * @param options - options (threshold: min value to display decimal part, maxDecimalLength: max decimal length)
+ * @returns - formatted balance
+ */
+export function formatBalance(
+  value: string | undefined,
+  options: {
+    threshold?: number;
+    maxDecimalLength?: number;
+  } = {}
+): {
+  integerPart: string;
+  decimalPart: string;
+  fullDisplay: string;
+} {
+  const { threshold = 0.001, maxDecimalLength = 8 } = options;
+
+  const [integerPart, decimalPart = ''] = (value || '0').split('.');
+  let formattedDecimal = '';
+
+  if (Number(value) < threshold) {
+    const firstNonZeroIndex = decimalPart
+      .split('')
+      .findIndex((char: string) => char !== '0');
+    if (firstNonZeroIndex !== -1) {
+      formattedDecimal = decimalPart.slice(0, firstNonZeroIndex + 2);
+    }
+  } else {
+    formattedDecimal = decimalPart.slice(0, maxDecimalLength);
+  }
+
+  const displayDecimalPart = formattedDecimal || '000';
+
+  return {
+    integerPart,
+    decimalPart: displayDecimalPart,
+    fullDisplay: `${integerPart}.${displayDecimalPart}`,
+  };
+}
