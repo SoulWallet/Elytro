@@ -256,6 +256,10 @@ class WalletController {
       calcResult: formatObjectWithBigInt(calcResult),
     };
   }
+
+  public async getENSAddressByName(name: string) {
+    return await walletClient.getENSAddressByName(name);
+  }
 }
 
 export const walletController = new WalletController();

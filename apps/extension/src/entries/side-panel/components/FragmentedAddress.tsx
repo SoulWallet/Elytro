@@ -23,7 +23,7 @@ export default function FragmentedAddress({
   }
 
   const prefix = address.slice(0, 6);
-  const suffix = address.slice(address.length - 6, address.length);
+  const suffix = address.slice(-6);
 
   return (
     <div className={cn('flex items-center gap-sm', className)}>
@@ -38,8 +38,12 @@ export default function FragmentedAddress({
           <TooltipTrigger>
             <span className="px-1 bg-[#B5D6BA] rounded-xs"> … </span>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>{address}</p>
+          <TooltipContent className="bg-dark-blue p-4 ">
+            <div className="text-blue">
+              <span className="text-light-blue">{prefix}</span>
+              {address.slice(6, -6)}
+              <span className="text-light-blue">{suffix}</span>
+            </div>
           </TooltipContent>
         </Tooltip>
         <span>{suffix}</span>

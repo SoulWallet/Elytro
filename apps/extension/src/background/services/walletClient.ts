@@ -12,6 +12,7 @@ import {
 } from 'viem';
 import { ethErrors } from 'eth-rpc-errors';
 import { formatBlockInfo, formatBlockParam } from '@/utils/format';
+import { normalize } from 'viem/ens';
 
 class ElytroWalletClient {
   private _client!: PublicClient;
@@ -77,6 +78,19 @@ class ElytroWalletClient {
     return await this._client.getBalance({
       address,
     });
+  }
+
+  public async getENSAddressByName(name: string) {
+    try {
+      const ensAddress = await this._client.getEnsAddress({
+        name: normalize(name),
+        universalResolverAddress:
+          DEFAULT_CHAIN_CONFIG.ensContractAddress as Address,
+      });
+      return ensAddress;
+    } catch (error) {
+      throw ethErrors.rpc.internal((error as Error)?.message);
+    }
   }
 }
 
