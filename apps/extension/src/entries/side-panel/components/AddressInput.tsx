@@ -7,6 +7,45 @@ import FragmentedAddress from './FragmentedAddress';
 import { useWallet } from '@/contexts/wallet';
 import Spin from '@/components/Spin';
 
+interface IENSInfo {
+  name: string;
+  address: string;
+  avatar: string;
+}
+
+const ENSInfoComponent = ({
+  ensInfo,
+  chainId,
+}: {
+  ensInfo: IENSInfo;
+  chainId: number;
+}) => {
+  return (
+    <>
+      <div className="flex items-center">
+        {ensInfo.avatar ? (
+          <img
+            src={ensInfo.avatar}
+            alt={ensInfo.name}
+            className="w-6 h-6 rounded-full mr-2"
+          />
+        ) : (
+          <div className="w-6 h-6 rounded-full flex items-center font-semibold justify-center text-white bg-blue mr-2">
+            {ensInfo.name[0].toUpperCase()}
+          </div>
+        )}
+        <div className="text-sm font-semibold">{ensInfo.name}</div>
+      </div>
+      <div className="scale-75 origin-left">
+        <FragmentedAddress
+          address={ensInfo.address}
+          chainId={chainId as number}
+        />
+      </div>
+    </>
+  );
+};
+
 export default function AddressInput({
   field,
   currentChain,
@@ -18,12 +57,11 @@ export default function AddressInput({
   const [displayLabel, setDisplayLabel] = useState<string>('');
   const [value, setValue] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [ensAddress, setEnsAddress] = useState<string>('');
+  const [ensInfo, setEnsInfo] = useState<IENSInfo | null>(null);
   const [isFocused, setIsFocused] = useState<boolean>(false);
-
   const handleClickENS = () => {
-    if (ensAddress) {
-      field.onChange(ensAddress);
+    if (ensInfo) {
+      field.onChange(ensInfo.address);
     }
   };
 
@@ -31,18 +69,18 @@ export default function AddressInput({
     try {
       const isENS = value.endsWith('.eth');
       if (!isENS) {
-        if (ensAddress) {
-          setEnsAddress('');
+        if (ensInfo) {
+          setEnsInfo(null);
         }
         return;
       }
       setLoading(true);
-      const ensAddr = await wallet.getENSAddressByName(value);
+      const ensAddr = await wallet.getENSInfoByName(value);
       if (ensAddr) {
-        setEnsAddress(ensAddr);
+        setEnsInfo(ensAddr as IENSInfo);
       }
     } catch (error) {
-      setEnsAddress('');
+      setEnsInfo(null);
       field.onChange(value);
       console.error(error);
     } finally {
@@ -59,7 +97,7 @@ export default function AddressInput({
       setDisplayLabel('');
     }
     setIsFocused(false);
-    field.onChange(ensAddress || value);
+    field.onChange(ensInfo?.address || value);
   };
 
   const handleFocus = () => {
@@ -82,16 +120,13 @@ export default function AddressInput({
         </div>
       );
     }
-    if (ensAddress) {
+    if (ensInfo) {
       return (
         <div className="absolute bg-white">
-          <div className="text-sm font-semibold">{value}</div>
-          <div className="scale-75 origin-left">
-            <FragmentedAddress
-              address={ensAddress}
-              chainId={currentChain?.chainId as number}
-            />
-          </div>
+          <ENSInfoComponent
+            ensInfo={ensInfo}
+            chainId={currentChain?.chainId as number}
+          />
         </div>
       );
     }
@@ -107,28 +142,25 @@ export default function AddressInput({
       <Input
         className="text-lg border-none"
         placeholder={
-          !isFocused && !(displayLabel || ensAddress)
+          !isFocused && !(displayLabel || ensInfo)
             ? 'Recipient address / ENS'
             : ''
         }
-        value={isFocused ? value : displayLabel || ensAddress ? '' : value}
+        value={isFocused ? value : displayLabel || ensInfo ? '' : value}
         onBlur={handleBlur}
         onFocus={handleFocus}
         onChange={handleChange}
       />
       {!isFocused && genInputResult()}
-      {isFocused && (loading || ensAddress) && (
+      {isFocused && (loading || ensInfo) && (
         <div className="absolute top-full left-0 right-0 bg-white border rounded-md mt-1 z-10 p-4">
           <Spin isLoading={loading} />
-          {ensAddress && (
+          {ensInfo && (
             <div className="hover:bg-gray-300" onClick={handleClickENS}>
-              <div className="text-sm font-semibold">{value}</div>
-              <div className="scale-75 origin-left">
-                <FragmentedAddress
-                  address={ensAddress}
-                  chainId={currentChain?.chainId as number}
-                />
-              </div>
+              <ENSInfoComponent
+                ensInfo={ensInfo}
+                chainId={currentChain?.chainId as number}
+              />
             </div>
           )}
         </div>

@@ -257,8 +257,14 @@ class WalletController {
     };
   }
 
-  public async getENSAddressByName(name: string) {
-    return await walletClient.getENSAddressByName(name);
+  public async getENSInfoByName(name: string) {
+    const address = await walletClient.getENSAddressByName(name);
+    const avatar = await walletClient.getENAAvatarByName(name);
+    return {
+      name,
+      address,
+      avatar,
+    };
   }
 }
 

@@ -92,6 +92,19 @@ class ElytroWalletClient {
       throw ethErrors.rpc.internal((error as Error)?.message);
     }
   }
+
+  public async getENAAvatarByName(name: string) {
+    try {
+      const avatar = await this._client.getEnsAvatar({
+        name: normalize(name),
+        universalResolverAddress:
+          DEFAULT_CHAIN_CONFIG.ensContractAddress as Address,
+      });
+      return avatar;
+    } catch (error) {
+      throw ethErrors.rpc.internal((error as Error)?.message);
+    }
+  }
 }
 
 const walletClient = new ElytroWalletClient();
