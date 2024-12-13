@@ -54,6 +54,7 @@ export function UserOpConfirmDialog() {
           userOp={userOp}
           calcResult={calcResult}
           chainId={currentChain!.chainId}
+          decodedUserOp={decodedDetail}
         />
       );
 
@@ -89,20 +90,19 @@ export function UserOpConfirmDialog() {
           opHash,
           timestamp: Date.now(),
           from: userOp!.sender,
-          to: decodedDetail[0].to,
-          method: decodedDetail[0].method,
-          value: decodedDetail[0].value.toString(),
+          to: decodedDetail.to,
+          method: decodedDetail.method,
+          value: decodedDetail.value.toString(),
         });
       }
 
       await toast({
         title: 'Transaction sent successfully',
-        description: 'User operation hash: ',
+        description: 'User operation hash: ' + opHash,
       });
 
-      // TODO: change this
       navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard, {
-        activating: '1',
+        activating: opType as unknown as string,
       });
 
       closeUserOpConfirmDialog();

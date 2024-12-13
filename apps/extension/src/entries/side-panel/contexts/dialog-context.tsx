@@ -19,7 +19,7 @@ type IDialogContext = {
   hasSufficientBalance: boolean;
   userOp: Nullable<ElytroUserOperation>;
   calcResult: Nullable<TUserOperationPreFundResult>;
-  decodedDetail: Nullable<DecodeResult[]>;
+  decodedDetail: Nullable<DecodeResult>;
   // TODO: params can be an array of transactions
   openUserOpConfirmDialog: (opType: UserOpType, params?: Transaction) => void;
   closeUserOpConfirmDialog: () => void;
@@ -45,7 +45,7 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
   const [opType, setOpType] = useState<Nullable<UserOpType>>(null);
   const [isPacking, setIsPacking] = useState(false);
   const [decodedDetail, setDecodedDetail] =
-    useState<Nullable<DecodeResult[]>>(null);
+    useState<Nullable<DecodeResult>>(null);
   const [hasSufficientBalance, setHasSufficientBalance] = useState(false);
   const [userOp, setUserOp] = useState<Nullable<ElytroUserOperation>>(null);
   const [calcResult, setCalcResult] =
@@ -79,15 +79,14 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
         currentUserOp = await wallet.createDeployUserOp();
       } else if (params) {
         currentUserOp = await wallet.createTxUserOp([params]);
-
-        const decodeRes = await wallet.decodeUserOp(currentUserOp);
+        // TODO: use the first decoded result only. what if there are multiple decoded results?
+        const decodeRes = (await wallet.decodeUserOp(currentUserOp))?.[0];
 
         if (!decodeRes) {
           throw new Error('Failed to decode user operation');
         }
 
-        transferAmount = BigInt(decodeRes[0].value); // hex to bigint
-
+        transferAmount = BigInt(decodeRes.value); // hex to bigint
         setDecodedDetail(decodeRes);
       } else {
         throw new Error('Invalid user operation type');

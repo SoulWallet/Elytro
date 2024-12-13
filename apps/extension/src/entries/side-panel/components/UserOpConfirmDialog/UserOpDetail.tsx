@@ -4,7 +4,8 @@ import SessionCard from '../SessionCard';
 import InfoCard from '../InfoCard';
 import { formatEther } from 'viem';
 import FragmentedAddress from '../FragmentedAddress';
-import { formatBalance } from '@/utils/format';
+import { formatBalance, formatTokenAmount } from '@/utils/format';
+import { DecodeResult } from '@soulwallet/decoder';
 
 interface IUserOpDetailProps {
   session?: TSessionData;
@@ -12,6 +13,7 @@ interface IUserOpDetailProps {
   userOp: ElytroUserOperation;
   calcResult: Nullable<TUserOperationPreFundResult>;
   chainId: number;
+  decodedUserOp: Nullable<DecodeResult>;
 }
 
 const UserOpTitleMap = {
@@ -32,6 +34,7 @@ export function UserOpDetail({
   userOp,
   calcResult,
   chainId,
+  decodedUserOp,
 }: IUserOpDetailProps) {
   return (
     <div className="flex flex-col w-full gap-y-md">
@@ -48,8 +51,41 @@ export function UserOpDetail({
       </div>
 
       {/* DApp Info: no need for sending transaction */}
-      {opType === UserOpType.SendTransaction ? null : (
-        <SessionCard session={session} />
+      {opType === UserOpType.SendTransaction ? (
+        <div className="flex flex-col gap-y-sm">
+          <div className="flex items-center justify-between p-2xs">
+            <span className="flex items-center gap-x-sm elytro-text-bold-body">
+              {/* TODO: no fromInfo. no logo & name */}
+              <img
+                className="size-6"
+                src={decodedUserOp?.fromInfo?.logoURI}
+                alt={decodedUserOp?.fromInfo?.name}
+              />
+              <span>
+                {formatTokenAmount(decodedUserOp?.value.toString())}
+                {decodedUserOp?.fromInfo?.symbol}
+              </span>
+            </span>
+
+            {/* TODO: no token price API. */}
+            <span className="elytro-text-smaller-body text-gray-600">--</span>
+          </div>
+
+          <div className="elytro-text-bold-body">To</div>
+
+          <FragmentedAddress
+            address={userOp?.sender}
+            chainId={chainId}
+            className="bg-gray-150 px-lg py-md rounded-md"
+          />
+        </div>
+      ) : null}
+
+      {opType === UserOpType.ApproveTransaction && (
+        <div>
+          <SessionCard session={session} />
+          {/* TODO: show transaction info */}
+        </div>
       )}
 
       {/* UserOp Pay Info */}

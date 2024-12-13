@@ -4,14 +4,20 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
+import { cn } from '@/utils/shadcn/utils';
 import { isAddress } from 'viem';
 
 interface IProps {
   address: string;
   chainId: number;
+  className?: string;
 }
 
-export default function FragmentedAddress({ address, chainId }: IProps) {
+export default function FragmentedAddress({
+  address,
+  chainId,
+  className,
+}: IProps) {
   if (!isAddress(address)) {
     return null;
   }
@@ -20,7 +26,7 @@ export default function FragmentedAddress({ address, chainId }: IProps) {
   const suffix = address.slice(address.length - 6, address.length);
 
   return (
-    <div className="flex items-center gap-sm">
+    <div className={cn('flex items-center gap-sm', className)}>
       <img
         src={SUPPORTED_CHAIN_ICON_MAP[chainId]}
         alt={chainId.toString()}
