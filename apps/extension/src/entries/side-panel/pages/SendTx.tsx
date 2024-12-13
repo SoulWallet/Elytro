@@ -1,4 +1,4 @@
-import { formatEther, Hex, hexToBigInt, isAddress } from 'viem';
+import { formatEther, Hex, hexToBigInt, isAddress, parseEther } from 'viem';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +21,7 @@ import FragmentedAddress from '../components/FragmentedAddress';
 import AddressInput from '../components/AddressInput';
 import TokenSelector from '../components/TokenSelector';
 import AmountInput from '../components/AmountInput';
+import { useDialog, UserOpType } from '../contexts/dialog-context';
 
 export default function SendTx() {
   const {
@@ -28,6 +29,7 @@ export default function SendTx() {
     accountInfo: { address },
   } = useAccount();
   const { currentChain } = useChain();
+  const { openUserOpConfirmDialog } = useDialog();
   const formResolverConfig = z.object({
     token: z.object({
       name: z.string(),
@@ -92,13 +94,13 @@ export default function SendTx() {
       console.error('Address is undefined');
       return;
     }
+
     const txParams: Transaction = {
       to: form.getValues('to'),
-      data: '',
-      value: form.getValues('amount').toString(),
-      gasLimit: '0x0',
+      value: parseEther(form.getValues('amount')).toString(),
     };
-    console.log(txParams);
+
+    openUserOpConfirmDialog(UserOpType.SendTransaction, txParams);
   };
   return (
     <SecondaryPageWrapper

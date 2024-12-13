@@ -4,6 +4,7 @@ import SessionCard from '../SessionCard';
 import InfoCard from '../InfoCard';
 import { formatEther } from 'viem';
 import FragmentedAddress from '../FragmentedAddress';
+import { formatBalance } from '@/utils/format';
 
 interface IUserOpDetailProps {
   session?: TSessionData;
@@ -20,7 +21,9 @@ const UserOpTitleMap = {
 };
 
 const formatGasUsed = (gasUsed?: string) => {
-  return gasUsed ? Number(formatEther(BigInt(gasUsed))).toFixed(4) : '--';
+  return gasUsed
+    ? formatBalance(formatEther(BigInt(gasUsed))).fullDisplay
+    : '--';
 };
 
 export function UserOpDetail({

@@ -150,7 +150,7 @@ class ElytroSDK {
   }
 
   public async canGetSponsored(userOp: ElytroUserOperation) {
-    return canUserOpGetSponsor(
+    return await canUserOpGetSponsor(
       userOp,
       this._chainConfig.chainId,
       TEMP_ENTRY_POINT
@@ -354,7 +354,6 @@ class ElytroSDK {
     useDefaultGasPrice = true
   ) {
     // looks like only deploy wallet will need this
-
     if (useDefaultGasPrice) {
       const gasPrice = await this._getFeeData();
 
@@ -413,8 +412,13 @@ class ElytroSDK {
     userOp: ElytroUserOperation,
     transferValue: bigint
   ) {
-    const res = await this._sdk.preFund(userOp);
     const hasSponsored = await this.canGetSponsored(userOp);
+
+    if (!hasSponsored) {
+      await this.estimateGas(userOp);
+    }
+
+    const res = await this._sdk.preFund(userOp);
 
     if (res.isErr()) {
       throw res.ERR;
@@ -435,7 +439,7 @@ class ElytroSDK {
           balance, // user balance
           gasUsed: prefund,
           hasSponsored, // for this userOp, can get sponsored or not
-          missAmount, // for this userOp, how much it needs to deposit
+          missAmount: missAmount > 0n ? missAmount : 0n, // for this userOp, how much it needs to deposit
           needDeposit: missAmount > 0n, // need to deposit or not
           suspiciousOp: missAmount > parseEther('0.001'), // if missAmount is too large, it may considered suspicious
         } as TUserOperationPreFundResult,

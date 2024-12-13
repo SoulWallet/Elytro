@@ -86,14 +86,14 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
           throw new Error('Failed to decode user operation');
         }
 
-        transferAmount = decodeRes[0].value;
+        transferAmount = BigInt(decodeRes[0].value); // hex to bigint
 
         setDecodedDetail(decodeRes);
       } else {
         throw new Error('Invalid user operation type');
       }
 
-      currentUserOp = await wallet.estimateGas(currentUserOp);
+      // currentUserOp = await wallet.estimateGas(currentUserOp);
 
       const res = await wallet.packUserOp(currentUserOp, toHex(transferAmount));
 
@@ -101,11 +101,13 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
       setCalcResult(res.calcResult);
       setHasSufficientBalance(!res.calcResult.needDeposit);
     } catch (err: unknown) {
+      const errMsg = (err as Error)?.message || String(err) || 'Unknown Error';
       toast({
         title: 'Failed to pack user operation',
         variant: 'destructive',
-        description: (err as Error)?.message || String(err) || 'Unknown Error',
+        description: errMsg,
       });
+      console.error(errMsg);
     } finally {
       setIsPacking(false);
     }

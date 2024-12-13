@@ -159,10 +159,16 @@ function checkType(value: SafeAny) {
 const formatBigIntToHex = (value: SafeAny) => {
   const type = checkType(value);
 
-  return type === 'bigint' ? toHex(value) : value;
+  if (type === 'bigint') {
+    if (value < 0n) {
+      return `-0x${(-value).toString(16)}`;
+    }
+    return toHex(value);
+  }
+  return value;
 };
 
-export const formatObjectWithBigInt = (obj: SafeAny) => {
+export const formatObjectWithBigInt = (obj: SafeAny): SafeAny => {
   const type = checkType(obj);
 
   switch (type) {
@@ -174,7 +180,7 @@ export const formatObjectWithBigInt = (obj: SafeAny) => {
         ])
       );
     case 'array':
-      return (obj as SafeAny[]).map((value) => formatBigIntToHex(value));
+      return (obj as SafeAny[]).map((value) => formatObjectWithBigInt(value));
     case 'function':
     case 'undefined':
     case 'null':

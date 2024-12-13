@@ -238,7 +238,9 @@ class WalletController {
   }
 
   public async decodeUserOp(userOp: ElytroUserOperation) {
-    return await elytroSDK.getDecodedUserOperation(userOp);
+    return formatObjectWithBigInt(
+      await elytroSDK.getDecodedUserOperation(userOp)
+    );
   }
 
   public async estimateGas(userOp: ElytroUserOperation) {

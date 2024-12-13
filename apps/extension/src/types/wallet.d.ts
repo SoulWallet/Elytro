@@ -1,7 +1,7 @@
 type TUserOperationPreFundResult = {
   balance: bigint;
   hasSponsored: boolean;
-  missAmount: bigint;
+  // missAmount: bigint;
   needDeposit: boolean;
   suspiciousOp: boolean;
   gasUsed: string;
