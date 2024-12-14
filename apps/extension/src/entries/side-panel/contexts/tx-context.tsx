@@ -1,9 +1,11 @@
 import { useWallet } from '@/contexts/wallet';
 import { toast } from '@/hooks/use-toast';
+import { navigateTo } from '@/utils/navigation';
 import { DecodeResult } from '@soulwallet/decoder';
 import type { Transaction } from '@soulwallet/sdk';
 import { createContext, useContext, useState } from 'react';
 import { toHex } from 'viem';
+import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
 
 export enum UserOpType {
   DeployWallet = 1,
@@ -11,9 +13,8 @@ export enum UserOpType {
   ApproveTransaction,
 }
 
-// TODO: move approvals to dialog-context. means that there is no isXXXDialogVisible but which dialog is open
-type IDialogContext = {
-  isUserOpConfirmDialogVisible: boolean;
+// TODO: move approvals to tx-context. means that there is no isXXXTxVisible but which tx is open
+type ITxContext = {
   opType: Nullable<UserOpType>;
   isPacking: boolean;
   hasSufficientBalance: boolean;
@@ -21,26 +22,24 @@ type IDialogContext = {
   calcResult: Nullable<TUserOperationPreFundResult>;
   decodedDetail: Nullable<DecodeResult>;
   // TODO: params can be an array of transactions
-  openUserOpConfirmDialog: (opType: UserOpType, params?: Transaction) => void;
-  closeUserOpConfirmDialog: () => void;
+  openUserOpConfirmTx: (opType: UserOpType, params?: Transaction) => void;
+  closeUserOpConfirmTx: () => void;
 };
 
-const DialogContext = createContext<IDialogContext>({
-  isUserOpConfirmDialogVisible: false,
+const TxContext = createContext<ITxContext>({
   opType: null,
   isPacking: false,
   hasSufficientBalance: false,
   userOp: null,
   calcResult: null,
   decodedDetail: null,
-  openUserOpConfirmDialog: () => {},
-  closeUserOpConfirmDialog: () => {},
+  openUserOpConfirmTx: () => {},
+  closeUserOpConfirmTx: () => {},
 });
 
-export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
+// TODO: maybe move this to tx-confirm page?
+export const TxProvider = ({ children }: { children: React.ReactNode }) => {
   const wallet = useWallet();
-  const [isUserOpConfirmDialogVisible, setIsUserOpConfirmDialogVisible] =
-    useState(false);
 
   const [opType, setOpType] = useState<Nullable<UserOpType>>(null);
   const [isPacking, setIsPacking] = useState(false);
@@ -51,17 +50,16 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
   const [calcResult, setCalcResult] =
     useState<Nullable<TUserOperationPreFundResult>>(null);
 
-  const openUserOpConfirmDialog = async (
+  const openUserOpConfirmTx = async (
     type: UserOpType,
     params?: Transaction
   ) => {
-    setIsUserOpConfirmDialogVisible(true);
+    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.TxConfirm);
     setOpType(type);
     packUserOp(type, params);
   };
 
-  const closeUserOpConfirmDialog = () => {
-    setIsUserOpConfirmDialogVisible(false);
+  const closeUserOpConfirmTx = () => {
     setOpType(null);
     setDecodedDetail(null);
     setHasSufficientBalance(false);
@@ -113,7 +111,7 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <DialogContext.Provider
+    <TxContext.Provider
       value={{
         userOp,
         opType,
@@ -121,16 +119,15 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
         calcResult,
         hasSufficientBalance,
         decodedDetail,
-        isUserOpConfirmDialogVisible,
-        openUserOpConfirmDialog,
-        closeUserOpConfirmDialog,
+        openUserOpConfirmTx,
+        closeUserOpConfirmTx,
       }}
     >
       {children}
-    </DialogContext.Provider>
+    </TxContext.Provider>
   );
 };
 
-export const useDialog = () => {
-  return useContext(DialogContext);
+export const useTx = () => {
+  return useContext(TxContext);
 };

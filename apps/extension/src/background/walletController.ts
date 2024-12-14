@@ -259,7 +259,7 @@ class WalletController {
 
   public async getENSInfoByName(name: string) {
     const address = await walletClient.getENSAddressByName(name);
-    const avatar = await walletClient.getENAAvatarByName(name);
+    const avatar = await walletClient.getENSAvatarByName(name);
     return {
       name,
       address,

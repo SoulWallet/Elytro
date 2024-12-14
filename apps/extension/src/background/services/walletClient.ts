@@ -93,7 +93,7 @@ class ElytroWalletClient {
     }
   }
 
-  public async getENAAvatarByName(name: string) {
+  public async getENSAvatarByName(name: string) {
     try {
       const avatar = await this._client.getEnsAvatar({
         name: normalize(name),

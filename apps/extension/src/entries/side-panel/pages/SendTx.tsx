@@ -21,7 +21,8 @@ import FragmentedAddress from '../components/FragmentedAddress';
 import AddressInput from '../components/AddressInput';
 import TokenSelector from '../components/TokenSelector';
 import AmountInput from '../components/AmountInput';
-import { useDialog, UserOpType } from '../contexts/dialog-context';
+import { useTx } from '../contexts/tx-context';
+import { UserOpType } from '../contexts/tx-context';
 
 export default function SendTx() {
   const {
@@ -29,7 +30,7 @@ export default function SendTx() {
     accountInfo: { address },
   } = useAccount();
   const { currentChain } = useChain();
-  const { openUserOpConfirmDialog } = useDialog();
+  const { openUserOpConfirmTx } = useTx();
   const formResolverConfig = z.object({
     token: z.object({
       name: z.string(),
@@ -100,8 +101,9 @@ export default function SendTx() {
       value: parseEther(form.getValues('amount')).toString(),
     };
 
-    openUserOpConfirmDialog(UserOpType.SendTransaction, txParams);
+    openUserOpConfirmTx(UserOpType.SendTransaction, txParams);
   };
+
   return (
     <SecondaryPageWrapper
       title="Send"
@@ -109,7 +111,7 @@ export default function SendTx() {
         <Button
           variant="secondary"
           size="large"
-          className="fixed bottom-lg  left-lg right-lg"
+          className="w-full"
           disabled={!form.formState.isValid}
           onClick={handleContinue}
         >

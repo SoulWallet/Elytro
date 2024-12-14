@@ -51,9 +51,7 @@ export default function SecondaryPageWrapper({
         {children}
 
         {/* Footer: fixed to bottom */}
-        {footer && (
-          <div className="fixed bottom-0 left-0 right-0">{footer}</div>
-        )}
+        {footer && <div className="flex w-full mt-auto mb-md">{footer}</div>}
       </div>
     </div>
   );

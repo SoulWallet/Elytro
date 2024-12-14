@@ -1,5 +1,5 @@
 import { TSessionData } from '@/constants/session';
-import { UserOpType } from '../../contexts/dialog-context';
+import { UserOpType } from '../../contexts/tx-context';
 import SessionCard from '../SessionCard';
 import InfoCard from '../InfoCard';
 import { formatEther } from 'viem';

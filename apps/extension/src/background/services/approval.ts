@@ -1,4 +1,6 @@
+import { EVENT_TYPES } from '@/constants/events';
 import { ApprovalTypeEn } from '@/constants/operations';
+import eventBus from '@/utils/eventBus';
 import {
   openPopupWindow,
   tryRemoveWindow,
@@ -11,7 +13,7 @@ import { v4 as UUIDv4 } from 'uuid';
 const APPROVAL_TYPE_ROUTE_MAP: Record<ApprovalTypeEn, string> = {
   [ApprovalTypeEn.Unlock]: 'unlock',
   [ApprovalTypeEn.Connect]: 'connect',
-  [ApprovalTypeEn.SendTx]: 'sendTx',
+  [ApprovalTypeEn.SendTx]: 'tx-confirm',
   [ApprovalTypeEn.Alert]: 'alert',
   [ApprovalTypeEn.Sign]: 'sign',
 };
@@ -61,6 +63,8 @@ class ApprovalService {
               winId: approvalWindowId,
             };
             this._approvals.set(approvalWindowId, this._currentApproval);
+
+            eventBus.emit(EVENT_TYPES.APPROVAL.REQUESTED, approval.id);
           }
         }
       );

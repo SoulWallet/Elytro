@@ -217,6 +217,7 @@ chrome.runtime.onConnect.addListener((port) => {
 });
 
 const initBackgroundMessage = () => {
+  /** History */
   eventBus.on(EVENT_TYPES.HISTORY.ITEMS_UPDATED, () => {
     RuntimeMessage.sendMessage(EVENT_TYPES.HISTORY.ITEMS_UPDATED);
   });
@@ -228,6 +229,11 @@ const initBackgroundMessage = () => {
         status,
       }
     );
+  });
+
+  /** Approval */
+  eventBus.on(EVENT_TYPES.APPROVAL.REQUESTED, (approvalId) => {
+    RuntimeMessage.sendMessage(EVENT_TYPES.APPROVAL.REQUESTED, approvalId);
   });
 };
 

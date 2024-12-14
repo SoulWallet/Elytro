@@ -3,4 +3,7 @@ export const EVENT_TYPES = {
     ITEMS_UPDATED: 'historyItemsUpdated',
     ITEM_STATUS_UPDATED: 'historyItemStatusUpdated',
   },
+  APPROVAL: {
+    REQUESTED: 'approvalRequested',
+  },
 };

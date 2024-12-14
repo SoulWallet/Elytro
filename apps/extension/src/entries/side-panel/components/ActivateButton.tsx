@@ -1,16 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { useAccount } from '../contexts/account-context';
 import { toast } from '@/hooks/use-toast';
-import { useDialog, UserOpType } from '../contexts/dialog-context';
+import { useTx, UserOpType } from '../contexts/tx-context';
 
 export default function ActivateButton() {
   const { accountInfo } = useAccount();
-  const { openUserOpConfirmDialog, isUserOpConfirmDialogVisible } = useDialog();
+  const { openUserOpConfirmTx } = useTx();
 
   const onClickActivate = async () => {
     try {
       // TODO: send userOp to Send Tx Modal
-      openUserOpConfirmDialog(UserOpType.DeployWallet);
+      openUserOpConfirmTx(UserOpType.DeployWallet);
     } catch (error) {
       toast({
         title: 'Activate account failed',
@@ -21,10 +21,7 @@ export default function ActivateButton() {
   };
 
   return (
-    <Button
-      onClick={onClickActivate}
-      disabled={isUserOpConfirmDialogVisible || !accountInfo}
-    >
+    <Button onClick={onClickActivate} disabled={!accountInfo}>
       Activate account
     </Button>
   );
