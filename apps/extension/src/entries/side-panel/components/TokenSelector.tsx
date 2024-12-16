@@ -1,9 +1,10 @@
 import { TokenDTO } from '@/hooks/use-tokens';
 import { Select, SelectTrigger, SelectContent } from '@/components/ui/select';
 import { ChevronDown } from 'lucide-react';
-import { formatEther, hexToBigInt } from 'viem';
+import { formatEther } from 'viem';
 import DefaultTokenIcon from '@/assets/icons/ether.svg';
 import { useState } from 'react';
+import TokenItem from '@/components/TokenItem';
 
 function SelectedToken({ token }: { token?: TokenDTO }) {
   if (!token)
@@ -66,19 +67,11 @@ export default function TokenSelector({
         {tokens.map((item) => {
           return (
             <div
-              key={item.name}
               onClick={() => handleSelect(item)}
-              className="flex items-center justify-between cursor-pointer hover:bg-gray-200 py-4 px-4"
+              className="cursor-pointer hover:bg-gray-200 p-3 px-3"
+              key={item.name}
             >
-              <img
-                className="h-10 w-10 mr-4"
-                src={item.logoURI || DefaultTokenIcon}
-                alt={item.name}
-              />
-              <div className="flex-1 text-lg">{item.name}</div>
-              <div className="text-gray-400 text-lg">
-                {formatEther(hexToBigInt(item.tokenBalance))}
-              </div>
+              <TokenItem token={item} />
             </div>
           );
         })}
