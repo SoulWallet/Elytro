@@ -63,7 +63,6 @@ export default function CreateNewAddress() {
                 needCheckIcon={false}
                 value={chain.chainId.toString()}
                 className="px-5 py-0 h-16"
-                onClick={() => setSelectedChain(chain)}
               >
                 <ChainItem chain={chain} />
               </SelectItem>
