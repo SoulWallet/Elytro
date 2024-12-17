@@ -78,10 +78,14 @@ export function formatAddressToShort(address: Nullable<string>) {
     : '--';
 }
 
-export function formatTokenAmount(amount: string | null | undefined): string {
+export function formatTokenAmount(
+  amount: string | null | undefined,
+  decimals: number = 18,
+  symbol: string = 'ETH'
+): string {
   // todo: format amount. 8 decimal places is enough?
   try {
-    return formatUnits(BigInt(amount!), 18) + ' ETH';
+    return `${formatUnits(BigInt(amount!), decimals)} ${symbol}`;
   } catch {
     return '--';
   }
@@ -289,9 +293,9 @@ export function formatQuantity(value: SafeAny): string {
   return '0x' + (hexString === '0' ? '0' : hexString);
 }
 
-export function getHostname(url: string) {
+export function getHostname(url?: string) {
   try {
-    const { hostname } = new URL(url);
+    const { hostname } = new URL(url || '');
     return hostname;
   } catch {
     return url;

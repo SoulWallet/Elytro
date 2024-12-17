@@ -40,6 +40,7 @@ const ENSInfoComponent = ({
         <FragmentedAddress
           address={ensInfo.address}
           chainId={chainId as number}
+          size="md"
         />
       </div>
     </>
@@ -116,6 +117,7 @@ export default function AddressInput({
           <FragmentedAddress
             address={displayLabel}
             chainId={currentChain?.chainId as number}
+            size="md"
           />
         </div>
       );

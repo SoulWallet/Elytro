@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
 import { UserOpType, useTx } from '../contexts/tx-context';
 import { useChain } from '../contexts/chain-context';
-import { UserOpDetail } from '../components/UserOpConfirmDialog/UserOpDetail';
-import PackingTip from '../components/UserOpConfirmDialog/PackingTip';
+import PackingTip from '../components/PackingTip';
 import { Button } from '@/components/ui/button';
 import { navigateTo } from '@/utils/navigation';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
@@ -10,6 +9,8 @@ import { useApproval } from '../contexts/approval-context';
 import { useWallet } from '@/contexts/wallet';
 import { formatObjectWithBigInt } from '@/utils/format';
 import { toast } from '@/hooks/use-toast';
+import SecondaryPageWrapper from '../components/SecondaryPageWrapper';
+import { UserOpDetail } from '../components/UserOpDetail';
 
 export default function TxConfirm() {
   const wallet = useWallet();
@@ -23,24 +24,26 @@ export default function TxConfirm() {
   } = useTx();
   const { currentChain } = useChain();
   const [isSending, setIsSending] = useState(false);
-  const { reject, resolve } = useApproval();
+  const { reject, resolve, approval } = useApproval();
 
   const renderContent = useMemo(() => {
     if (isPacking) return <PackingTip />;
 
-    if (opType && userOp)
+    if (opType && decodedDetail) {
       return (
         <UserOpDetail
           opType={opType}
-          userOp={userOp}
           calcResult={calcResult}
           chainId={currentChain!.chainId}
           decodedUserOp={decodedDetail}
+          session={approval?.data?.dApp}
         />
       );
+    }
 
-    return 'No user operation';
-  }, [isPacking, opType, userOp]);
+    // TODO: error tip
+    return null;
+  }, [isPacking, opType, calcResult, decodedDetail]);
 
   const handleCancel = () => {
     if (opType === UserOpType.ApproveTransaction) {
@@ -117,7 +120,7 @@ export default function TxConfirm() {
   };
 
   return (
-    <div className="flex flex-col p-md w-full h-full">
+    <SecondaryPageWrapper className="flex flex-col p-md" title="Confirm">
       {/* Content */}
       <div className="flex flex-col gap-y-md pb-14">{renderContent}</div>
 
@@ -146,6 +149,6 @@ export default function TxConfirm() {
           </Button>
         </div>
       </div>
-    </div>
+    </SecondaryPageWrapper>
   );
 }

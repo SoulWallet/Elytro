@@ -3,9 +3,10 @@ import { toast } from '@/hooks/use-toast';
 import { navigateTo } from '@/utils/navigation';
 import { DecodeResult } from '@soulwallet/decoder';
 import type { Transaction } from '@soulwallet/sdk';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { toHex } from 'viem';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
+import { useApproval } from './approval-context';
 
 export enum UserOpType {
   DeployWallet = 1,
@@ -28,7 +29,7 @@ type ITxContext = {
 
 const TxContext = createContext<ITxContext>({
   opType: null,
-  isPacking: false,
+  isPacking: true,
   hasSufficientBalance: false,
   userOp: null,
   calcResult: null,
@@ -40,13 +41,14 @@ const TxContext = createContext<ITxContext>({
 // TODO: maybe move this to tx-confirm page?
 export const TxProvider = ({ children }: { children: React.ReactNode }) => {
   const wallet = useWallet();
+  const userOpRef = useRef<Nullable<ElytroUserOperation>>();
+  const { approval } = useApproval();
 
   const [opType, setOpType] = useState<Nullable<UserOpType>>(null);
-  const [isPacking, setIsPacking] = useState(false);
+  const [isPacking, setIsPacking] = useState(true);
   const [decodedDetail, setDecodedDetail] =
     useState<Nullable<DecodeResult>>(null);
   const [hasSufficientBalance, setHasSufficientBalance] = useState(false);
-  const [userOp, setUserOp] = useState<Nullable<ElytroUserOperation>>(null);
   const [calcResult, setCalcResult] =
     useState<Nullable<TUserOperationPreFundResult>>(null);
 
@@ -55,7 +57,6 @@ export const TxProvider = ({ children }: { children: React.ReactNode }) => {
     params?: Transaction
   ) => {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.TxConfirm);
-    setOpType(type);
     packUserOp(type, params);
   };
 
@@ -69,13 +70,18 @@ export const TxProvider = ({ children }: { children: React.ReactNode }) => {
   const packUserOp = async (type: UserOpType, params?: Transaction) => {
     try {
       setIsPacking(true);
+      setOpType(type);
 
       let transferAmount = 0n;
       let currentUserOp: ElytroUserOperation;
 
       if (type === UserOpType.DeployWallet) {
         currentUserOp = await wallet.createDeployUserOp();
-      } else if (params) {
+      } else {
+        if (!params) {
+          throw new Error('Invalid user operation');
+        }
+
         currentUserOp = await wallet.createTxUserOp([params]);
         // TODO: use the first decoded result only. what if there are multiple decoded results?
         const decodeRes = (await wallet.decodeUserOp(currentUserOp))?.[0];
@@ -86,15 +92,13 @@ export const TxProvider = ({ children }: { children: React.ReactNode }) => {
 
         transferAmount = BigInt(decodeRes.value); // hex to bigint
         setDecodedDetail(decodeRes);
-      } else {
-        throw new Error('Invalid user operation type');
       }
 
       // currentUserOp = await wallet.estimateGas(currentUserOp);
 
       const res = await wallet.packUserOp(currentUserOp, toHex(transferAmount));
 
-      setUserOp(res.userOp);
+      userOpRef.current = res.userOp;
       setCalcResult(res.calcResult);
       setHasSufficientBalance(!res.calcResult.needDeposit);
     } catch (err: unknown) {
@@ -110,10 +114,19 @@ export const TxProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  useEffect(() => {
+    if (approval?.data?.tx?.[0]) {
+      packUserOp(
+        UserOpType.ApproveTransaction,
+        approval?.data?.tx?.[0] as Transaction
+      );
+    }
+  }, [approval]);
+
   return (
     <TxContext.Provider
       value={{
-        userOp,
+        userOp: userOpRef.current,
         opType,
         isPacking,
         calcResult,

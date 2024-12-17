@@ -1,17 +1,17 @@
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
 
-interface IInfoCardItemProps extends PropsWithChildren {
+interface IInfoCardItemProps {
   label: string;
-  children: React.ReactNode;
+  content: React.ReactNode;
 }
 
-function InfoCardItem({ label, children }: IInfoCardItemProps) {
+function InfoCardItem({ label, content }: IInfoCardItemProps) {
   return (
-    <div className="flex flex-row justify-between items-center">
-      <span className="elytro-text-smaller-bold-body text-gray-750">
+    <div className="flex flex-row justify-between items-center gap-x-sm">
+      <span className="elytro-text-smaller-bold-body text-gray-750 text-nowrap">
         {label}
       </span>
-      {children}
+      {content}
     </div>
   );
 }

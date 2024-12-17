@@ -231,10 +231,10 @@ const initBackgroundMessage = () => {
     );
   });
 
-  /** Approval */
-  eventBus.on(EVENT_TYPES.APPROVAL.REQUESTED, (approvalId) => {
-    RuntimeMessage.sendMessage(EVENT_TYPES.APPROVAL.REQUESTED, approvalId);
-  });
+  // /** Approval */
+  // eventBus.on(EVENT_TYPES.APPROVAL.REQUESTED, (approvalId) => {
+  //   RuntimeMessage.sendMessage(EVENT_TYPES.APPROVAL.REQUESTED, { approvalId });
+  // });
 };
 
 initBackgroundMessage();

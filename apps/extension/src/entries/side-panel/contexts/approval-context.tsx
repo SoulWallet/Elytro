@@ -1,10 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
 import { toast } from '@/hooks/use-toast';
-import { RuntimeMessage } from '@/utils/message';
-import { EVENT_TYPES } from '@/constants/events';
-import { UserOpType, useTx } from './tx-context';
-import { Transaction } from '@soulwallet/sdk';
 import { useInterval } from 'usehooks-ts';
 
 type IApprovalContext = {
@@ -25,24 +21,13 @@ export const ApprovalProvider = ({
   children: React.ReactNode;
 }) => {
   const wallet = useWallet();
-  const { openUserOpConfirmTx } = useTx();
   const [approval, setApproval] = useState<Nullable<TApprovalInfo>>(null);
 
-  const getCurrentApproval = async (targetApprovalId?: string) => {
-    const approval = await wallet.getCurrentApproval();
+  const getCurrentApproval = async () => {
+    const newApproval = await wallet.getCurrentApproval();
 
-    // todo : add '&& approval?.id === targetApprovalId' once all approval requests are handled by the target page
-    if (approval) {
-      setApproval(approval);
-
-      // TODO: move approval fetching to target page
-      // approval.type === ApprovalTypeEn.SendTx
-      if (approval.data?.tx?.[0]) {
-        openUserOpConfirmTx(
-          UserOpType.ApproveTransaction,
-          approval.data?.tx?.[0] as Transaction
-        );
-      }
+    if (newApproval) {
+      setApproval(newApproval);
     } else {
       setApproval(null);
     }
@@ -73,12 +58,6 @@ export const ApprovalProvider = ({
       getCurrentApproval();
     }
   }, 1000);
-
-  useEffect(() => {
-    RuntimeMessage.onMessage(EVENT_TYPES.APPROVAL.REQUESTED, (approvalId) => {
-      getCurrentApproval(approvalId as unknown as string);
-    });
-  }, [approval]);
 
   return (
     <ApprovalContext.Provider value={{ approval, resolve, reject }}>

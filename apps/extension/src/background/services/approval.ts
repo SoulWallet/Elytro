@@ -1,6 +1,4 @@
-import { EVENT_TYPES } from '@/constants/events';
 import { ApprovalTypeEn } from '@/constants/operations';
-import eventBus from '@/utils/eventBus';
 import {
   openPopupWindow,
   tryRemoveWindow,
@@ -64,7 +62,7 @@ class ApprovalService {
             };
             this._approvals.set(approvalWindowId, this._currentApproval);
 
-            eventBus.emit(EVENT_TYPES.APPROVAL.REQUESTED, approval.id);
+            // eventBus.emit(EVENT_TYPES.APPROVAL.REQUESTED, approval.id);
           }
         }
       );

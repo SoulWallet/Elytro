@@ -19,8 +19,8 @@ const main = () => {
     <ApolloProvider client={client}>
       <ChainProvider>
         <AccountProvider>
-          <TxProvider>
-            <ApprovalProvider>
+          <ApprovalProvider>
+            <TxProvider>
               {/*  according to chrome dev team. the minimum width of the side panel is 360px */}
               <PageContainer className="max-w-screen-md min-w-[360px]">
                 <TooltipProvider>
@@ -30,8 +30,8 @@ const main = () => {
                   {/* <UserOpConfirmDialog /> */}
                 </TooltipProvider>
               </PageContainer>
-            </ApprovalProvider>
-          </TxProvider>
+            </TxProvider>
+          </ApprovalProvider>
         </AccountProvider>
       </ChainProvider>
     </ApolloProvider>
