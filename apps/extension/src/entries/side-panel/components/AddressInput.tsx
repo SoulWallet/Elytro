@@ -9,6 +9,8 @@ import { useWallet } from '@/contexts/wallet';
 import Spin from '@/components/Spin';
 import dayjs from 'dayjs';
 
+const ELYTRO_RECENT_ADDRESS_STORE = 'ELYTRO_RECENT_ADDRESS_STORE';
+
 export default function AddressInput({
   field,
   currentChain,
@@ -127,12 +129,15 @@ export default function AddressInput({
     const isExist = recentAddress && recentAddress[data.address];
     if (!isExist) {
       const storedAddress = { ...recentAddress, [data.address]: data };
-      localStorage.setItem('recentAddress', JSON.stringify(storedAddress));
+      localStorage.setItem(
+        ELYTRO_RECENT_ADDRESS_STORE,
+        JSON.stringify(storedAddress)
+      );
     }
   };
 
   const getRecentAddressStore = () => {
-    const addressStr = localStorage.getItem('recentAddress');
+    const addressStr = localStorage.getItem(ELYTRO_RECENT_ADDRESS_STORE);
     if (addressStr) {
       setRecentAddress(JSON.parse(addressStr));
     }
