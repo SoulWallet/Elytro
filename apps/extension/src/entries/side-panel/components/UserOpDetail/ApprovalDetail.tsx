@@ -6,15 +6,15 @@ import FragmentedAddress from '../FragmentedAddress';
 
 const { InfoCardItem, InfoCardWrapper } = InfoCard;
 
-interface IDecodeDetailProps {
+interface IApprovalDetailProps {
   session?: TDAppInfo;
   decodedUserOp: Nullable<DecodeResult>;
 }
 
-export default function DecodeDetail({
+export default function ActivationDetail({
   session,
   decodedUserOp,
-}: IDecodeDetailProps) {
+}: IApprovalDetailProps) {
   return (
     <>
       <SessionCard session={session} />

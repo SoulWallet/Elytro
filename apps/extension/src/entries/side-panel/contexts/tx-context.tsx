@@ -77,6 +77,7 @@ export const TxProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (type === UserOpType.DeployWallet) {
         currentUserOp = await wallet.createDeployUserOp();
+        currentUserOp = await wallet.estimateGas(currentUserOp);
       } else {
         if (!params) {
           throw new Error('Invalid user operation');
@@ -93,8 +94,6 @@ export const TxProvider = ({ children }: { children: React.ReactNode }) => {
         transferAmount = BigInt(decodeRes.value); // hex to bigint
         setDecodedDetail(decodeRes);
       }
-
-      // currentUserOp = await wallet.estimateGas(currentUserOp);
 
       const res = await wallet.packUserOp(currentUserOp, toHex(transferAmount));
 

@@ -4,10 +4,11 @@ import { formatEther } from 'viem';
 import FragmentedAddress from '../FragmentedAddress';
 import { formatBalance } from '@/utils/format';
 import { DecodeResult } from '@soulwallet/decoder';
-import TokenAmountItem from '../TokenAmountItem';
-import DecodeDetail from './DecodeDetail';
 import { useMemo } from 'react';
 import { cn } from '@/utils/shadcn/utils';
+import ActivateDetail from './ActivationDetail';
+import InnerSendingDetail from './InnerSendingDetail';
+import ApprovalDetail from './ApprovalDetail';
 
 const { InfoCardItem, InfoCardWrapper } = InfoCard;
 
@@ -17,6 +18,7 @@ interface IUserOpDetailProps {
   calcResult: Nullable<TUserOperationPreFundResult>;
   chainId: number;
   decodedUserOp: Nullable<DecodeResult>;
+  from?: string;
 }
 
 const UserOpTitleMap = {
@@ -38,37 +40,22 @@ export function UserOpDetail({
   calcResult,
   chainId,
   decodedUserOp,
+  from,
 }: IUserOpDetailProps) {
   const DetailContent = useMemo(() => {
-    if (opType === UserOpType.SendTransaction) {
-      return (
-        <>
-          <div className="flex items-center justify-between p-2xs">
-            <TokenAmountItem
-              {...decodedUserOp?.fromInfo}
-              amount={decodedUserOp?.value?.toString()}
-            />
+    switch (opType) {
+      case UserOpType.DeployWallet:
+        return <ActivateDetail />;
 
-            {/* TODO: no token price API. */}
-            <span className="elytro-text-smaller-body text-gray-600">--</span>
-          </div>
+      case UserOpType.SendTransaction:
+        return <InnerSendingDetail decodedUserOp={decodedUserOp} />;
 
-          <div className="elytro-text-bold-body">To</div>
+      case UserOpType.ApproveTransaction:
+        return <ApprovalDetail decodedUserOp={decodedUserOp} />;
 
-          <FragmentedAddress
-            address={decodedUserOp?.to}
-            chainId={chainId}
-            className="bg-gray-150 px-lg py-md rounded-md"
-          />
-        </>
-      );
+      default:
+        return null;
     }
-
-    if (opType === UserOpType.ApproveTransaction) {
-      return <DecodeDetail decodedUserOp={decodedUserOp} />;
-    }
-
-    return null;
   }, [opType, decodedUserOp]);
 
   return (
@@ -92,12 +79,7 @@ export function UserOpDetail({
       <InfoCardWrapper>
         <InfoCardItem
           label="From account"
-          content={
-            <FragmentedAddress
-              address={decodedUserOp?.from}
-              chainId={chainId}
-            />
-          }
+          content={<FragmentedAddress address={from} chainId={chainId} />}
         />
 
         {/* Network cost: unit ETH */}

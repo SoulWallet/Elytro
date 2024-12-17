@@ -12,6 +12,12 @@ import { toast } from '@/hooks/use-toast';
 import SecondaryPageWrapper from '../components/SecondaryPageWrapper';
 import { UserOpDetail } from '../components/UserOpDetail';
 
+const UserOpTitleMap = {
+  [UserOpType.DeployWallet]: 'Activate account',
+  [UserOpType.SendTransaction]: "You' are sending",
+  [UserOpType.ApproveTransaction]: 'Confirm Transaction',
+};
+
 export default function TxConfirm() {
   const wallet = useWallet();
   const {
@@ -29,7 +35,7 @@ export default function TxConfirm() {
   const renderContent = useMemo(() => {
     if (isPacking) return <PackingTip />;
 
-    if (opType && decodedDetail) {
+    if (opType) {
       return (
         <UserOpDetail
           opType={opType}
@@ -37,6 +43,7 @@ export default function TxConfirm() {
           chainId={currentChain!.chainId}
           decodedUserOp={decodedDetail}
           session={approval?.data?.dApp}
+          from={userOp?.sender}
         />
       );
     }
@@ -120,7 +127,10 @@ export default function TxConfirm() {
   };
 
   return (
-    <SecondaryPageWrapper className="flex flex-col p-md" title="Confirm">
+    <SecondaryPageWrapper
+      className="flex flex-col p-md"
+      title={UserOpTitleMap[opType!]}
+    >
       {/* Content */}
       <div className="flex flex-col gap-y-md pb-14">{renderContent}</div>
 

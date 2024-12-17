@@ -182,15 +182,15 @@ class WalletController {
     }
 
     if (!basicInfo.isDeployed) {
-      basicInfo.isDeployed = await elytroSDK.isSmartAccountDeployed(
+      const isDeployed = await elytroSDK.isSmartAccountDeployed(
         basicInfo.address
       );
-
-      accountManager.activateCurrentAccount();
+      if (isDeployed) {
+        accountManager.activateCurrentAccount();
+      }
     }
 
     const balanceBn = await walletClient.getBalance(basicInfo.address);
-
     return { ...basicInfo, balance: formatEther(balanceBn) };
   }
 
