@@ -55,14 +55,14 @@ export default function CreateNewAddress() {
         <SelectTrigger className="h-16 px-5 py-0 rounded-sm">
           <ChainItem chain={selectedChain} />
         </SelectTrigger>
-        <SelectContent className="rounded-3xl bg-white overflow-hidden w-full">
+        <SelectContent className="rounded-sm bg-white overflow-hidden w-full">
           {chains.map((chain) => {
             return (
               <SelectItem
                 key={chain.chainId}
                 needCheckIcon={false}
                 value={chain.chainId.toString()}
-                className="px-5 py-0 h-16"
+                className="px-5 py-0 h-16 rounded-none"
               >
                 <ChainItem chain={chain} />
               </SelectItem>
