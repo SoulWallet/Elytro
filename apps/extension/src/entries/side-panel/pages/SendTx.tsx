@@ -121,13 +121,13 @@ export default function SendTx() {
     >
       <div>
         <Form {...form}>
-          <div className="bg-light-green p-5 rounded-lg mb-4">
-            <h3 className="text-xl font-semibold mb-4">Sending</h3>
+          <div className="bg-light-green rounded-lg">
+            <h3 className="text-xl font-semibold p-4">Sending</h3>
             <FormField
               control={form.control}
               name="amount"
               render={({ field }) => (
-                <FormItem className="mb-4">
+                <FormItem className="px-4">
                   <FormControl>
                     <AmountInput
                       field={field}
@@ -143,10 +143,11 @@ export default function SendTx() {
               control={form.control}
               name="token"
               render={() => (
-                <div className="relative">
+                <div className="relative mb-4">
                   <FormItem>
                     <FormControl>
                       <TokenSelector
+                        className="h-16 px-4"
                         tokens={tokens}
                         onTokenChange={handleTokenSelect}
                       />
@@ -155,7 +156,7 @@ export default function SendTx() {
                   </FormItem>
                   <Button
                     disabled={!form.getValues('token')}
-                    className="absolute right-0 top-0 text-lg bg-green"
+                    className="absolute right-4 top-3 text-lg bg-green"
                     size="tiny"
                     onClick={() => handleFillMax()}
                   >

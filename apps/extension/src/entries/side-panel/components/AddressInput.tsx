@@ -4,48 +4,10 @@ import { PropsWithChildren, useEffect, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import { isAddress } from 'viem';
 import FragmentedAddress from './FragmentedAddress';
+import ENSInfoComponent, { EnsAddress } from './ENSInfo';
 import { useWallet } from '@/contexts/wallet';
 import Spin from '@/components/Spin';
-
-interface IENSInfo {
-  name: string;
-  address: string;
-  avatar: string;
-}
-
-const ENSInfoComponent = ({
-  ensInfo,
-  chainId,
-}: {
-  ensInfo: IENSInfo;
-  chainId: number;
-}) => {
-  return (
-    <>
-      <div className="flex items-center">
-        {ensInfo.avatar ? (
-          <img
-            src={ensInfo.avatar}
-            alt={ensInfo.name}
-            className="w-6 h-6 rounded-full mr-2"
-          />
-        ) : (
-          <div className="w-6 h-6 rounded-full flex items-center font-semibold justify-center text-white bg-blue mr-2">
-            {ensInfo.name[0].toUpperCase()}
-          </div>
-        )}
-        <div className="text-sm font-semibold">{ensInfo.name}</div>
-      </div>
-      <div className="scale-75 origin-left">
-        <FragmentedAddress
-          address={ensInfo.address}
-          chainId={chainId as number}
-          size="md"
-        />
-      </div>
-    </>
-  );
-};
+import dayjs from 'dayjs';
 
 export default function AddressInput({
   field,
@@ -58,9 +20,18 @@ export default function AddressInput({
   const [displayLabel, setDisplayLabel] = useState<string>('');
   const [value, setValue] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [ensInfo, setEnsInfo] = useState<IENSInfo | null>(null);
+  const [ensInfo, setEnsInfo] = useState<EnsAddress | null>(null);
   const [isFocused, setIsFocused] = useState<boolean>(false);
-  const handleClickENS = () => {
+  const [recentAddress, setRecentAddress] = useState<{
+    [key: string]: EnsAddress;
+  } | null>(null);
+  const handleClickENS = (ens?: EnsAddress) => {
+    if (ens) {
+      setEnsInfo(ens);
+      field.onChange(ens.address);
+      setValue(ens.name as string);
+      return;
+    }
     if (ensInfo) {
       field.onChange(ensInfo.address);
     }
@@ -68,17 +39,23 @@ export default function AddressInput({
 
   const getENSAddress = async (value: string) => {
     try {
-      const isENS = value.endsWith('.eth');
-      if (!isENS) {
+      const existedEns = Object.values(recentAddress || {}).find(
+        (item) => item.name === value
+      );
+      const needToSearch = value.endsWith('.eth') && !existedEns;
+      if (!needToSearch) {
         if (ensInfo) {
           setEnsInfo(null);
+        }
+        if (existedEns) {
+          setEnsInfo(existedEns);
         }
         return;
       }
       setLoading(true);
       const ensAddr = await wallet.getENSInfoByName(value);
       if (ensAddr) {
-        setEnsInfo(ensAddr as IENSInfo);
+        setEnsInfo(ensAddr as EnsAddress);
       }
     } catch (error) {
       setEnsInfo(null);
@@ -94,11 +71,24 @@ export default function AddressInput({
     const isAddr = isAddress(value);
     if (isAddr) {
       setDisplayLabel(value);
+      saveRecentAddressStore({
+        time: new Date().toISOString(),
+        address: value,
+      });
     } else {
       setDisplayLabel('');
     }
-    setIsFocused(false);
-    field.onChange(ensInfo?.address || value);
+    if (ensInfo?.address) {
+      field.onChange(ensInfo.address);
+      saveRecentAddressStore({
+        ...ensInfo,
+        time: new Date().toISOString(),
+      });
+    } else {
+      field.onChange(value);
+    }
+    // delay to hide the dropdown for trigger the click event on it
+    setTimeout(() => setIsFocused(false), 200);
   };
 
   const handleFocus = () => {
@@ -125,15 +115,31 @@ export default function AddressInput({
     if (ensInfo) {
       return (
         <div className="absolute bg-white">
-          <ENSInfoComponent
-            ensInfo={ensInfo}
-            chainId={currentChain?.chainId as number}
-          />
+          <ENSInfoComponent ensInfo={ensInfo} />
         </div>
       );
     }
     return null;
   };
+
+  const saveRecentAddressStore = (data: EnsAddress) => {
+    const isExist = recentAddress && recentAddress[data.address];
+    if (!isExist) {
+      const storedAddress = { ...recentAddress, [data.address]: data };
+      localStorage.setItem('recentAddress', JSON.stringify(storedAddress));
+    }
+  };
+
+  const getRecentAddressStore = () => {
+    const addressStr = localStorage.getItem('recentAddress');
+    if (addressStr) {
+      setRecentAddress(JSON.parse(addressStr));
+    }
+  };
+
+  useEffect(() => {
+    getRecentAddressStore();
+  }, [isFocused]);
 
   useEffect(() => {
     getENSAddress(value);
@@ -154,15 +160,71 @@ export default function AddressInput({
         onChange={handleChange}
       />
       {!isFocused && genInputResult()}
-      {isFocused && (loading || ensInfo) && (
-        <div className="absolute top-full left-0 right-0 bg-white border rounded-md mt-1 z-10 p-4">
-          <Spin isLoading={loading} />
-          {ensInfo && (
-            <div className="hover:bg-gray-300" onClick={handleClickENS}>
-              <ENSInfoComponent
-                ensInfo={ensInfo}
-                chainId={currentChain?.chainId as number}
-              />
+
+      {isFocused && (
+        <div className="absolute top-full left-0 right-0 bg-white shadow-md rounded-md mt-1 z-10 overflow-hidden">
+          {recentAddress && (
+            <div className="w-full">
+              <div className="text-base text-gray-600 font-semibold p-4">
+                Recent
+              </div>
+              <div>
+                {Object.values(recentAddress).map((item: EnsAddress) => {
+                  const handleClick = () => {
+                    if (item.name) {
+                      handleClickENS(item);
+                    } else {
+                      field.onChange(item.address);
+                      setDisplayLabel(item.address);
+                    }
+                  };
+                  let Comp = null;
+                  if (item.name) {
+                    Comp = <ENSInfoComponent ensInfo={item} />;
+                  } else {
+                    Comp = (
+                      <FragmentedAddress
+                        address={item.address}
+                        chainId={currentChain?.chainId as number}
+                      />
+                    );
+                  }
+                  return (
+                    <div
+                      key={item.address}
+                      onClick={handleClick}
+                      className="h-16 px-4 cursor-pointer flex items-center justify-between hover:bg-gray-300"
+                    >
+                      {Comp}
+                      <div className="text-gray-600 text-sm font-normal">
+                        {dayjs().diff(item.time, 'h') > 0 ? 'hrs' : 'An hour'}{' '}
+                        ago
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {(ensInfo || loading) && (
+            <div>
+              <div className="text-base text-gray-600 font-semibold px-4 py-2">
+                ENS Search
+              </div>
+              <div className="relative min-h-16">
+                {<Spin isLoading={loading} />}
+                {ensInfo && (
+                  <div
+                    className="px-4 h-16 cursor-pointer hover:bg-gray-300"
+                    onClick={() => {
+                      handleClickENS();
+                      setIsFocused(false);
+                    }}
+                  >
+                    <ENSInfoComponent ensInfo={ensInfo} />
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

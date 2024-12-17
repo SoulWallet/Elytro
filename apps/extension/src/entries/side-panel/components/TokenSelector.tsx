@@ -5,6 +5,7 @@ import { formatEther } from 'viem';
 import DefaultTokenIcon from '@/assets/icons/ether.svg';
 import { useState } from 'react';
 import TokenItem from '@/components/TokenItem';
+import { cn } from '@/utils/shadcn/utils';
 
 function SelectedToken({ token }: { token?: TokenDTO }) {
   if (!token)
@@ -37,9 +38,11 @@ function SelectedToken({ token }: { token?: TokenDTO }) {
 
 export default function TokenSelector({
   tokens,
+  className,
   onTokenChange,
 }: {
   tokens: TokenDTO[];
+  className?: string;
   onTokenChange?: (token: TokenDTO) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -56,19 +59,19 @@ export default function TokenSelector({
       <SelectTrigger
         needDropdown={false}
         onClick={() => setOpen(!open)}
-        className="border-0"
+        className={cn('border-0', className)}
       >
         <SelectedToken token={selectedToken as TokenDTO} />
       </SelectTrigger>
       <SelectContent
-        className="rounded-3xl bg-white overflow-hidden w-full mt-4"
+        className="rounded-3xl bg-white overflow-hidden w-full"
         onPointerDownOutside={() => setOpen(false)}
       >
         {tokens.map((item) => {
           return (
             <div
               onClick={() => handleSelect(item)}
-              className="cursor-pointer hover:bg-gray-200 p-3 px-3"
+              className="cursor-pointer hover:bg-gray-200"
               key={item.name}
             >
               <TokenItem token={item} />
