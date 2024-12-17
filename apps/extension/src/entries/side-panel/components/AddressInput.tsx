@@ -30,6 +30,7 @@ export default function AddressInput({
       setEnsInfo(ens);
       field.onChange(ens.address);
       setValue(ens.name as string);
+      setDisplayLabel('');
       return;
     }
     if (ensInfo) {
@@ -174,8 +175,8 @@ export default function AddressInput({
                     if (item.name) {
                       handleClickENS(item);
                     } else {
-                      field.onChange(item.address);
                       setDisplayLabel(item.address);
+                      setValue(item.address);
                     }
                   };
                   let Comp = null;
@@ -184,11 +185,13 @@ export default function AddressInput({
                   } else {
                     Comp = (
                       <FragmentedAddress
+                        size="md"
                         address={item.address}
                         chainId={currentChain?.chainId as number}
                       />
                     );
                   }
+                  const hour = dayjs().diff(item.time, 'h');
                   return (
                     <div
                       key={item.address}
@@ -197,8 +200,7 @@ export default function AddressInput({
                     >
                       {Comp}
                       <div className="text-gray-600 text-sm font-normal">
-                        {dayjs().diff(item.time, 'h') > 0 ? 'hrs' : 'An hour'}{' '}
-                        ago
+                        {hour > 1 ? `${hour}hrs` : 'An hour'} ago
                       </div>
                     </div>
                   );
