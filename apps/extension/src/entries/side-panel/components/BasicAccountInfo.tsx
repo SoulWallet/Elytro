@@ -52,7 +52,13 @@ export default function BasicAccountInfo() {
     <div className="flex flex-col p-sm">
       {/* Chain & Address */}
       <div className="flex flex-row gap-2 w-full items-center justify-between">
-        <Account chain={currentChain!} address={address} />
+        <Account
+          chain={currentChain!}
+          account={{
+            address,
+            balance,
+          }}
+        />
         <div className="flex flex-row gap-lg">
           <Ellipsis className="elytro-clickable-icon" onClick={onClickMore} />
           <RefreshCcw
