@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { navigateTo } from '@/utils/navigation';
+import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
 
 interface IAccountItemProps {
   address: string;
@@ -57,6 +59,9 @@ export default function Account({
   chain: TChainConfigItem;
 }) {
   const [open, setOpen] = useState(false);
+  const onClickCreateBtn = () => {
+    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.CreateNewAddress);
+  };
   return (
     <DropdownMenu open={open}>
       <DropdownMenuTrigger onClick={() => setOpen(true)}>
@@ -78,7 +83,7 @@ export default function Account({
       >
         <div className="px-5 py-3 flex justify-between items-center min-w-[400px]">
           <div className=" font-bold text-base">Switch Addresses</div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={onClickCreateBtn}>
             Create New Address
           </Button>
         </div>

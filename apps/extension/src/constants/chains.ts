@@ -8,6 +8,7 @@ export type TChainConfigItem = {
   bundlerUrl: string;
   currencySymbol: { name: string; symbol: string; decimals: number };
   ensContractAddress: string;
+  icon?: string;
 };
 
 // DEFAULT_LOCAL_CHAINS is used to store chains in local storage
