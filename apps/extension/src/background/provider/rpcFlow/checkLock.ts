@@ -7,7 +7,13 @@ import { ApprovalTypeEn } from '@/constants/operations';
 // todo: move to keyring service
 let isUnlocking = false;
 
-const PUBLIC_METHODS: ProviderMethodType[] = ['eth_chainId', 'eth_getCode'];
+const PUBLIC_METHODS: ProviderMethodType[] = [
+  'eth_chainId',
+  'eth_getCode',
+  'eth_call',
+  'eth_blockNumber',
+  'eth_estimateGas',
+];
 
 const SEMI_PUBLIC_METHODS: ProviderMethodType[] = ['eth_accounts'];
 

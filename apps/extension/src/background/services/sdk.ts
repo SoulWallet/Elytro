@@ -21,7 +21,6 @@ import { DecodeUserOp } from '@soulwallet/decoder';
 import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
 import keyring from './keyring';
 import { simulateSendUserOp } from '@/utils/ethRpc/simulate';
-import { UserOperationStatusEn } from '@/constants/operations';
 import {
   Address,
   createPublicClient,
@@ -209,18 +208,11 @@ class ElytroSDK {
       if (res?.isErr()) {
         throw res.ERR;
       } else if (res?.OK) {
-        if (res.OK.success) {
-          // TODO: maybe return all fields, not just status?
-          return UserOperationStatusEn.confirmedSuccess; //  res.OK.receipt;
-        }
-
-        return UserOperationStatusEn.confirmedFailed;
+        return { ...res.OK.receipt };
       }
-
-      return UserOperationStatusEn.pending;
     } catch (error) {
       console.error('Elytro: Failed to get user operation receipt.', error);
-      return UserOperationStatusEn.pending; // maybe error?
+      return null;
     }
   }
 

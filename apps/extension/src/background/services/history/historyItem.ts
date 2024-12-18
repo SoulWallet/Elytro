@@ -7,6 +7,11 @@ import eventBus from '@/utils/eventBus';
 
 const FETCH_INTERVAL = 1000;
 
+const STATUS_MAP = {
+  '0x1': UserOperationStatusEn.confirmedSuccess,
+  '0x0': UserOperationStatusEn.confirmedFailed,
+};
+
 class HistoryItem {
   private _data: UserOperationHistory;
   private _watcher: ReturnType<typeof setInterval> | null = null;
@@ -68,10 +73,11 @@ class HistoryItem {
 
     try {
       this._fetching = true;
-      const opStatus = await elytroSDK.getUserOperationReceipt(
-        this._data.opHash
-      );
-      this._updateStatus(opStatus);
+      const res = await elytroSDK.getUserOperationReceipt(this._data.opHash);
+      const newStatus =
+        STATUS_MAP[res?.status as keyof typeof STATUS_MAP] ||
+        UserOperationStatusEn.pending;
+      this._updateStatus(newStatus);
     } catch (error) {
       console.error(error);
     } finally {

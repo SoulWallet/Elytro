@@ -62,9 +62,9 @@ export default function TxConfirm() {
     }
   };
 
-  const onSendSuccess = async () => {
+  const onSendSuccess = async (opHash: string) => {
     if (opType === UserOpType.ApproveTransaction) {
-      resolve();
+      resolve(opHash);
     } else {
       navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard, {
         activating: opType as unknown as string,
@@ -112,7 +112,7 @@ export default function TxConfirm() {
         description: 'User operation hash: ' + opHash,
       });
 
-      onSendSuccess();
+      onSendSuccess(opHash);
     } catch (error) {
       toast({
         title: 'Failed to send transaction',
