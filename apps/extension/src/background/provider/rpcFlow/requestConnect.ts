@@ -6,7 +6,10 @@ import connectionManager from '@/background/services/connection';
 import type { TFlowMiddleWareFn } from '@/utils/asyncTaskFlow';
 import { ethErrors } from 'eth-rpc-errors';
 
-const CONNECT_METHODS: ProviderMethodType[] = ['eth_requestAccounts'];
+const CONNECT_METHODS: ProviderMethodType[] = [
+  'eth_accounts',
+  'eth_requestAccounts',
+];
 
 const CONNECT_METHODS_WITH_PERMISSIONS: ProviderMethodType[] = [
   'wallet_requestPermissions',
@@ -57,12 +60,16 @@ export const requestConnect: TFlowMiddleWareFn = async (ctx, next) => {
 
     try {
       connectingSites.add(dApp.origin);
-      await approvalService.request(ApprovalTypeEn.Connect, { dApp });
+      await approvalService.request(ApprovalTypeEn.Connect, {
+        dApp,
+      });
 
       // Only wallet_requestPermissions needs to return the permissions, else leave it to the next middleware
       if (method === 'wallet_requestPermissions') {
         return connectionManager.getPermissions(dApp.origin);
       }
+    } catch {
+      return ethErrors.provider.userRejectedRequest();
     } finally {
       connectingSites.delete(dApp.origin);
     }
