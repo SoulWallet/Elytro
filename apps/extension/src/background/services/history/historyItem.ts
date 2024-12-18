@@ -75,7 +75,8 @@ class HistoryItem {
       this._fetching = true;
       const res = await elytroSDK.getUserOperationReceipt(this._data.opHash);
       const newStatus =
-        STATUS_MAP[res?.status as keyof typeof STATUS_MAP] ||
+        // the definition is not correct. res has 'status' field
+        STATUS_MAP[(res as SafeAny)?.status as keyof typeof STATUS_MAP] ||
         UserOperationStatusEn.pending;
       this._updateStatus(newStatus);
     } catch (error) {
