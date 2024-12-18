@@ -27,6 +27,7 @@ type IAccountContext = {
   accounts: TAccountInfo[];
   updateHistory: () => Promise<void>;
   getAccounts: () => Promise<void>;
+  updateTokens: () => Promise<void>;
 };
 
 // TODO: extract HistoryContext
@@ -42,6 +43,7 @@ const AccountContext = createContext<IAccountContext>({
   updateHistory: async () => {},
   accounts: [],
   getAccounts: async () => {},
+  updateTokens: async () => {},
 });
 
 export const AccountProvider = ({
@@ -81,10 +83,14 @@ export const AccountProvider = ({
     }
   };
 
-  const { tokens, loadingTokens } = useTokens({
+  const { tokens, loadingTokens, refetchTokens } = useTokens({
     address: accountInfo.address as Address,
     chainId: accountInfo.chainId,
   });
+
+  const updateTokens = async () => {
+    await refetchTokens();
+  };
 
   // TODO: check this logic
   const updateHistory = async () => {
@@ -140,6 +146,7 @@ export const AccountProvider = ({
           tokens,
           loadingTokens,
         },
+        updateTokens,
         history,
         updateHistory,
         loading,

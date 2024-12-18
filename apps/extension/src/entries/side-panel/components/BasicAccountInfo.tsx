@@ -16,12 +16,11 @@ import Account from './Account';
 import { useAccount } from '../contexts/account-context';
 import { useChain } from '../contexts/chain-context';
 import Spin from '@/components/Spin';
-import { formatBalance } from '@/utils/format';
 
 export default function BasicAccountInfo() {
   const {
     accountInfo: { isDeployed, address, balance },
-    updateAccount,
+    updateTokens,
   } = useAccount();
   const { currentChain } = useChain();
   const [openSendModal, setOpenSendModal] = useState(false);
@@ -43,10 +42,10 @@ export default function BasicAccountInfo() {
     return <Spin isLoading />;
   }
 
-  const { integerPart, decimalPart } = formatBalance(balance, {
-    threshold: 0.001,
-    maxDecimalLength: 8,
-  });
+  // const { integerPart, decimalPart } = formatBalance(balance, {
+  //   threshold: 0.001,
+  //   maxDecimalLength: 8,
+  // });
 
   return (
     <div className="flex flex-col p-sm">
@@ -63,16 +62,17 @@ export default function BasicAccountInfo() {
           <Ellipsis className="elytro-clickable-icon" onClick={onClickMore} />
           <RefreshCcw
             className="elytro-clickable-icon"
-            onClick={updateAccount}
+            onClick={updateTokens}
           />
         </div>
       </div>
 
+      {/* TODO: NOT SHOW BALANCE FOR NOW */}
       {/* Balance: $XX.xx */}
-      <div className="my-sm py-1 elytro-text-hero">
+      {/* <div className="my-sm py-1 elytro-text-hero">
         <span>{integerPart}</span>
         <span className=" text-gray-450">.{decimalPart}</span> ETH
-      </div>
+      </div> */}
 
       {/* Actions */}
       <div>
