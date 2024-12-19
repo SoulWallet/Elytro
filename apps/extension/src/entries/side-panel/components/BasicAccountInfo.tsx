@@ -16,6 +16,7 @@ import Account from './Account';
 import { useAccount } from '../contexts/account-context';
 import { useChain } from '../contexts/chain-context';
 import Spin from '@/components/Spin';
+import { useWallet } from '@/contexts/wallet';
 
 export default function BasicAccountInfo() {
   const {
@@ -24,7 +25,8 @@ export default function BasicAccountInfo() {
     updateTokens,
     updateAccount,
   } = useAccount();
-  const { currentChain } = useChain();
+  const wallet = useWallet();
+  const { currentChain, chains } = useChain();
   const [openSendModal, setOpenSendModal] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [openAccounts, setOpenAccounts] = useState(false);
@@ -54,14 +56,24 @@ export default function BasicAccountInfo() {
     await updateTokens();
   };
 
+  const handleSwitchAccount = async (account: TAccountInfo) => {
+    try {
+      await wallet.switchAccountByChain(account.chainId);
+      await reloadAccount();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex flex-col p-sm pb-0 ">
       {/* Chain & Address */}
       <div className="flex flex-row gap-2 w-full items-center justify-between mb-lg">
         <Account
-          chain={currentChain!}
+          chains={chains}
           currentAccountAddress={address}
           accounts={accounts}
+          onClickAccount={handleSwitchAccount}
         />
         <div className="flex flex-row gap-lg">
           <Ellipsis className="elytro-clickable-icon" onClick={onClickMore} />

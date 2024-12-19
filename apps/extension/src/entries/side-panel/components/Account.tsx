@@ -64,13 +64,13 @@ const AccountItem = ({
 interface IAccountProps {
   currentAccountAddress: string;
   accounts: TAccountInfo[];
-  chain: TChainConfigItem;
+  chains: TChainConfigItem[];
   onClickAccount?: (account: TAccountInfo) => void;
 }
 
 export default function Account({
   accounts,
-  chain,
+  chains = [],
   currentAccountAddress,
   onClickAccount,
 }: IAccountProps) {
@@ -81,15 +81,22 @@ export default function Account({
   const handleClickItem = (item: TAccountInfo) => {
     if (onClickAccount) {
       onClickAccount(item);
+      setOpen(false);
     }
   };
+  const currentAccount = accounts.find(
+    (ac) => ac.address === currentAccountAddress
+  );
+  const currentChain = chains.find(
+    (c) => c.chainId === currentAccount?.chainId
+  );
   return (
     <DropdownMenu open={open}>
       <DropdownMenuTrigger onClick={() => setOpen(true)}>
         <div className="flex flex-row gap-2 items-center bg-white rounded-sm p-xs cursor-pointer hover:bg-gray-200">
           <img
             className="w-5 h-5"
-            src={SUPPORTED_CHAIN_ICON_MAP[chain.chainId]}
+            src={SUPPORTED_CHAIN_ICON_MAP[currentChain!.chainId]}
           />
           <div className="font-light font-base">
             <SplittedGrayAddress address={currentAccountAddress} />
@@ -108,22 +115,40 @@ export default function Account({
             Create New Address
           </Button>
         </div>
-        {accounts.map((account) => {
-          return (
-            <div key={account.address}>
-              <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
-                {chain.chainName}
-              </DropdownMenuLabel>
-              <div onClick={() => handleClickItem(account)}>
-                <AccountItem
-                  isCurrent={account.address === currentAccountAddress}
-                  address={account.address}
-                  balance={account.balance}
-                />
+        <div>
+          <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
+            {currentChain?.chainName} {currentAccountAddress && '(Current)'}
+          </DropdownMenuLabel>
+          <AccountItem
+            isCurrent
+            address={currentAccountAddress}
+            balance={currentAccount?.balance || '0'}
+          />
+        </div>
+        {accounts
+          .filter((ac) => ac.address !== currentAccountAddress)
+          .map((account) => {
+            const chainName =
+              chains.find((c) => c.chainId === account.chainId)?.chainName ||
+              'Unknown Chian';
+            return (
+              <div
+                key={account.address}
+                onClick={() => handleClickItem(account)}
+              >
+                <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
+                  {chainName}{' '}
+                  {account.address === currentAccountAddress && '(Current)'}
+                </DropdownMenuLabel>
+                <div onClick={() => handleClickItem(account)}>
+                  <AccountItem
+                    address={account.address}
+                    balance={account.balance}
+                  />
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
