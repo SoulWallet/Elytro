@@ -9,9 +9,11 @@ import PackingTip from '../components/PackingTip';
 import { useWallet } from '@/contexts/wallet';
 import { navigateTo } from '@/utils/navigation';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
+import { useAccount } from '../contexts/account-context';
 
 export default function CreateNewAddress() {
-  const { chains, currentChain } = useChain();
+  const { chains, currentChain, getCurrentChain } = useChain();
+  const { getAccounts, updateAccount, updateTokens } = useAccount();
   const wallet = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedChain, setSelectedChain] = useState<TChainConfigItem | null>(
@@ -22,6 +24,13 @@ export default function CreateNewAddress() {
       () =>
         chains.find((chain) => chain.chainId.toString() === value) || chains[0]
     );
+  };
+
+  const handleAfterCreating = async () => {
+    await getCurrentChain();
+    await getAccounts();
+    await updateAccount();
+    await updateTokens();
   };
 
   const handleCreate = async () => {
@@ -36,13 +45,14 @@ export default function CreateNewAddress() {
     try {
       setIsLoading(true);
       await wallet.createAccount(selectedChain.chainId, true);
+      await handleAfterCreating();
       setTimeout(() => {
         navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
       }, 300);
     } catch (error) {
       console.error(error);
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
   return (

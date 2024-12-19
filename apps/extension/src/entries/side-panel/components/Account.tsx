@@ -18,15 +18,17 @@ import { cn } from '@/utils/shadcn/utils';
 interface IAccountItemProps {
   address: string;
   chainIcon?: string;
-  balance: string;
-  onDelete?: (address: string) => void;
+  balance: string | null;
   isCurrent?: boolean;
+  isDeployed?: boolean;
+  onDelete?: (address: string) => void;
 }
 
 export const AccountItem = ({
   address,
   chainIcon,
   balance,
+  isDeployed,
   onDelete,
   isCurrent = false,
 }: IAccountItemProps) => {
@@ -36,6 +38,7 @@ export const AccountItem = ({
   };
   const handleDelete: MouseEventHandler<SVGSVGElement> = (e) => {
     e.stopPropagation();
+    // should use a dialog component
     const confirmed = confirm('Are you sure to delete this address?');
     if (confirmed) {
       onDelete?.(address);
@@ -60,7 +63,7 @@ export const AccountItem = ({
       </div>
       <div className="flex items-center gap-2 ">
         <div className="text-gray-600">
-          {balance ? `${balance} ETH` : 'Inactivated'}{' '}
+          {isDeployed ? `${balance} ETH` : 'Inactivated'}{' '}
         </div>
         <Copy className="size-4" onClick={handleClickCopy} />
         {!isCurrent && <Trash className="size-4" onClick={handleDelete} />}
@@ -129,6 +132,7 @@ export default function Account({
             {chain?.chainName} {currentAccountAddress && '(Current)'}
           </DropdownMenuLabel>
           <AccountItem
+            isDeployed={currentAccount?.isDeployed}
             isCurrent
             address={currentAccountAddress}
             balance={currentAccount?.balance || '0'}
@@ -136,7 +140,7 @@ export default function Account({
         </div>
         {accounts
           .filter((ac) => ac.address !== currentAccountAddress)
-          .map((account) => {
+          .map((account: TAccountInfo) => {
             const chainName =
               chains.find((c) => c.chainId === account.chainId)?.chainName ||
               'Unknown Chian';
@@ -151,8 +155,9 @@ export default function Account({
                 </DropdownMenuLabel>
                 <div onClick={() => handleClickItem(account)}>
                   <AccountItem
+                    isDeployed={account.isDeployed}
                     address={account.address}
-                    balance={account.balance}
+                    balance={account.balance || '0'}
                     onDelete={onDeleteAccount}
                   />
                 </div>

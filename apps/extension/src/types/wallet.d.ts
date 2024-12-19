@@ -12,7 +12,7 @@ type TAccountInfo = {
   chainId: number;
   isDeployed: boolean;
   balance?: Nullable<string>;
-} & Account;
+};
 
 type TTransactionInfo = {
   from: string; // Address
