@@ -12,6 +12,7 @@ import SignTxModal from '@/entries/side-panel/components/SignTxModal';
 import { client } from '@/requests';
 import SendTxModal from './components/SendTxModal';
 import { TxProvider } from './contexts/tx-context';
+import { AlerterProvider } from '@/components/ui/alerter';
 
 const main = () => {
   const SidePanelApp: React.FC = () => (
@@ -22,9 +23,11 @@ const main = () => {
             <TxProvider>
               {/*  according to chrome dev team. the minimum width of the side panel is 360px */}
               <TooltipProvider>
-                <HashRouter routes={routes} />
-                <SignTxModal />
-                <SendTxModal />
+                <AlerterProvider>
+                  <HashRouter routes={routes} />
+                  <SignTxModal />
+                  <SendTxModal />
+                </AlerterProvider>
                 {/* <UserOpConfirmDialog /> */}
               </TooltipProvider>
             </TxProvider>

@@ -14,6 +14,7 @@ import { navigateTo } from '@/utils/navigation';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
 import SplittedGrayAddress from '@/components/SplittedGrayAddress';
 import { cn } from '@/utils/shadcn/utils';
+import { useAlert } from '@/components/ui/alerter';
 
 interface IAccountItemProps {
   address: string;
@@ -32,17 +33,19 @@ export const AccountItem = ({
   onDelete,
   isCurrent = false,
 }: IAccountItemProps) => {
+  const { elytroAlert } = useAlert();
   const handleClickCopy: MouseEventHandler<SVGSVGElement> = (e) => {
     e.stopPropagation();
     safeClipboard(address || '');
   };
   const handleDelete: MouseEventHandler<SVGSVGElement> = (e) => {
     e.stopPropagation();
-    // should use a dialog component
-    const confirmed = confirm('Are you sure to delete this address?');
-    if (confirmed) {
-      onDelete?.(address);
-    }
+    elytroAlert({
+      title: 'Are you sure to delete this address?',
+      onConfirm: () => {
+        onDelete?.(address);
+      },
+    });
   };
   return (
     <div
