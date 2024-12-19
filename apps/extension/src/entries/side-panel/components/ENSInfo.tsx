@@ -1,3 +1,5 @@
+import SplittedGrayAddress from '@/components/SplittedGrayAddress';
+
 export interface EnsAddress {
   address: string;
   time: string;
@@ -23,7 +25,7 @@ const ENSInfo = ({ ensInfo }: { ensInfo: EnsAddress }) => {
       <div className="text-base">
         <div>{ensInfo.name}</div>
         <div className="text-xs font-light">
-          {ensInfo.address.slice(0, 6)}...{ensInfo.address.slice(-4)}
+          <SplittedGrayAddress address={ensInfo.address} />
         </div>
       </div>
     </div>

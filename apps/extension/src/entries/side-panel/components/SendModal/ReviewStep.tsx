@@ -8,7 +8,7 @@ import {
 import questionIcon from '@/assets/icons/question.svg';
 import { TxData } from '.';
 import { ChevronRight } from 'lucide-react';
-import SplitedGrayAddress from '@/components/SplitedGrayAddress';
+import SplittedGrayAddress from '@/components/SplittedGrayAddress';
 import { Address, formatEther, Hex, parseEther, toHex } from 'viem';
 import { useElytroStep } from '@/components/steps/StepProvider';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,7 @@ export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
       </div>
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">To</Label>
-        <SplitedGrayAddress
+        <SplittedGrayAddress
           className="text-2xl font-medium"
           address={stepData?.to as Address}
         />
