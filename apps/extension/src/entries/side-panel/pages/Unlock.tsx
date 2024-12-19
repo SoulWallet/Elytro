@@ -25,7 +25,7 @@ export default function Unlock() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col px-8 items-center justify-center gap-y-8 bg-elytro-background min-w-80">
+    <div className="w-full h-full flex flex-col px-8 items-center justify-center gap-y-8 elytro-gradient-bg min-w-80">
       <>
         <Slogan size="md" />
         <PasswordInput
