@@ -41,7 +41,9 @@ export const AccountItem = ({
   const handleDelete: MouseEventHandler<SVGSVGElement> = (e) => {
     e.stopPropagation();
     elytroAlert({
-      title: 'Are you sure to delete this address?',
+      title: 'Delete from this device',
+      description:
+        'The account is still functional but is no longer accessible from this device. You can add it back any time.',
       onConfirm: () => {
         onDelete?.(address);
       },
