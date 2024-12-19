@@ -141,6 +141,12 @@ class AccountManager {
       currentAccount: null,
     });
   }
+
+  public async removeAccountByAddress(address: string) {
+    this._accounts = this._accounts.filter(
+      (account) => account.address !== address
+    );
+  }
 }
 
 const accountManager = new AccountManager();

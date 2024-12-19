@@ -19,21 +19,27 @@ interface IAccountItemProps {
   address: string;
   chainIcon?: string;
   balance: string;
+  onDelete?: (address: string) => void;
   isCurrent?: boolean;
 }
 
-const AccountItem = ({
+export const AccountItem = ({
   address,
   chainIcon,
   balance,
+  onDelete,
   isCurrent = false,
 }: IAccountItemProps) => {
   const handleClickCopy: MouseEventHandler<SVGSVGElement> = (e) => {
     e.stopPropagation();
     safeClipboard(address || '');
   };
-  const handleDelete = () => {
-    console.log('delete');
+  const handleDelete: MouseEventHandler<SVGSVGElement> = (e) => {
+    e.stopPropagation();
+    const confirmed = confirm('Are you sure to delete this address?');
+    if (confirmed) {
+      onDelete?.(address);
+    }
   };
   return (
     <div
@@ -52,10 +58,12 @@ const AccountItem = ({
           {address.slice(0, 6)}...{address.slice(-4)}
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="text-gray-600">{balance} ETH</div>
+      <div className="flex items-center gap-2 ">
+        <div className="text-gray-600">
+          {balance ? `${balance} ETH` : 'Inactivated'}{' '}
+        </div>
         <Copy className="size-4" onClick={handleClickCopy} />
-        <Trash className="size-4" onClick={handleDelete} />
+        {!isCurrent && <Trash className="size-4" onClick={handleDelete} />}
       </div>
     </div>
   );
@@ -64,15 +72,19 @@ const AccountItem = ({
 interface IAccountProps {
   currentAccountAddress: string;
   accounts: TAccountInfo[];
+  chain: TChainConfigItem;
   chains: TChainConfigItem[];
   onClickAccount?: (account: TAccountInfo) => void;
+  onDeleteAccount?: (address: string) => void;
 }
 
 export default function Account({
   accounts,
+  chain,
   chains = [],
   currentAccountAddress,
   onClickAccount,
+  onDeleteAccount,
 }: IAccountProps) {
   const [open, setOpen] = useState(false);
   const onClickCreateBtn = () => {
@@ -87,16 +99,13 @@ export default function Account({
   const currentAccount = accounts.find(
     (ac) => ac.address === currentAccountAddress
   );
-  const currentChain = chains.find(
-    (c) => c.chainId === currentAccount?.chainId
-  );
   return (
     <DropdownMenu open={open}>
       <DropdownMenuTrigger onClick={() => setOpen(true)}>
         <div className="flex flex-row gap-2 items-center bg-white rounded-sm p-xs cursor-pointer hover:bg-gray-200">
           <img
             className="w-5 h-5"
-            src={SUPPORTED_CHAIN_ICON_MAP[currentChain!.chainId]}
+            src={SUPPORTED_CHAIN_ICON_MAP[chain!.chainId]}
           />
           <div className="font-light font-base">
             <SplittedGrayAddress address={currentAccountAddress} />
@@ -117,7 +126,7 @@ export default function Account({
         </div>
         <div>
           <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
-            {currentChain?.chainName} {currentAccountAddress && '(Current)'}
+            {chain?.chainName} {currentAccountAddress && '(Current)'}
           </DropdownMenuLabel>
           <AccountItem
             isCurrent
@@ -144,6 +153,7 @@ export default function Account({
                   <AccountItem
                     address={account.address}
                     balance={account.balance}
+                    onDelete={onDeleteAccount}
                   />
                 </div>
               </div>

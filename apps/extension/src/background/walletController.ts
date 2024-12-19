@@ -279,6 +279,10 @@ class WalletController {
       avatar,
     };
   }
+
+  public async removeAccount(address: string) {
+    await accountManager.removeAccountByAddress(address);
+  }
 }
 
 export const walletController = new WalletController();
