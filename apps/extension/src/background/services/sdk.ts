@@ -67,8 +67,16 @@ class ElytroSDK {
       throw new Error(`Elytro: chain ${chainId} is not supported for now.`);
     }
 
-    const { factory, fallback, recovery } = this._config;
-    this._sdk = new SoulWallet(rpcUrl, bundlerUrl, factory, fallback, recovery);
+    const { factory, fallback, recovery, onchainConfig } = this._config;
+    this._sdk = new SoulWallet(
+      rpcUrl,
+      bundlerUrl,
+      factory,
+      fallback,
+      recovery,
+      onchainConfig
+    );
+
     this._bundler = new Bundler(bundlerUrl);
     this._chainConfig = chainConfig;
   }

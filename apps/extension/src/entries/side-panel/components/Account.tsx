@@ -76,7 +76,7 @@ export const AccountItem = ({
 };
 
 interface IAccountProps {
-  currentAccountAddress: string;
+  currentAccount: TAccountInfo;
   accounts: TAccountInfo[];
   chain: TChainConfigItem;
   chains: TChainConfigItem[];
@@ -88,7 +88,7 @@ export default function Account({
   accounts,
   chain,
   chains = [],
-  currentAccountAddress,
+  currentAccount,
   onClickAccount,
   onDeleteAccount,
 }: IAccountProps) {
@@ -102,9 +102,7 @@ export default function Account({
       setOpen(false);
     }
   };
-  const currentAccount = accounts.find(
-    (ac) => ac.address === currentAccountAddress
-  );
+
   return (
     <DropdownMenu open={open}>
       <DropdownMenuTrigger onClick={() => setOpen(true)}>
@@ -114,7 +112,7 @@ export default function Account({
             src={SUPPORTED_CHAIN_ICON_MAP[chain!.chainId]}
           />
           <div className="font-light font-base">
-            <SplittedGrayAddress address={currentAccountAddress} />
+            <SplittedGrayAddress address={currentAccount.address} />
           </div>
           <ChevronDown className="w-3 h-3" />
         </div>
@@ -132,17 +130,17 @@ export default function Account({
         </div>
         <div>
           <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
-            {chain?.chainName} {currentAccountAddress && '(Current)'}
+            {chain?.chainName} {currentAccount?.isDeployed && '(Current)'}
           </DropdownMenuLabel>
           <AccountItem
             isDeployed={currentAccount?.isDeployed}
             isCurrent
-            address={currentAccountAddress}
+            address={currentAccount?.address}
             balance={currentAccount?.balance || '0'}
           />
         </div>
         {accounts
-          .filter((ac) => ac.address !== currentAccountAddress)
+          .filter((ac) => ac.address !== currentAccount?.address)
           .map((account: TAccountInfo) => {
             const chainName =
               chains.find((c) => c.chainId === account.chainId)?.chainName ||
@@ -154,7 +152,7 @@ export default function Account({
               >
                 <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
                   {chainName}{' '}
-                  {account.address === currentAccountAddress && '(Current)'}
+                  {account.address === currentAccount?.address && '(Current)'}
                 </DropdownMenuLabel>
                 <div onClick={() => handleClickItem(account)}>
                   <AccountItem

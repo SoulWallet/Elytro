@@ -20,13 +20,8 @@ import { useWallet } from '@/contexts/wallet';
 import { toast } from '@/hooks/use-toast';
 
 export default function BasicAccountInfo() {
-  const {
-    accountInfo: { isDeployed, address },
-    accounts,
-    getAccounts,
-    updateTokens,
-    updateAccount,
-  } = useAccount();
+  const { accountInfo, accounts, getAccounts, updateTokens, updateAccount } =
+    useAccount();
   const wallet = useWallet();
   const { currentChain, chains, getCurrentChain } = useChain();
   const [openSendModal, setOpenSendModal] = useState(false);
@@ -44,7 +39,7 @@ export default function BasicAccountInfo() {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Receive);
   };
 
-  if (!currentChain || !address) {
+  if (!currentChain || !accountInfo) {
     return <Spin isLoading />;
   }
 
@@ -90,7 +85,7 @@ export default function BasicAccountInfo() {
         <Account
           chains={chains}
           chain={currentChain}
-          currentAccountAddress={address}
+          currentAccount={accountInfo}
           accounts={accounts}
           onClickAccount={handleSwitchAccount}
           onDeleteAccount={handleRemoveAccount}
@@ -114,7 +109,7 @@ export default function BasicAccountInfo() {
       {/* Actions */}
       <div>
         <div className="flex flex-row gap-sm">
-          {isDeployed ? (
+          {accountInfo.isDeployed ? (
             <>
               <ActionButton
                 className="bg-light-green"
