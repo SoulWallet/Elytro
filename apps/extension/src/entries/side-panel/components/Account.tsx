@@ -12,14 +12,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { navigateTo } from '@/utils/navigation';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
+import SplittedGrayAddress from '@/components/SplittedGrayAddress';
+import { cn } from '@/utils/shadcn/utils';
 
 interface IAccountItemProps {
   address: string;
   chainIcon?: string;
   balance: string;
+  isCurrent?: boolean;
 }
 
-const AccountItem = ({ address, chainIcon, balance }: IAccountItemProps) => {
+const AccountItem = ({
+  address,
+  chainIcon,
+  balance,
+  isCurrent = false,
+}: IAccountItemProps) => {
   const handleClickCopy: MouseEventHandler<SVGSVGElement> = (e) => {
     e.stopPropagation();
     safeClipboard(address || '');
@@ -28,7 +36,12 @@ const AccountItem = ({ address, chainIcon, balance }: IAccountItemProps) => {
     console.log('delete');
   };
   return (
-    <div className="flex items-center justify-between min-w-[300px] px-5 py-4 hover:bg-gray-150">
+    <div
+      className={cn(
+        'flex items-center justify-between min-w-[300px] px-5 py-4 hover:bg-gray-150',
+        isCurrent ? 'bg-gray-150' : 'cursor-pointer'
+      )}
+    >
       <div className="flex items-center">
         <img
           src={chainIcon || DefaultTokenIcon}
@@ -48,19 +61,27 @@ const AccountItem = ({ address, chainIcon, balance }: IAccountItemProps) => {
   );
 };
 
-export default function Account({
-  account,
-  chain,
-}: {
-  account: {
-    address: string;
-    balance: string;
-  };
+interface IAccountProps {
+  currentAccountAddress: string;
+  accounts: TAccountInfo[];
   chain: TChainConfigItem;
-}) {
+  onClickAccount?: (account: TAccountInfo) => void;
+}
+
+export default function Account({
+  accounts,
+  chain,
+  currentAccountAddress,
+  onClickAccount,
+}: IAccountProps) {
   const [open, setOpen] = useState(false);
   const onClickCreateBtn = () => {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.CreateNewAddress);
+  };
+  const handleClickItem = (item: TAccountInfo) => {
+    if (onClickAccount) {
+      onClickAccount(item);
+    }
   };
   return (
     <DropdownMenu open={open}>
@@ -71,7 +92,7 @@ export default function Account({
             src={SUPPORTED_CHAIN_ICON_MAP[chain.chainId]}
           />
           <div className="font-light font-base">
-            {account.address.slice(0, 6)}...{account.address.slice(-4)}
+            <SplittedGrayAddress address={currentAccountAddress} />
           </div>
           <ChevronDown className="w-3 h-3" />
         </div>
@@ -87,10 +108,22 @@ export default function Account({
             Create New Address
           </Button>
         </div>
-        <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
-          {chain.chainName}
-        </DropdownMenuLabel>
-        <AccountItem address={account.address} balance={account.balance} />
+        {accounts.map((account) => {
+          return (
+            <div key={account.address}>
+              <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
+                {chain.chainName}
+              </DropdownMenuLabel>
+              <div onClick={() => handleClickItem(account)}>
+                <AccountItem
+                  isCurrent={account.address === currentAccountAddress}
+                  address={account.address}
+                  balance={account.balance}
+                />
+              </div>
+            </div>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

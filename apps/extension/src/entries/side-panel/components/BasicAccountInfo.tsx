@@ -19,7 +19,8 @@ import Spin from '@/components/Spin';
 
 export default function BasicAccountInfo() {
   const {
-    accountInfo: { isDeployed, address, balance },
+    accountInfo: { isDeployed, address },
+    accounts,
     updateTokens,
     updateAccount,
   } = useAccount();
@@ -59,10 +60,8 @@ export default function BasicAccountInfo() {
       <div className="flex flex-row gap-2 w-full items-center justify-between mb-lg">
         <Account
           chain={currentChain!}
-          account={{
-            address,
-            balance,
-          }}
+          currentAccountAddress={address}
+          accounts={accounts}
         />
         <div className="flex flex-row gap-lg">
           <Ellipsis className="elytro-clickable-icon" onClick={onClickMore} />
