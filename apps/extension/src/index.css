@@ -4,12 +4,6 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --elytro-background-image: linear-gradient(
-      to top right,
-      #fbfbf9 0%,
-      #f7f1f0 24%,
-      #b7cde7 100%
-    );
     --elytro-btn-bg: linear-gradient(
       to right,
       #f0eee6 0%,
@@ -21,10 +15,12 @@
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --primary: 200 44% 24%;
+    --primary-foreground: 199, 42%, 86%;
+    --secondary: 199, 42%, 86%;
+    --secondary-foreground: 200, 44%, 24%;
+    --tertiary: 222, 8%, 76%;
+    --tertiary-foreground: 223, 42%, 15%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 240 4.8% 95.9%;
@@ -40,6 +36,10 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 1rem;
+    --hover-primary: 200 53% 60%;
+    --hover-primary-foreground: 0 0% 100%;
+    --hover-secondary: 200 53% 60%;
+    --hover-secondary-foreground: 0 0% 100%;
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -50,8 +50,8 @@
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 199, 42%, 86%;
+    --secondary-foreground: 200, 44%, 24%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
     --accent: 240 3.7% 15.9%;
@@ -71,9 +71,64 @@
 @layer base {
   * {
     @apply border-border;
+    @apply text-black-blue hover:text-dark-blue;
   }
   body {
     @apply bg-background text-foreground;
     user-select: none;
+  }
+}
+
+@layer components {
+  .elytro-text-hero {
+    @apply text-[52px] font-medium leading-[100%] text-black-blue;
+  }
+  .elytro-text-headline {
+    @apply text-[40px] font-medium leading-[100%] text-black-blue;
+  }
+
+  .elytro-text-subtitle {
+    @apply text-[28px] font-medium leading-[105%] text-black-blue;
+  }
+
+  .elytro-text-body {
+    @apply text-[18px] font-normal leading-[125%] text-black-blue;
+  }
+
+  .elytro-text-bold-body {
+    @apply elytro-text-body font-medium;
+  }
+
+  .elytro-text-small {
+    @apply text-[16px] font-normal leading-[130%] text-black-blue;
+  }
+
+  .elytro-text-small-bold {
+    @apply elytro-text-small font-medium;
+  }
+
+  .elytro-text-smaller-body {
+    @apply text-[14px] font-normal leading-[135%] text-black-blue;
+  }
+
+  .elytro-text-smaller-bold-body {
+    @apply elytro-text-smaller-body font-medium;
+  }
+
+  .elytro-text-tiny-body {
+    @apply text-[12px] font-normal leading-[140%] text-black-blue;
+  }
+
+  .elytro-text-tiny-bold-body {
+    @apply elytro-text-tiny-body font-medium;
+  }
+
+  .elytro-clickable-icon {
+    @apply size-6 text-dark-blue cursor-pointer hover:text-gray-500;
+  }
+
+  .elytro-gradient-bg {
+    background: linear-gradient(to top, #f9fbfb 0%, #f7f3f0 24%, #dfecf3 50%);
+    background-blend-mode: overlay;
   }
 }

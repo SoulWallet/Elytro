@@ -1,13 +1,14 @@
 import { TRoute } from '@/types/route';
 import Unlock from './pages/Unlock';
 import Dashboard from './pages/Dashboard';
-import Activate from './pages/Activate';
 import Receive from './pages/Receive';
 import Settings from './pages/Settings';
 import Connect from './pages/Connect';
 import SendTx from './pages/SendTx';
 import Alert from './pages/Alert';
 import Sign from './pages/Sign';
+import TxConfirm from './pages/TxConfirm';
+import CreateNewAddress from './pages/CreateNewAddress';
 
 export const SIDE_PANEL_ROUTE_PATHS = {
   Home: '/',
@@ -20,6 +21,8 @@ export const SIDE_PANEL_ROUTE_PATHS = {
   SendTx: '/sendTx',
   Alert: '/alert',
   Sign: '/sign',
+  TxConfirm: '/tx-confirm',
+  CreateNewAddress: '/create-new-address',
 } as const;
 
 export const routes: TRoute[] = [
@@ -41,10 +44,6 @@ export const routes: TRoute[] = [
   },
 
   {
-    path: SIDE_PANEL_ROUTE_PATHS.Activate,
-    component: Activate,
-  },
-  {
     path: SIDE_PANEL_ROUTE_PATHS.Receive,
     component: Receive,
   },
@@ -63,5 +62,13 @@ export const routes: TRoute[] = [
   {
     path: SIDE_PANEL_ROUTE_PATHS.Sign,
     component: Sign,
+  },
+  {
+    path: SIDE_PANEL_ROUTE_PATHS.TxConfirm,
+    component: TxConfirm,
+  },
+  {
+    path: SIDE_PANEL_ROUTE_PATHS.CreateNewAddress,
+    component: CreateNewAddress,
   },
 ];

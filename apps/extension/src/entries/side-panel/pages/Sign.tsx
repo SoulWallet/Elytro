@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useAccount } from '../contexts/account-context';
 import { useApproval } from '../contexts/approval-context';
 import Spin from '@/components/Spin';
 import { toast } from '@/hooks/use-toast';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
 import { navigateTo } from '@/utils/navigation';
 import SignDetail from '../components/SignDetail';
+import { useChain } from '../contexts/chain-context';
 
 export default function Sign() {
-  const { currentChain } = useAccount();
+  const { currentChain } = useChain();
   const { approval, reject, resolve } = useApproval();
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +44,7 @@ export default function Sign() {
           onConfirm={handleConfirm}
           onCancel={handleCancel}
           dapp={approval.data.dApp}
-          chainName={currentChain?.name as string}
+          chainName={currentChain?.chainName as string}
           signData={approval.data.sign}
         />
 

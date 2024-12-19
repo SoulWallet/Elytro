@@ -17,7 +17,7 @@ import Spin from '@/components/Spin';
 import { DecodeResult } from '@soulwallet/decoder';
 import { toast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
-import { formatUserOperation } from '@/utils/format';
+import { formatObjectWithBigInt } from '@/utils/format';
 
 interface ISendTxProps {
   txParams: TTransactionInfo;
@@ -59,14 +59,14 @@ export default function SendTx({
         throw new Error('Failed to decode user operation');
       }
 
-      const { needDeposit = true } = await elytroSDK.getRechargeAmountForUserOp(
+      const { calcResult } = await elytroSDK.getRechargeAmountForUserOp(
         res,
         decodeRes[0].value
       );
 
       setDecodedDetail(decodeRes);
       userOpRef.current = res;
-      setNeedDeposit(needDeposit);
+      setNeedDeposit(calcResult.needDeposit);
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +92,7 @@ export default function SendTx({
       }
 
       const { signature, opHash } = await wallet.signUserOperation(
-        formatUserOperation(userOpRef.current!)
+        formatObjectWithBigInt(userOpRef.current!)
       );
 
       userOpRef.current!.signature = signature;

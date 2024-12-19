@@ -42,7 +42,7 @@ export const canUserOpGetSponsor = async (
       paymasterVerificationGasLimit,
       paymasterPostOpGasLimit,
       // @ts-ignore
-    } = (res as any).sponsorOp; // TODO: add type definition
+    } = (res as SafeAny).sponsorOp; // TODO: add type definition
 
     Object.assign(userOp, {
       paymaster,
@@ -57,6 +57,7 @@ export const canUserOpGetSponsor = async (
     canGetSponsored = true;
   } catch (error) {
     console.error('Elytro: Failed to check valid for sponsor.', error);
+    canGetSponsored = false;
   } finally {
     return canGetSponsored;
   }

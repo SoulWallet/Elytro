@@ -7,6 +7,8 @@ export type TChainConfigItem = {
   blockExplorerUrl?: string;
   bundlerUrl: string;
   currencySymbol: { name: string; symbol: string; decimals: number };
+  ensContractAddress: string;
+  icon?: string;
 };
 
 // DEFAULT_LOCAL_CHAINS is used to store chains in local storage
@@ -19,15 +21,17 @@ export const DEFAULT_LOCAL_CHAINS: TChainConfigItem[] = [
       'https://api.pimlico.io/v2/11155111/rpc?apikey=pim_7KhEvjRKpLviLbtDBuHySr',
     currencySymbol: sepolia.nativeCurrency,
     blockExplorerUrl: sepolia.blockExplorers.default.url,
+    ensContractAddress: sepolia.contracts.ensUniversalResolver.address,
   },
   {
     chainId: optimismSepolia.id,
     chainName: optimismSepolia.name,
-    rpcUrl: optimismSepolia.rpcUrls.default.http[0], //,'https://opt-sepolia.g.alchemy.com/v2/q9tQ1GMZy-4gtTuQQO6JF_5m_Bf1NYdq',
+    rpcUrl: optimismSepolia.rpcUrls.default.http[0], //,'https://opt-sepolia.g.alchemy.com/v2/7EJnXZWkG9HIhjj0ZLx7vk_lexCq25Pr',
     bundlerUrl:
-      'https://soulwallet.optimism-sepolia.voltaire.candidewallet.com/rpc',
+      'https://api.pimlico.io/v2/optimism-sepolia/rpc?apikey=f1b5c1b8-24a5-440b-b6fe-646c55819509',
     currencySymbol: optimismSepolia.nativeCurrency,
     blockExplorerUrl: optimismSepolia.blockExplorers.default.url,
+    ensContractAddress: '',
   },
   {
     chainId: optimism.id,
@@ -37,6 +41,7 @@ export const DEFAULT_LOCAL_CHAINS: TChainConfigItem[] = [
       'https://api.pimlico.io/v2/10/rpc?apikey=pim_7KhEvjRKpLviLbtDBuHySr',
     currencySymbol: optimism.nativeCurrency,
     blockExplorerUrl: optimism.blockExplorers.default.url,
+    ensContractAddress: '',
   },
 ];
 

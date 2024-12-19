@@ -7,36 +7,43 @@ import { ApprovalTypeEn } from '@/constants/operations';
 // todo: move to keyring service
 let isUnlocking = false;
 
-const PUBLIC_METHODS: ProviderMethodType[] = ['eth_chainId', 'eth_getCode'];
+// TODO: check if other methods are private
+const PRIVATE_METHODS: ProviderMethodType[] = [
+  'eth_requestAccounts',
+  'eth_sendTransaction',
+  'personal_sign',
+  'eth_signTypedData_v1',
+  'eth_signTypedData_v3',
+  'eth_signTypedData_v4',
+];
 
 const SEMI_PUBLIC_METHODS: ProviderMethodType[] = ['eth_accounts'];
 
 export const checkLock: TFlowMiddleWareFn = async (ctx, next) => {
-  if (PUBLIC_METHODS.includes(ctx.request.rpcReq.method)) {
-    return next();
-  } else if (SEMI_PUBLIC_METHODS.includes(ctx.request.rpcReq.method)) {
+  const { method } = ctx.request.rpcReq;
+
+  if (SEMI_PUBLIC_METHODS.includes(method)) {
     ctx.request.needConnection = true;
-    return next();
-  }
+  } else if (PRIVATE_METHODS.includes(method)) {
+    if (keyring.locked) {
+      await keyring.tryUnlock();
 
-  await keyring.tryUnlock();
+      // only allow one unlocking request once at a time
+      if (isUnlocking) {
+        throw ethErrors.rpc.resourceNotFound(
+          'Elytro: Unlocking in progress. Please wait.'
+        );
+      }
 
-  if (keyring.locked) {
-    // only allow one unlocking request once at a time
-    if (isUnlocking) {
-      throw ethErrors.rpc.resourceNotFound(
-        'Elytro: Unlocking in progress. Please wait.'
-      );
-    }
-
-    try {
-      isUnlocking = true;
-      await approvalService.request(ApprovalTypeEn.Unlock);
-    } finally {
+      try {
+        isUnlocking = true;
+        await approvalService.request(ApprovalTypeEn.Unlock);
+      } finally {
+        isUnlocking = false;
+      }
+    } else {
       isUnlocking = false;
     }
-  } else {
-    isUnlocking = false;
   }
 
   return next();

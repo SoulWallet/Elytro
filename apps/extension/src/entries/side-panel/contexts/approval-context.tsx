@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
-import { useInterval } from 'usehooks-ts';
 import { toast } from '@/hooks/use-toast';
+import { useInterval } from 'usehooks-ts';
 
 type IApprovalContext = {
   approval: Nullable<TApprovalInfo>;
@@ -24,8 +24,13 @@ export const ApprovalProvider = ({
   const [approval, setApproval] = useState<Nullable<TApprovalInfo>>(null);
 
   const getCurrentApproval = async () => {
-    const approval = await wallet.getCurrentApproval();
-    setApproval(approval);
+    const newApproval = await wallet.getCurrentApproval();
+
+    if (newApproval) {
+      setApproval(newApproval);
+    } else {
+      setApproval(null);
+    }
   };
 
   const resolve = async (data: unknown) => {
@@ -47,7 +52,7 @@ export const ApprovalProvider = ({
     });
   };
 
-  // todo: optimize it
+  // todo: delete it once all approval requests are handled by the target page
   useInterval(() => {
     if (!approval) {
       getCurrentApproval();

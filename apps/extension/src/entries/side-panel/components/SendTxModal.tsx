@@ -1,6 +1,6 @@
 import useDialogStore from '@/stores/dialog';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useAccount } from '../contexts/account-context';
+import { useChain } from '../contexts/chain-context';
 import SendTxComponent from '../components/SendTx';
 import ElytroIcon from '@/assets/logo.svg';
 
@@ -22,7 +22,7 @@ export default function SendTxModal() {
     url: 'https://elytro.io',
   };
 
-  const { currentChain } = useAccount();
+  const { currentChain } = useChain();
 
   return (
     <Dialog open={isSendTxDialogOpen} modal={false}>
@@ -30,7 +30,7 @@ export default function SendTxModal() {
         <SendTxComponent
           txParams={txDetail}
           dapp={dapp}
-          chainName={currentChain?.name as string}
+          chainName={currentChain?.chainName as string}
           onConfirm={handleConfirm}
           onCancel={closeSendTxDialog}
         />

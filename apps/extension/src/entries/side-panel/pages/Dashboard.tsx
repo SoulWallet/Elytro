@@ -4,23 +4,25 @@ import Spin from '@/components/Spin';
 import Activities from '../components/Activities';
 import { useAccount } from '../contexts/account-context';
 import Assets from '../components/Assets';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 export default function Dashboard() {
   const { loading } = useAccount();
 
   return (
-    <div className="w-full h-full flex flex-col bg-gray-50">
+    <div className="w-full h-full flex flex-col gap-2xl bg-gray-150 p-sm">
       <Spin isLoading={loading} />
 
       {/* Account Basic Info */}
       <BasicAccountInfo />
 
-      <div className="h-full px-2">
+      <div className="h-full">
         <div className="h-full bg-white rounded-3xl ">
-          <Tabs defaultValue="assets" className="px-4">
-            <TabsList>
+          <Tabs defaultValue="assets">
+            <TabsList className="px-4">
               <TabsTrigger value="assets">Assets</TabsTrigger>
-              <TabsTrigger value="activities">Activities</TabsTrigger>
+              <TabsTrigger value="activities">Activity</TabsTrigger>
             </TabsList>
             <div className="flex flex-col">
               <TabsContent value="assets">
@@ -33,6 +35,15 @@ export default function Dashboard() {
           </Tabs>
         </div>
       </div>
+
+      <Button
+        variant="secondary"
+        size="tiny"
+        className="fixed bottom-4 left-1/2 transform -translate-x-1/2"
+      >
+        <Plus className="w-3 h-3" />
+        Import token
+      </Button>
     </div>
   );
 }

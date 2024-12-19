@@ -11,24 +11,29 @@ import { routes } from './routes';
 import SignTxModal from '@/entries/side-panel/components/SignTxModal';
 import { client } from '@/requests';
 import SendTxModal from './components/SendTxModal';
-import { ChainProvider } from './contexts/chain-context';
+import { TxProvider } from './contexts/tx-context';
+import { AlerterProvider } from '@/components/ui/alerter';
 
 const main = () => {
   const SidePanelApp: React.FC = () => (
     <ApolloProvider client={client}>
-      <ChainProvider>
+      <PageContainer className="max-w-screen-md min-w-[360px]">
         <AccountProvider>
           <ApprovalProvider>
-            <PageContainer className="min-w-96">
+            <TxProvider>
+              {/*  according to chrome dev team. the minimum width of the side panel is 360px */}
               <TooltipProvider>
-                <HashRouter routes={routes} />
-                <SignTxModal />
-                <SendTxModal />
+                <AlerterProvider>
+                  <HashRouter routes={routes} />
+                  <SignTxModal />
+                  <SendTxModal />
+                </AlerterProvider>
+                {/* <UserOpConfirmDialog /> */}
               </TooltipProvider>
-            </PageContainer>
+            </TxProvider>
           </ApprovalProvider>
         </AccountProvider>
-      </ChainProvider>
+      </PageContainer>
     </ApolloProvider>
   );
 

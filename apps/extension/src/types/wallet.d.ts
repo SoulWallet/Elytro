@@ -1,9 +1,10 @@
 type TUserOperationPreFundResult = {
   balance: bigint;
   hasSponsored: boolean;
-  missAmount: bigint;
+  // missAmount: bigint;
   needDeposit: boolean;
   suspiciousOp: boolean;
+  gasUsed: string;
 };
 
 type TAccountInfo = {
@@ -11,7 +12,7 @@ type TAccountInfo = {
   chainId: number;
   isDeployed: boolean;
   balance?: Nullable<string>;
-} & Account;
+};
 
 type TTransactionInfo = {
   from: string; // Address

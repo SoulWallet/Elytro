@@ -100,7 +100,7 @@ export default function Activities() {
     );
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto px-4">
       {/* {activities.map((item) => (
         <DailyActivities key={item.date} dailyActivities={item} />
       ))} */}

@@ -40,7 +40,7 @@ export default function GuardianSignatureRequestStep() {
       <h3 className="text-3xl mb-4 font-semibold">
         Guardian signature request
       </h3>
-      <div className="bg-elytro-background rounded-md flex justify-between p-6 items-end mb-8">
+      <div className="elytro-gradient-bg rounded-md flex justify-between p-6 items-end mb-8">
         <div>
           <div className="text-4xl">2</div>
           <div className="text-2xl">more confirmations needed to recover</div>

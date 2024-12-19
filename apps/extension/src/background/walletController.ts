@@ -6,13 +6,17 @@ import { elytroSDK } from './services/sdk';
 import { hashEarlyTypedData, hashSignTypedData } from '@/utils/hash';
 import { ethErrors } from 'eth-rpc-errors';
 import sessionManager from './services/session';
-import { deformatUserOperation } from '@/utils/format';
+import {
+  deformatObjectWithBigInt,
+  formatObjectWithBigInt,
+} from '@/utils/format';
 import historyManager from './services/history';
 import { UserOperationHistory } from '@/constants/operations';
-import { formatEther, toHex } from 'viem';
+import { formatEther, Hex, toHex } from 'viem';
 import chainService from './services/chain';
 import accountManager from './services/account';
 import { TChainConfigItem } from '@/constants/chains';
+import type { Transaction } from '@soulwallet/sdk';
 
 // ! DO NOT use getter. They can not be proxied.
 // ! Please declare all methods async.
@@ -65,7 +69,13 @@ class WalletController {
   }
 
   public async signUserOperation(userOp: ElytroUserOperation) {
-    return await elytroSDK.signUserOperation(deformatUserOperation(userOp));
+    return await elytroSDK.signUserOperation(deformatObjectWithBigInt(userOp));
+  }
+
+  public async sendUserOperation(userOp: ElytroUserOperation) {
+    return await elytroSDK.sendUserOperation(
+      deformatObjectWithBigInt(userOp, ['maxFeePerGas', 'maxPriorityFeePerGas'])
+    );
   }
 
   public async signMessage(message: string) {
@@ -125,7 +135,6 @@ class WalletController {
 
     elytroSDK.resetSDK(chainConfig);
     walletClient.init(chainConfig);
-    accountManager.switchAccountByChainId(chainConfig.chainId);
 
     sessionManager.broadcastMessage('accountsChanged', [
       accountManager.currentAccount?.address as string,
@@ -171,8 +180,17 @@ class WalletController {
       throw new Error('Elytro: No current account');
     }
 
-    const balanceBn = await walletClient.getBalance(basicInfo.address);
+    if (!basicInfo.isDeployed) {
+      const isDeployed = await elytroSDK.isSmartAccountDeployed(
+        basicInfo.address
+      );
 
+      if (isDeployed) {
+        accountManager.activateCurrentAccount();
+      }
+    }
+
+    const balanceBn = await walletClient.getBalance(basicInfo.address);
     return { ...basicInfo, balance: formatEther(balanceBn) };
   }
 
@@ -181,23 +199,32 @@ class WalletController {
       throw new Error('Elytro: No owner address. Try create owner first.');
     }
 
-    await accountManager.createAccount(keyring.owner.address, chainId);
-
     if (setAsCurrent) {
-      this.switchAccountByChain(chainId);
+      this.switchChain(chainId);
     }
+
+    await accountManager.createAccount(
+      keyring.owner.address,
+      chainId,
+      setAsCurrent
+    );
   }
 
-  public async activateCurrentAccount() {
-    accountManager.activateCurrentAccount();
-  }
+  public async switchChain(chainId: number) {
+    if (chainId === chainService.currentChain?.chainId) {
+      return;
+    }
 
-  public async switchAccountByChain(chainId: number) {
     const newChainConfig = chainService.switchChain(chainId);
 
     if (newChainConfig) {
       this._onChainConfigChanged();
     }
+  }
+
+  public async switchAccountByChain(chainId: number) {
+    this.switchChain(chainId);
+    accountManager.switchAccountByChainId(chainId);
   }
 
   public async createDeployUserOp() {
@@ -209,9 +236,52 @@ class WalletController {
       keyring.owner.address as string
     );
 
-    await elytroSDK.estimateGas(deployUserOp);
+    // await elytroSDK.estimateGas(deployUserOp);
 
-    return deployUserOp;
+    return formatObjectWithBigInt(deployUserOp);
+  }
+
+  public async createTxUserOp(txs: Transaction[]) {
+    const userOp = await elytroSDK.createUserOpFromTxs(
+      accountManager.currentAccount?.address as string,
+      txs
+    );
+
+    return formatObjectWithBigInt(userOp);
+  }
+
+  public async decodeUserOp(userOp: ElytroUserOperation) {
+    return formatObjectWithBigInt(
+      await elytroSDK.getDecodedUserOperation(userOp)
+    );
+  }
+
+  public async estimateGas(userOp: ElytroUserOperation) {
+    return formatObjectWithBigInt(await elytroSDK.estimateGas(userOp, true));
+  }
+
+  public async packUserOp(userOp: ElytroUserOperation, amount: Hex) {
+    const { userOp: userOpRes, calcResult } =
+      await elytroSDK.getRechargeAmountForUserOp(userOp, BigInt(amount));
+
+    return {
+      userOp: formatObjectWithBigInt(userOpRes),
+      calcResult: formatObjectWithBigInt(calcResult),
+    };
+  }
+
+  public async getENSInfoByName(name: string) {
+    const address = await walletClient.getENSAddressByName(name);
+    const avatar = await walletClient.getENSAvatarByName(name);
+    return {
+      name,
+      address,
+      avatar,
+    };
+  }
+
+  public async removeAccount(address: string) {
+    await accountManager.removeAccountByAddress(address);
   }
 }
 

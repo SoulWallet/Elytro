@@ -12,11 +12,7 @@ export default function ActionButton({
   ...props
 }: ActionButtonProps) {
   return (
-    <Button
-      key={label}
-      className="bg-blue-100 text-gray-900 hover:bg-blue-200 h-12"
-      {...props}
-    >
+    <Button key={label} {...props} variant="secondary" size="small">
       {icon}
       {label}
     </Button>

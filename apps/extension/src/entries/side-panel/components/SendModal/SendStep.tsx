@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form';
 import { TxData } from '.';
 import { useAccount } from '../../contexts/account-context';
+import DefaultTokenIcon from '@/assets/icons/ether.svg';
 export interface TokenProps {
   name: string;
   balance: string | number;
@@ -29,7 +30,11 @@ function SelectedToken({ token }: { token?: TokenDTO }) {
     return <div className="text-gray-400 text-lg">Select a token</div>;
   return (
     <div className="flex items-center">
-      <img className="h-10 w-10" src={token.logoURI} alt={token.name} />
+      <img
+        className="h-10 w-10"
+        src={token.logoURI || DefaultTokenIcon}
+        alt={token.name}
+      />
       <div className="text-left ml-2">
         <div className="text-lg">{token.name}</div>
         <div className="text-gray-400">

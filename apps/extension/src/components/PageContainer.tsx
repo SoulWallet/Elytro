@@ -5,6 +5,8 @@ import { Toaster } from './ui/toaster';
 import { WalletProvider } from '@/contexts/wallet';
 import { KeyringProvider } from '@/contexts/keyring';
 import ErrorBoundary from './ErrorBoundary';
+import { cn } from '@/utils/shadcn/utils';
+import { ChainProvider } from '@/entries/side-panel/contexts/chain-context';
 
 interface IPageContainerProps {
   children: React.ReactNode;
@@ -15,10 +17,17 @@ function PageContainer({ children, className }: IPageContainerProps) {
   return (
     <>
       <ErrorBoundary>
-        <div className={`w-screen h-screen flex ${className}`}>
+        <div
+          className={cn(
+            'w-screen h-screen flex justify-center mx-auto',
+            className
+          )}
+        >
           <WalletProvider>
             <KeyringProvider>
-              <RequestProvider>{children}</RequestProvider>
+              <ChainProvider>
+                <RequestProvider>{children}</RequestProvider>
+              </ChainProvider>
             </KeyringProvider>
           </WalletProvider>
         </div>

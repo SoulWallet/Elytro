@@ -8,24 +8,25 @@ import {
 import questionIcon from '@/assets/icons/question.svg';
 import { TxData } from '.';
 import { ChevronRight } from 'lucide-react';
-import SplitedGrayAddress from '@/components/SplitedGrayAddress';
+import SplittedGrayAddress from '@/components/SplittedGrayAddress';
 import { Address, formatEther, Hex, parseEther, toHex } from 'viem';
 import { useElytroStep } from '@/components/steps/StepProvider';
 import { Button } from '@/components/ui/button';
 import useDialogStore from '@/stores/dialog';
+import { useChain } from '../../contexts/chain-context';
 
 export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
   const {
     accountInfo: { address },
-    currentChain,
   } = useAccount();
+  const { currentChain } = useChain();
   const { stepData } = useElytroStep() as { stepData: TxData };
   const { openSendTxDialog, closeSendTxDialog } = useDialogStore();
   const afterConfirm = () => {
     closeSendTxDialog();
     onConfirm();
   };
-  const handleComfirm = () => {
+  const handleConfirm = () => {
     if (!address) {
       console.error('Address is undefined');
       return;
@@ -60,7 +61,7 @@ export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
       </div>
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">To</Label>
-        <SplitedGrayAddress
+        <SplittedGrayAddress
           className="text-2xl font-medium"
           address={stepData?.to as Address}
         />
@@ -68,7 +69,7 @@ export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">Network</Label>
         <div className="flex flex-row items-center font-medium text-lg space-x-2">
-          <div>{currentChain?.name}</div>
+          <div>{currentChain?.chainName}</div>
           <Tooltip>
             <TooltipTrigger>
               <img src={questionIcon} alt="question icon" />
@@ -93,7 +94,7 @@ export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
       </div>
       <div className="absolute bottom-0 left-0 right-0">
         <Button
-          onClick={handleComfirm}
+          onClick={handleConfirm}
           className="w-full p-8 rounded-full bg-[#0E2D50]"
         >
           Confirm

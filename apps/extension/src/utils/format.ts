@@ -78,10 +78,14 @@ export function formatAddressToShort(address: Nullable<string>) {
     : '--';
 }
 
-export function formatTokenAmount(amount: string | null | undefined): string {
+export function formatTokenAmount(
+  amount: string | null | undefined,
+  decimals: number = 18,
+  symbol: string = 'ETH'
+): string {
   // todo: format amount. 8 decimal places is enough?
   try {
-    return formatUnits(BigInt(amount!), 18) + ' ETH';
+    return `${formatUnits(BigInt(amount!), decimals)} ${symbol}`;
   } catch {
     return '--';
   }
@@ -128,21 +132,84 @@ export function formatBlockInfo(block: Block) {
   };
 }
 
-// format bigint to hex string
-export function formatUserOperation(userOp: ElytroUserOperation) {
-  const formatBigIntToHex = (value: SafeAny) => {
-    return typeof value === 'bigint' ? toHex(value) : value;
-  };
+function checkType(value: SafeAny) {
+  const typeString = Object.prototype.toString.call(value);
 
-  const formattedUserOp = Object.fromEntries(
-    Object.entries(userOp).map(([key, value]) => [
-      key,
-      formatBigIntToHex(value),
-    ])
-  );
+  switch (typeString) {
+    case '[object BigInt]':
+      return 'bigint';
+    case '[object String]':
+      return 'string';
+    case '[object Number]':
+      return 'number';
+    case '[object Boolean]':
+      return 'boolean';
+    case '[object Undefined]':
+      return 'undefined';
+    case '[object Null]':
+      return 'null';
+    case '[object Array]':
+      return 'array';
+    case '[object Object]':
+      return 'object';
+    case '[object Function]':
+      return 'function';
 
-  return formattedUserOp as ElytroUserOperation;
+    default:
+      return 'unknown'; // 处理其他类型
+  }
 }
+
+const formatBigIntToHex = (value: SafeAny) => {
+  const type = checkType(value);
+
+  if (type === 'bigint') {
+    if (value < 0n) {
+      return `-0x${(-value).toString(16)}`;
+    }
+    return toHex(value);
+  }
+  return value;
+};
+
+export const formatObjectWithBigInt = (obj: SafeAny): SafeAny => {
+  const type = checkType(obj);
+
+  switch (type) {
+    case 'object':
+      return Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => [
+          key,
+          formatBigIntToHex(value),
+        ])
+      );
+    case 'array':
+      return (obj as SafeAny[]).map((value) => formatObjectWithBigInt(value));
+    case 'function':
+    case 'undefined':
+    case 'null':
+    case 'bigint':
+      return obj;
+    default:
+      return formatBigIntToHex(obj);
+  }
+};
+
+// format bigint to hex string
+// export function formatUserOperation(userOp: ElytroUserOperation) {
+//   const formatBigIntToHex = (value: SafeAny) => {
+//     return typeof value === 'bigint' ? toHex(value) : value;
+//   };
+
+//   const formattedUserOp = Object.fromEntries(
+//     Object.entries(userOp).map(([key, value]) => [
+//       key,
+//       formatBigIntToHex(value),
+//     ])
+//   );
+
+//   return formattedUserOp as ElytroUserOperation;
+// }
 
 const BIGINT_PARAM_KEY = [
   'callGasLimit',
@@ -150,13 +217,18 @@ const BIGINT_PARAM_KEY = [
   'paymasterVerificationGasLimit',
   'paymasterPostOpGasLimit',
   'preVerificationGas',
+  'maxFeePerGas',
+  'maxPriorityFeePerGas',
 ];
 
-export function deformatUserOperation(userOp: ElytroUserOperation) {
+export function deformatObjectWithBigInt(
+  userOp: ElytroUserOperation,
+  customBigIntKeys: string[] = BIGINT_PARAM_KEY
+) {
   const deformatUserOp = Object.fromEntries(
     Object.entries(userOp).map(([key, value]) => [
       key,
-      BIGINT_PARAM_KEY.includes(key) ? BigInt(value) : value,
+      customBigIntKeys.includes(key) && value !== null ? BigInt(value) : value,
     ])
   );
 
@@ -219,4 +291,55 @@ export function formatQuantity(value: SafeAny): string {
 
   // Ensure the hex string is prefixed with '0x'
   return '0x' + (hexString === '0' ? '0' : hexString);
+}
+
+export function getHostname(url?: string) {
+  try {
+    const { hostname } = new URL(url || '');
+    return hostname;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * format balance to display
+ * @param value - balance value
+ * @param options - options (threshold: min value to display decimal part, maxDecimalLength: max decimal length)
+ * @returns - formatted balance
+ */
+export function formatBalance(
+  value: string | undefined,
+  options: {
+    threshold?: number;
+    maxDecimalLength?: number;
+  } = {}
+): {
+  integerPart: string;
+  decimalPart: string;
+  fullDisplay: string;
+} {
+  const { threshold = 0.001, maxDecimalLength = 8 } = options;
+
+  const [integerPart, decimalPart = ''] = (value || '0').split('.');
+  let formattedDecimal = '';
+
+  if (Number(value) < threshold) {
+    const firstNonZeroIndex = decimalPart
+      .split('')
+      .findIndex((char: string) => char !== '0');
+    if (firstNonZeroIndex !== -1) {
+      formattedDecimal = decimalPart.slice(0, firstNonZeroIndex + 2);
+    }
+  } else {
+    formattedDecimal = decimalPart.slice(0, maxDecimalLength);
+  }
+
+  const displayDecimalPart = formattedDecimal || '000';
+
+  return {
+    integerPart,
+    decimalPart: displayDecimalPart,
+    fullDisplay: `${integerPart}.${displayDecimalPart}`,
+  };
 }

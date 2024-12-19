@@ -25,7 +25,7 @@ export default function Unlock() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col px-8 items-center justify-center gap-y-8 bg-elytro-background min-w-80">
+    <div className="w-full h-full flex flex-col px-8 items-center justify-center gap-y-8 elytro-gradient-bg min-w-80">
       <>
         <Slogan size="md" />
         <PasswordInput
@@ -34,11 +34,7 @@ export default function Unlock() {
             setPwd(value);
           }}
         />
-        <Button
-          className="w-full bg-white text-black rounded-full hover:bg-gray-100"
-          onClick={handleUnlock}
-          disabled={!pwd}
-        >
+        <Button className="w-full" onClick={handleUnlock} disabled={!pwd}>
           Unlock
         </Button>
         <div className="text-sm text-[#32417]}">

@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { isAddress } from 'viem';
-import { useAccount } from '../../contexts/account-context';
+import { useChain } from '../../contexts/chain-context';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,18 +23,18 @@ import { useElytroStep } from '@/components/steps/StepProvider';
 import { TxData } from '.';
 
 export default function RecipientStep() {
-  const { currentChain } = useAccount();
+  const { currentChain } = useChain();
   const { handleContinue } = useElytroStep();
   const formResolverConfig = z.object({
     address: z.string().refine((address) => isAddress(address), {
-      message: 'Pleaase give a valid address.',
+      message: 'Please give a valid address.',
     }),
   });
   const form = useForm<z.infer<typeof formResolverConfig>>({
     resolver: zodResolver(formResolverConfig),
     mode: 'onChange',
   });
-  const handleComfirm = () => {
+  const handleConfirm = () => {
     const { address } = form.getValues();
     handleContinue<TxData>({ to: address });
   };
@@ -65,7 +65,7 @@ export default function RecipientStep() {
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">Network</Label>
         <div className="flex flex-row items-center font-medium text-lg space-x-2">
-          <div>{currentChain?.name}</div>
+          <div>{currentChain?.chainName}</div>
           <Tooltip>
             <TooltipTrigger>
               <img src={questionIcon} alt="question icon" />
@@ -78,7 +78,7 @@ export default function RecipientStep() {
       </div>
       <div className="absolute bottom-0 left-0 right-0">
         <Button
-          onClick={handleComfirm}
+          onClick={handleConfirm}
           disabled={!form.formState.isValid}
           className={`w-full p-8 rounded-full ${form.formState.isValid ? 'bg-[#0E2D50]' : 'bg-[#F2F3F5] text-[#676B75]'}`}
         >

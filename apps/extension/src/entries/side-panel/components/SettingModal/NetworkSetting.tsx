@@ -30,7 +30,7 @@ export default function NetworkSetting({ onBack }: { onBack: () => void }) {
         <ul className="space-y-2">
           {chains.map((chain) => (
             <li
-              key={chain.id}
+              key={chain.chainId}
               className="bg-gray-50 rounded-md px-4 py-6 flex items-center justify-between cursor-pointer"
               onClick={() => setEditingNetwork(chain)}
             >

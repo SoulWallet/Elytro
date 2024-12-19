@@ -1,0 +1,28 @@
+import React from 'react';
+
+interface IInfoCardItemProps {
+  label: string;
+  content: React.ReactNode;
+}
+
+function InfoCardItem({ label, content }: IInfoCardItemProps) {
+  return (
+    <div className="flex flex-row justify-between items-center gap-x-sm">
+      <span className="elytro-text-smaller-bold-body text-gray-750 text-nowrap">
+        {label}
+      </span>
+      {content}
+    </div>
+  );
+}
+
+function InfoCardWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col w-full px-lg py-md bg-gray-150 rounded-sm gap-y-sm">
+      {children}
+    </div>
+  );
+}
+const InfoCard = { InfoCardItem, InfoCardWrapper };
+
+export default InfoCard;

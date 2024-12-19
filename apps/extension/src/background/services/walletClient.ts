@@ -12,6 +12,8 @@ import {
 } from 'viem';
 import { ethErrors } from 'eth-rpc-errors';
 import { formatBlockInfo, formatBlockParam } from '@/utils/format';
+import { normalize } from 'viem/ens';
+import { elytroSDK } from './sdk';
 
 class ElytroWalletClient {
   private _client!: PublicClient;
@@ -77,6 +79,37 @@ class ElytroWalletClient {
     return await this._client.getBalance({
       address,
     });
+  }
+
+  public async getENSAddressByName(name: string) {
+    try {
+      const ensAddress = await this._client.getEnsAddress({
+        name: normalize(name),
+        universalResolverAddress:
+          DEFAULT_CHAIN_CONFIG.ensContractAddress as Address,
+      });
+      return ensAddress;
+    } catch (error) {
+      throw ethErrors.rpc.internal((error as Error)?.message);
+    }
+  }
+
+  public async getENSAvatarByName(name: string) {
+    try {
+      const avatar = await this._client.getEnsAvatar({
+        name: normalize(name),
+        universalResolverAddress:
+          DEFAULT_CHAIN_CONFIG.ensContractAddress as Address,
+      });
+      return avatar;
+    } catch (error) {
+      throw ethErrors.rpc.internal((error as Error)?.message);
+    }
+  }
+
+  public async getTransactionReceipt(hash: Hex) {
+    // TODO: check if it's a user operation hash
+    return await elytroSDK.getUserOperationReceipt(hash);
   }
 }
 

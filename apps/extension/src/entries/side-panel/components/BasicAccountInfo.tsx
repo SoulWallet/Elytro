@@ -1,20 +1,29 @@
-import { ArrowDownLeft, ArrowUpRight, Ellipsis } from 'lucide-react';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Ellipsis,
+  RefreshCcw,
+} from 'lucide-react';
 import { SIDE_PANEL_ROUTE_PATHS } from '../routes';
 import { navigateTo } from '@/utils/navigation';
 import ActionButton from './ActionButton';
 import ActivateButton from './ActivateButton';
 import SendModal from './SendModal';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import SettingModal from './SettingModal';
 import AccountsModal from './AccountsModal';
 import Account from './Account';
 import { useAccount } from '../contexts/account-context';
 import { useChain } from '../contexts/chain-context';
+import Spin from '@/components/Spin';
+import { useWallet } from '@/contexts/wallet';
+import { toast } from '@/hooks/use-toast';
 
 export default function BasicAccountInfo() {
-  const { accountInfo } = useAccount();
-  const { currentChain } = useChain();
+  const { accountInfo, accounts, getAccounts, updateTokens, updateAccount } =
+    useAccount();
+  const wallet = useWallet();
+  const { currentChain, chains, getCurrentChain } = useChain();
   const [openSendModal, setOpenSendModal] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [openAccounts, setOpenAccounts] = useState(false);
@@ -23,61 +32,103 @@ export default function BasicAccountInfo() {
   };
 
   const onClickSend = () => {
-    setOpenSendModal(true);
+    navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.SendTx);
   };
 
   const onClickReceive = () => {
     navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Receive);
   };
 
+  if (!currentChain || !accountInfo) {
+    return <Spin isLoading />;
+  }
+
+  // const { integerPart, decimalPart } = formatBalance(balance, {
+  //   threshold: 0.001,
+  //   maxDecimalLength: 8,
+  // });
+
+  const reloadAccount = async () => {
+    await updateAccount();
+    await updateTokens();
+  };
+
+  const handleSwitchAccount = async (account: TAccountInfo) => {
+    try {
+      await wallet.switchAccountByChain(account.chainId);
+      await getCurrentChain();
+      await reloadAccount();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRemoveAccount = async (address: string) => {
+    try {
+      await wallet.removeAccount(address);
+      toast({
+        title: 'Account removed successfully',
+      });
+      getAccounts();
+    } catch (error) {
+      toast({
+        title: 'Account removed failed',
+      });
+      console.error(error);
+    }
+  };
+
   return (
-    <div className="flex flex-col p-6">
+    <div className="flex flex-col p-sm pb-0 ">
       {/* Chain & Address */}
-      <div className="flex flex-row justify-between w-full">
-        <div className="flex flex-row gap-2 w-full items-center justify-between">
-          <div
-            className="rounded-md p-2 cursor-pointer hover:bg-white"
-            onClick={() => setOpenAccounts(true)}
-          >
-            {currentChain && (
-              <Account
-                chain={currentChain}
-                address={accountInfo?.address as string}
-              />
-            )}
-          </div>
-          <Button variant="ghost" onClick={onClickMore}>
-            <Ellipsis className="w-6 h-6 text-gray-900" />
-          </Button>
+      <div className="flex flex-row gap-2 w-full items-center justify-between mb-lg">
+        <Account
+          chains={chains}
+          chain={currentChain}
+          currentAccount={accountInfo}
+          accounts={accounts}
+          onClickAccount={handleSwitchAccount}
+          onDeleteAccount={handleRemoveAccount}
+        />
+        <div className="flex flex-row gap-lg">
+          <Ellipsis className="elytro-clickable-icon" onClick={onClickMore} />
+          <RefreshCcw
+            className="elytro-clickable-icon"
+            onClick={reloadAccount}
+          />
         </div>
-      </div>
-      {/* Balance: $XX.xx */}
-      <div className="mt-6 text-5xl font-medium py-1">
-        <span className=" text-gray-900">
-          {accountInfo.balance?.split?.('.')?.[0]}
-        </span>
-        <span className=" text-gray-200">
-          .{accountInfo.balance?.split?.('.')?.[1]?.slice(0, 3) || '000'}
-        </span>
       </div>
 
+      {/* TODO: NOT SHOW BALANCE FOR NOW */}
+      {/* Balance: $XX.xx */}
+      {/* <div className="my-sm py-1 elytro-text-hero">
+        <span>{integerPart}</span>
+        <span className=" text-gray-450">.{decimalPart}</span> ETH
+      </div> */}
+
       {/* Actions */}
-      {accountInfo?.isDeployed ? (
-        <div className="grid grid-cols-2 gap-2 mt-2 ">
-          <ActionButton
-            icon={<ArrowDownLeft />}
-            label="Receive"
-            onClick={onClickReceive}
-          />
-          <ActionButton
-            icon={<ArrowUpRight />}
-            label="Send"
-            onClick={onClickSend}
-          />
+      <div>
+        <div className="flex flex-row gap-sm">
+          {accountInfo.isDeployed ? (
+            <>
+              <ActionButton
+                className="bg-light-green"
+                icon={<ArrowDownLeft />}
+                label="Receive"
+                onClick={onClickReceive}
+              />
+              <ActionButton
+                icon={<ArrowUpRight />}
+                label="Send"
+                onClick={onClickSend}
+              />
+            </>
+          ) : (
+            <ActivateButton />
+          )}
         </div>
-      ) : (
-        <ActivateButton />
-      )}
+      </div>
+
       <SendModal
         open={openSendModal}
         onOpenChange={() => setOpenSendModal(false)}

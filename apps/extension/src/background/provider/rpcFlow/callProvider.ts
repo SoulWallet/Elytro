@@ -5,4 +5,8 @@ export const callProvider: TFlowMiddleWareFn = async (ctx) => {
   const { rpcReq } = ctx.request;
 
   return await builtinProvider.request(rpcReq);
+
+  // console.log('Elytro: callProvider res', res);
+
+  // return res;
 };

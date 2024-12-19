@@ -65,7 +65,11 @@ class AccountManager {
     );
   }
 
-  public async createAccount(eoaAddress: string, chainId: number) {
+  public async createAccount(
+    eoaAddress: string,
+    chainId: number,
+    setAsCurrent = false
+  ) {
     const account = this.getAccountByChainId(chainId);
 
     if (account) {
@@ -77,20 +81,24 @@ class AccountManager {
     }
 
     try {
+      // creating address is not a sdk chain related request, so we don't rely on switch chain
       const newAccountAddress = await elytroSDK.createWalletAddress(
         eoaAddress,
         chainId
       );
 
+      const newAccount = {
+        address: newAccountAddress,
+        chainId,
+        isDeployed: false,
+      };
+
       // ! push method will not trigger state update, so we need to reset the array
-      this._accounts = [
-        ...this._accounts,
-        {
-          address: newAccountAddress,
-          chainId,
-          isDeployed: false,
-        },
-      ];
+      this._accounts = [...this._accounts, newAccount];
+
+      if (setAsCurrent) {
+        this._currentAccount = newAccount;
+      }
     } catch (error) {
       console.error(error);
     }
@@ -132,6 +140,12 @@ class AccountManager {
       accounts: [],
       currentAccount: null,
     });
+  }
+
+  public async removeAccountByAddress(address: string) {
+    this._accounts = this._accounts.filter(
+      (account) => account.address !== address
+    );
   }
 }
 

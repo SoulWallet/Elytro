@@ -21,7 +21,6 @@ import { DecodeUserOp } from '@soulwallet/decoder';
 import { canUserOpGetSponsor } from '@/utils/ethRpc/sponsor';
 import keyring from './keyring';
 import { simulateSendUserOp } from '@/utils/ethRpc/simulate';
-import { UserOperationStatusEn } from '@/constants/operations';
 import {
   Address,
   createPublicClient,
@@ -68,8 +67,16 @@ class ElytroSDK {
       throw new Error(`Elytro: chain ${chainId} is not supported for now.`);
     }
 
-    const { factory, fallback, recovery } = this._config;
-    this._sdk = new SoulWallet(rpcUrl, bundlerUrl, factory, fallback, recovery);
+    const { factory, fallback, recovery, onchainConfig } = this._config;
+    this._sdk = new SoulWallet(
+      rpcUrl,
+      bundlerUrl,
+      factory,
+      fallback,
+      recovery,
+      onchainConfig
+    );
+
     this._bundler = new Bundler(bundlerUrl);
     this._chainConfig = chainConfig;
   }
@@ -150,7 +157,7 @@ class ElytroSDK {
   }
 
   public async canGetSponsored(userOp: ElytroUserOperation) {
-    return canUserOpGetSponsor(
+    return await canUserOpGetSponsor(
       userOp,
       this._chainConfig.chainId,
       TEMP_ENTRY_POINT
@@ -209,18 +216,11 @@ class ElytroSDK {
       if (res?.isErr()) {
         throw res.ERR;
       } else if (res?.OK) {
-        if (res.OK.success) {
-          // TODO: maybe return all fields, not just status?
-          return UserOperationStatusEn.confirmedSuccess; //  res.OK.receipt;
-        }
-
-        return UserOperationStatusEn.confirmedFailed;
+        return { ...res.OK.receipt };
       }
-
-      return UserOperationStatusEn.pending;
     } catch (error) {
       console.error('Elytro: Failed to get user operation receipt.', error);
-      return UserOperationStatusEn.pending; // maybe error?
+      return null;
     }
   }
 
@@ -354,7 +354,6 @@ class ElytroSDK {
     useDefaultGasPrice = true
   ) {
     // looks like only deploy wallet will need this
-
     if (useDefaultGasPrice) {
       const gasPrice = await this._getFeeData();
 
@@ -393,6 +392,7 @@ class ElytroSDK {
       userOp.callGasLimit = BigInt(callGasLimit);
       userOp.preVerificationGas = BigInt(preVerificationGas);
       userOp.verificationGasLimit = BigInt(verificationGasLimit);
+
       if (
         userOp.paymaster !== null &&
         typeof paymasterPostOpGasLimit !== 'undefined' &&
@@ -403,6 +403,8 @@ class ElytroSDK {
           paymasterVerificationGasLimit
         );
       }
+
+      return userOp;
     }
   }
 
@@ -410,29 +412,38 @@ class ElytroSDK {
     userOp: ElytroUserOperation,
     transferValue: bigint
   ) {
-    const res = await this._sdk.preFund(userOp);
     const hasSponsored = await this.canGetSponsored(userOp);
+
+    if (!hasSponsored) {
+      await this.estimateGas(userOp);
+    }
+
+    const res = await this._sdk.preFund(userOp);
 
     if (res.isErr()) {
       throw res.ERR;
     } else {
       const {
         missfund,
+        prefund,
         //deposit, prefund
       } = res.OK;
-
       const balance = await this._sdk.provider.getBalance(userOp.sender);
       const missAmount = hasSponsored
         ? transferValue - balance // why transferValue is not accurate? missfund is wrong during preFund?
         : BigInt(missfund) + transferValue - balance;
 
       return {
-        balance, // user balance
-        hasSponsored, // for this userOp, can get sponsored or not
-        missAmount, // for this userOp, how much it needs to deposit
-        needDeposit: missAmount > 0n, // need to deposit or not
-        suspiciousOp: missAmount > parseEther('0.001'), // if missAmount is too large, it may considered suspicious
-      } as TUserOperationPreFundResult;
+        userOp,
+        calcResult: {
+          balance, // user balance
+          gasUsed: prefund,
+          hasSponsored, // for this userOp, can get sponsored or not
+          missAmount: missAmount > 0n ? missAmount : 0n, // for this userOp, how much it needs to deposit
+          needDeposit: missAmount > 0n, // need to deposit or not
+          suspiciousOp: missAmount > parseEther('0.001'), // if missAmount is too large, it may considered suspicious
+        } as TUserOperationPreFundResult,
+      };
     }
   }
 
