@@ -6,6 +6,7 @@ import { WalletProvider } from '@/contexts/wallet';
 import { KeyringProvider } from '@/contexts/keyring';
 import ErrorBoundary from './ErrorBoundary';
 import { cn } from '@/utils/shadcn/utils';
+import { ChainProvider } from '@/entries/side-panel/contexts/chain-context';
 
 interface IPageContainerProps {
   children: React.ReactNode;
@@ -24,7 +25,9 @@ function PageContainer({ children, className }: IPageContainerProps) {
         >
           <WalletProvider>
             <KeyringProvider>
-              <RequestProvider>{children}</RequestProvider>
+              <ChainProvider>
+                <RequestProvider>{children}</RequestProvider>
+              </ChainProvider>
             </KeyringProvider>
           </WalletProvider>
         </div>

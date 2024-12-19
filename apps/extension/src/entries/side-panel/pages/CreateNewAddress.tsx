@@ -8,21 +8,7 @@ import {
   SelectTrigger,
 } from '@/components/ui/select';
 import { useState } from 'react';
-import DefaultTokenIcon from '@/assets/icons/ether.svg'; // Adjust the path as necessary
-import { TChainConfigItem } from '@/constants/chains';
-
-const ChainItem = ({ chain }: { chain: TChainConfigItem }) => {
-  return (
-    <div className="flex items-center gap-2">
-      <img
-        src={chain?.icon || DefaultTokenIcon}
-        alt={chain.chainName}
-        className="w-8 h-8"
-      />
-      <div className="font-semibold">{chain.chainName}</div>
-    </div>
-  );
-};
+import ChainItem from '@/components/ChainItem';
 
 export default function CreateNewAddress() {
   const { chains } = useChain();

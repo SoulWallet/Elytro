@@ -135,7 +135,6 @@ class WalletController {
 
     elytroSDK.resetSDK(chainConfig);
     walletClient.init(chainConfig);
-    accountManager.switchAccountByChainId(chainConfig.chainId);
 
     sessionManager.broadcastMessage('accountsChanged', [
       accountManager.currentAccount?.address as string,
@@ -185,6 +184,7 @@ class WalletController {
       const isDeployed = await elytroSDK.isSmartAccountDeployed(
         basicInfo.address
       );
+
       if (isDeployed) {
         accountManager.activateCurrentAccount();
       }
@@ -199,19 +199,32 @@ class WalletController {
       throw new Error('Elytro: No owner address. Try create owner first.');
     }
 
-    await accountManager.createAccount(keyring.owner.address, chainId);
-
     if (setAsCurrent) {
-      this.switchAccountByChain(chainId);
+      this.switchChain(chainId);
     }
+
+    await accountManager.createAccount(
+      keyring.owner.address,
+      chainId,
+      setAsCurrent
+    );
   }
 
-  public async switchAccountByChain(chainId: number) {
+  public async switchChain(chainId: number) {
+    if (chainId === chainService.currentChain?.chainId) {
+      return;
+    }
+
     const newChainConfig = chainService.switchChain(chainId);
 
     if (newChainConfig) {
       this._onChainConfigChanged();
     }
+  }
+
+  public async switchAccountByChain(chainId: number) {
+    this.switchChain(chainId);
+    accountManager.switchAccountByChainId(chainId);
   }
 
   public async createDeployUserOp() {

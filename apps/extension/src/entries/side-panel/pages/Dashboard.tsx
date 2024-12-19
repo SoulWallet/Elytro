@@ -11,7 +11,7 @@ export default function Dashboard() {
   const { loading } = useAccount();
 
   return (
-    <div className="w-full h-full flex flex-col gap-2xl bg-gray-50 px-2">
+    <div className="w-full h-full flex flex-col gap-2xl bg-gray-150 p-sm">
       <Spin isLoading={loading} />
 
       {/* Account Basic Info */}

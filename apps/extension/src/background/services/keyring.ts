@@ -104,9 +104,9 @@ class KeyringService {
   }
 
   public async createNewOwner(password: string) {
-    if (this._owner) {
-      throw new Error('Cannot create new owner if owner is already set');
-    }
+    // if (this._owner) {
+    //   throw new Error('Cannot create new owner if owner is already set');
+    // }
 
     try {
       this._key = generatePrivateKey();

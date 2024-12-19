@@ -52,64 +52,67 @@ export function PasswordSetter({ onSubmit, loading }: PasswordSetterProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="w-[416px] space-y-8"
+        className="w-[416px] space-y-3xl"
       >
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <PasswordInput
-                  field={field}
-                  disabled={loading}
-                  placeholder="Enter your password"
-                  onPwdVisibleChange={setIsPwdVisible}
-                />
-              </FormControl>
-
-              {form.formState.errors.password ? (
-                <FormMessage />
-              ) : (
-                <FormDescription>
-                  The password should be more than 6 characters and include more
-                  than 1 capitalized letter.
-                </FormDescription>
-              )}
-            </FormItem>
-          )}
-        />
-
-        {(loading ||
-          (form.getValues('password')?.length > 0 &&
-            form.formState.errors.password === undefined)) && (
+        <div className="space-y-sm">
           <FormField
             control={form.control}
-            name="confirm"
+            name="password"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
                   <PasswordInput
                     field={field}
                     disabled={loading}
-                    placeholder="Enter password again"
-                    showEye={false}
-                    outerPwdVisible={isPwdVisible}
+                    placeholder="Enter password"
+                    onPwdVisibleChange={setIsPwdVisible}
                   />
                 </FormControl>
 
-                <FormMessage />
+                {form.formState.errors.password ? (
+                  <FormMessage />
+                ) : (
+                  <FormDescription>
+                    The password should be more than 6 characters and include
+                    more than 1 capitalized letter.
+                  </FormDescription>
+                )}
               </FormItem>
             )}
           />
-        )}
+
+          {(loading ||
+            (form.getValues('password')?.length > 0 &&
+              form.formState.errors.password === undefined)) && (
+            <FormField
+              control={form.control}
+              name="confirm"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <PasswordInput
+                      field={field}
+                      disabled={loading}
+                      placeholder="Repeat password"
+                      showEye={false}
+                      outerPwdVisible={isPwdVisible}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+
         <Button
           type="submit"
           className="w-full rounded-full h-14"
           disabled={loading}
           size="large"
         >
-          {loading ? 'Creating...' : 'Submit'}
+          {loading ? 'Creating...' : 'Continue'}
         </Button>
       </form>
     </Form>

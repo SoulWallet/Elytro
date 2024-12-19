@@ -21,6 +21,7 @@ export default function BasicAccountInfo() {
   const {
     accountInfo: { isDeployed, address, balance },
     updateTokens,
+    updateAccount,
   } = useAccount();
   const { currentChain } = useChain();
   const [openSendModal, setOpenSendModal] = useState(false);
@@ -47,10 +48,15 @@ export default function BasicAccountInfo() {
   //   maxDecimalLength: 8,
   // });
 
+  const reloadAccount = async () => {
+    await updateAccount();
+    await updateTokens();
+  };
+
   return (
-    <div className="flex flex-col p-sm">
+    <div className="flex flex-col p-sm pb-0 ">
       {/* Chain & Address */}
-      <div className="flex flex-row gap-2 w-full items-center justify-between">
+      <div className="flex flex-row gap-2 w-full items-center justify-between mb-lg">
         <Account
           chain={currentChain!}
           account={{
@@ -62,7 +68,7 @@ export default function BasicAccountInfo() {
           <Ellipsis className="elytro-clickable-icon" onClick={onClickMore} />
           <RefreshCcw
             className="elytro-clickable-icon"
-            onClick={updateTokens}
+            onClick={reloadAccount}
           />
         </div>
       </div>
@@ -76,23 +82,25 @@ export default function BasicAccountInfo() {
 
       {/* Actions */}
       <div>
-        {isDeployed ? (
-          <div className="flex flex-row gap-sm mt-sm ">
-            <ActionButton
-              className="bg-light-green"
-              icon={<ArrowDownLeft />}
-              label="Receive"
-              onClick={onClickReceive}
-            />
-            <ActionButton
-              icon={<ArrowUpRight />}
-              label="Send"
-              onClick={onClickSend}
-            />
-          </div>
-        ) : (
-          <ActivateButton />
-        )}
+        <div className="flex flex-row gap-sm">
+          {isDeployed ? (
+            <>
+              <ActionButton
+                className="bg-light-green"
+                icon={<ArrowDownLeft />}
+                label="Receive"
+                onClick={onClickReceive}
+              />
+              <ActionButton
+                icon={<ArrowUpRight />}
+                label="Send"
+                onClick={onClickSend}
+              />
+            </>
+          ) : (
+            <ActivateButton />
+          )}
+        </div>
       </div>
 
       <SendModal

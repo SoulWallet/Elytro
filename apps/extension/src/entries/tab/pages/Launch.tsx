@@ -45,11 +45,9 @@ const Launch: React.FC = () => {
           >
             Create wallet for free
           </Button>
-          <p className="text-center text-sm">
+          <p className="text-center elytro-text-small-body text-gray-750">
             Used to have an account?{' '}
-            <Link href={TAB_ROUTE_PATHS.Recover} className={'font-semibold'}>
-              Recover here
-            </Link>
+            <Link href={TAB_ROUTE_PATHS.Recover}>Recover here</Link>
           </p>
         </div>
       </div>

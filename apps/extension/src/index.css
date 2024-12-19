@@ -4,12 +4,6 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --elytro-background-image: linear-gradient(
-      to top right,
-      #fbfbf9 0%,
-      #f7f1f0 24%,
-      #b7cde7 100%
-    );
     --elytro-btn-bg: linear-gradient(
       to right,
       #f0eee6 0%,
@@ -131,5 +125,10 @@
 
   .elytro-clickable-icon {
     @apply size-6 text-dark-blue cursor-pointer hover:text-gray-500;
+  }
+
+  .elytro-gradient-bg {
+    background: linear-gradient(to top, #f9fbfb 0%, #f7f3f0 24%, #dfecf3 50%);
+    background-blend-mode: overlay;
   }
 }
