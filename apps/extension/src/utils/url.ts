@@ -10,3 +10,11 @@ export const getDAppInfoFromSender = async (
     icon: tabInfo?.favIconUrl || '',
   };
 };
+
+export const removeSearchParamsOfCurrentWindow = (paramName: string) => {
+  const urlObj = new URL(window.location.href);
+
+  urlObj.searchParams.delete(paramName);
+
+  window.history.replaceState({}, '', urlObj);
+};

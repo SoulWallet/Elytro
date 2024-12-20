@@ -1,8 +1,4 @@
-import {
-  DEFAULT_CHAIN_CONFIG,
-  SUPPORTED_CHAIN_IDS,
-  TChainConfigItem,
-} from '@/constants/chains';
+import { SUPPORTED_CHAIN_IDS } from '@/constants/chains';
 import {
   getDomainSeparator,
   getEncoded1271MessageHash,
@@ -37,22 +33,14 @@ class ElytroSDK {
   private _sdk!: SoulWallet;
   private _bundler!: Bundler;
   private _config!: SDKInitConfig;
-  private _chainConfig!: TChainConfigItem;
   private _pimlicoRpc: Nullable<PublicClient> = null;
-
-  constructor() {
-    // TODO: maybe not init sdk until user select a chain.
-    this.resetSDK(DEFAULT_CHAIN_CONFIG);
-  }
 
   get bundler() {
     return this._bundler;
   }
 
-  public resetSDK(chainConfig: TChainConfigItem) {
-    const { chainId, bundlerUrl, rpcUrl } = chainConfig;
-
-    if (chainId === this._chainConfig?.chainId) {
+  public resetSDK(chainId: number) {
+    if (chainId === this._config?.onchainConfig?.chainId) {
       console.log('Elytro::SDK: chainId is the same, no need to reset.');
       return;
     }
@@ -61,24 +49,25 @@ class ElytroSDK {
       throw new Error(`Elytro: chain ${chainId} is not supported for now.`);
     }
 
-    this._config = SDK_INIT_CONFIG_BY_CHAIN_MAP[chainId];
+    const config = SDK_INIT_CONFIG_BY_CHAIN_MAP[chainId];
 
-    if (!this._config) {
+    if (!config) {
       throw new Error(`Elytro: chain ${chainId} is not supported for now.`);
     }
 
-    const { factory, fallback, recovery, onchainConfig } = this._config;
+    const { factory, fallback, recovery, onchainConfig, bundler, endpoint } =
+      config;
     this._sdk = new SoulWallet(
-      rpcUrl,
-      bundlerUrl,
+      endpoint,
+      bundler,
       factory,
       fallback,
       recovery,
       onchainConfig
     );
 
-    this._bundler = new Bundler(bundlerUrl);
-    this._chainConfig = chainConfig;
+    this._bundler = new Bundler(bundler);
+    this._config = config;
   }
 
   // TODO: temp, make sure it's unique later.
@@ -157,11 +146,8 @@ class ElytroSDK {
   }
 
   public async canGetSponsored(userOp: ElytroUserOperation) {
-    return await canUserOpGetSponsor(
-      userOp,
-      this._chainConfig.chainId,
-      TEMP_ENTRY_POINT
-    );
+    const { chainId, entryPoint } = this._config.onchainConfig;
+    return await canUserOpGetSponsor(userOp, chainId, entryPoint);
   }
 
   public async isSmartAccountDeployed(address: string) {
@@ -169,16 +155,6 @@ class ElytroSDK {
     // when account is not deployed, it's code is undefined or 0x.
     return code !== undefined && code !== '0x';
   }
-
-  // public async activateSmartAccount(address: string) {
-  //   try {
-  //     const userOp = await this.createUnsignedDeployWalletUserOp(address);
-  //     await this.estimateGas(userOp);
-  //     await this.sendUserOperation(userOp);
-  //   } catch (error) {
-  //     console.error('Elytro: Failed to activate smart account.', error);
-  //   }
-  // }
 
   public async sendUserOperation(userOp: ElytroUserOperation) {
     // estimate gas before sending userOp, but can not do it here (for the case of sign tx)
@@ -291,7 +267,7 @@ class ElytroSDK {
 
     // todo: entrypoint should be dynamically changed with chainId?
     const res = await DecodeUserOp(
-      this._chainConfig.chainId,
+      this._config.onchainConfig.chainId,
       TEMP_ENTRY_POINT,
       userOp
     );
@@ -307,7 +283,7 @@ class ElytroSDK {
     return await simulateSendUserOp(
       userOp,
       TEMP_ENTRY_POINT,
-      this._chainConfig.chainId
+      this._config.onchainConfig.chainId
     );
   }
 
@@ -324,13 +300,13 @@ class ElytroSDK {
   }
 
   private async _getPimlicoFeeData() {
-    this._pimlicoRpc = this._pimlicoRpc
-      ? this._pimlicoRpc
-      : createPublicClient({
-          transport: http(this._config.bundler),
-        });
+    const newRpcUrl = this._config.bundler;
+    if (!this._pimlicoRpc || this._pimlicoRpc.transport.url !== newRpcUrl) {
+      this._pimlicoRpc = createPublicClient({
+        transport: http(newRpcUrl),
+      });
+    }
 
-    // TODO: fix type
     const ret = await this._pimlicoRpc.request({
       method: 'pimlico_getUserOperationGasPrice' as SafeAny,
       params: [] as SafeAny,
@@ -340,7 +316,7 @@ class ElytroSDK {
 
   private async _getFeeData() {
     let gasPrice;
-    if (this._chainConfig.bundlerUrl.includes('pimlico')) {
+    if (this._config.bundler.includes('pimlico')) {
       // pimlico uses different gas price
       gasPrice = await this._getPimlicoFeeData();
     } else {
@@ -455,7 +431,7 @@ class ElytroSDK {
 
     const encode1271MessageHash = getEncoded1271MessageHash(rawMessage);
     const domainSeparator = getDomainSeparator(
-      toHex(this._chainConfig.chainId),
+      toHex(this._config.onchainConfig.chainId),
       saAddress
     );
     const encodedSHA = getEncodedSHA(domainSeparator, encode1271MessageHash);
@@ -477,18 +453,6 @@ class ElytroSDK {
       throw _userOp.ERR;
     } else {
       return _userOp.OK;
-    }
-  }
-
-  public async sendTransaction(userOp: ElytroUserOperation) {
-    try {
-      // const userOp = await this.createUserOpFromTxs(tx);
-      // todo: use outer gas estimation, not auto
-      // await this.estimateGas(userOp, false);
-      return await this.sendUserOperation(userOp);
-    } catch (error) {
-      console.error('Elytro:: send_transaction failed:', error);
-      throw ethErrors.rpc.transactionRejected();
     }
   }
 

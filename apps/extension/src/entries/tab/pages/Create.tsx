@@ -72,7 +72,7 @@ const CreateAccountStep = ({ onNext }: { onNext: () => void }) => {
     }
 
     try {
-      await wallet.createAccount(selectedChain.chainId, true);
+      await wallet.createAccount(selectedChain.chainId);
 
       onNext();
     } catch (error) {

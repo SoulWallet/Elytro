@@ -44,7 +44,7 @@ export default function CreateNewAddress() {
     }
     try {
       setIsLoading(true);
-      await wallet.createAccount(selectedChain.chainId, true);
+      await wallet.createAccount(selectedChain.chainId);
       await handleAfterCreating();
       setTimeout(() => {
         navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);

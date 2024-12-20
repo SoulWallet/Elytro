@@ -7,6 +7,7 @@ import useTokens, { TokenDTO } from '@/hooks/use-tokens';
 import { UserOperationHistory } from '@/constants/operations';
 import RuntimeMessage from '@/utils/message/runtimeMessage';
 import { EVENT_TYPES } from '@/constants/events';
+import { removeSearchParamsOfCurrentWindow } from '@/utils/url';
 
 const DEFAULT_ACCOUNT_INFO: TAccountInfo = {
   address: '',
@@ -73,8 +74,8 @@ export const AccountProvider = ({
       setAccountInfo(res);
 
       if (intervalRef.current && res.isDeployed) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+        removeSearchParamsOfCurrentWindow('activating');
+        removeInterval();
       }
     } catch (error) {
       console.error(error);
@@ -117,6 +118,13 @@ export const AccountProvider = ({
     }
   }, [pathname]);
 
+  const removeInterval = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
   useEffect(() => {
     if (searchParams.activating) {
       intervalRef.current = setInterval(() => {
@@ -124,11 +132,7 @@ export const AccountProvider = ({
       }, 1000);
     }
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
+    return removeInterval;
   }, [searchParams]);
 
   const getAccounts = async () => {

@@ -126,14 +126,15 @@ class WalletController {
     return res;
   }
 
-  private _onChainConfigChanged() {
+  private async _onChainConfigChanged() {
     const chainConfig = chainService.currentChain;
 
     if (!chainConfig) {
       throw new Error('Elytro: No current chain config');
     }
 
-    elytroSDK.resetSDK(chainConfig);
+    elytroSDK.resetSDK(chainConfig.chainId);
+
     walletClient.init(chainConfig);
 
     sessionManager.broadcastMessage('chainChanged', toHex(chainConfig.chainId));
@@ -191,16 +192,13 @@ class WalletController {
     return { ...basicInfo, balance: formatEther(balanceBn) };
   }
 
-  public async createAccount(chainId: number, setAsCurrent = false) {
+  public async createAccount(chainId: number) {
     if (!keyring.owner?.address) {
       throw new Error('Elytro: No owner address. Try create owner first.');
     }
 
-    await accountManager.createAccount(keyring.owner.address, chainId);
-
-    if (setAsCurrent) {
-      this.switchAccountByChain(chainId);
-    }
+    this._switchChain(chainId);
+    accountManager.createAccountAsCurrent(keyring.owner.address, chainId);
   }
 
   private async _switchChain(chainId: number) {
