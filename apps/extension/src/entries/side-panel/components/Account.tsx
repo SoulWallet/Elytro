@@ -156,14 +156,12 @@ export default function Account({
                   {chainName}{' '}
                   {account.address === currentAccount?.address && '(Current)'}
                 </DropdownMenuLabel>
-                <div onClick={() => handleClickItem(account)}>
-                  <AccountItem
-                    isDeployed={account.isDeployed}
-                    address={account.address}
-                    balance={account.balance || '0'}
-                    onDelete={onDeleteAccount}
-                  />
-                </div>
+                <AccountItem
+                  isDeployed={account.isDeployed}
+                  address={account.address}
+                  balance={account.balance || '0'}
+                  onDelete={onDeleteAccount}
+                />
               </div>
             );
           })}

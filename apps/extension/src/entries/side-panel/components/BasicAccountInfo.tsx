@@ -83,6 +83,7 @@ export default function BasicAccountInfo() {
       {/* Chain & Address */}
       <div className="flex flex-row gap-2 w-full items-center justify-between mb-lg">
         <Account
+          key={accountInfo.chainId}
           chains={chains}
           chain={currentChain}
           currentAccount={accountInfo}

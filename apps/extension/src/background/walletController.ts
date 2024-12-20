@@ -118,12 +118,14 @@ class WalletController {
   }
 
   public getLatestHistories() {
-    const res = historyManager.histories.map((item) => ({
+    if (!historyManager.isInitialized) {
+      historyManager.switchAccount(accountManager.currentAccount);
+    }
+
+    return historyManager.histories.map((item) => ({
       ...item.data,
       status: item.status,
     }));
-
-    return res;
   }
 
   private async _onChainConfigChanged() {
@@ -215,8 +217,8 @@ class WalletController {
 
   public async switchAccountByChain(chainId: number) {
     this._switchChain(chainId);
-    accountManager.switchAccountByChainId(chainId);
 
+    accountManager.switchAccountByChainId(chainId);
     historyManager.switchAccount(accountManager.currentAccount);
 
     sessionManager.broadcastMessage('accountsChanged', [

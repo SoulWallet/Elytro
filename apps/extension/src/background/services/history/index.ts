@@ -21,10 +21,27 @@ class HistoryManager {
     this._historyQueue = new UniqueQueue<HistoryItem>();
     this._store = new SubscribableStore({} as HistoryState);
     this._initialize();
+
+    eventBus.on('historyItemStatusUpdated', (opHash, status) => {
+      const historyItem = this.find(opHash);
+      if (historyItem) {
+        this._store.setState({
+          ...this._store.state,
+          [opHash]: {
+            ...this._store.state[opHash],
+            status,
+          },
+        });
+      }
+    });
   }
 
   private get _storageKey() {
     return `${HISTORY_STORAGE_KEY}-${this._currentAccount?.chainId}-${this._currentAccount?.address}`;
+  }
+
+  get isInitialized() {
+    return !!this._currentAccount;
   }
 
   get histories() {
@@ -57,15 +74,20 @@ class HistoryManager {
         this._historyQueue.enqueue(new HistoryItem(data));
       });
     }
-
-    eventBus.emit(EVENT_TYPES.HISTORY.ITEMS_UPDATED);
   };
 
   public switchAccount(account: TAccountInfo | null) {
+    if (
+      account?.address &&
+      account?.address === this._currentAccount?.address
+    ) {
+      return;
+    }
+
     this._currentAccount = account;
     this._store.resetState();
-
     this._historyQueue.clear();
+
     this._initialize();
   }
 

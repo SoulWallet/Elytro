@@ -54,6 +54,7 @@ class AccountManager {
     const { [ACCOUNTS_STORAGE_KEY]: prevState } = await localStorage.get([
       ACCOUNTS_STORAGE_KEY,
     ]);
+
     if (prevState) {
       this._store.setState(JSON.parse(prevState as string));
     }

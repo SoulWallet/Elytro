@@ -5,7 +5,7 @@ import {
 import { elytroSDK } from '../sdk';
 import eventBus from '@/utils/eventBus';
 
-const FETCH_INTERVAL = 1000;
+const FETCH_INTERVAL = 1_000;
 
 const STATUS_MAP = {
   '0x1': UserOperationStatusEn.confirmedSuccess,
@@ -52,11 +52,10 @@ class HistoryItem {
     }
 
     this._status = status;
-    this._broadcastToUI();
+    this._broadcastStatusChange();
   }
 
-  private _broadcastToUI() {
-    // todo: test broadcast to ui
+  private _broadcastStatusChange() {
     eventBus.emit('historyItemStatusUpdated', this._data.opHash, this.status);
   }
 

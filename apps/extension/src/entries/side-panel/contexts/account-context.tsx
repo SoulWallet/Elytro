@@ -72,6 +72,7 @@ export const AccountProvider = ({
 
       const res = (await wallet.getCurrentAccount()) ?? DEFAULT_ACCOUNT_INFO;
       setAccountInfo(res);
+      updateHistory();
 
       if (intervalRef.current && res.isDeployed) {
         removeSearchParamsOfCurrentWindow('activating');
