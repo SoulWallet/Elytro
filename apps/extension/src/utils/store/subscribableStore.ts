@@ -15,6 +15,11 @@ export class SubscribableStore<T> {
     this._notifySubscribers();
   }
 
+  public resetState() {
+    this._subscribers.clear();
+    this._state = {} as T;
+  }
+
   private _notifySubscribers(): void {
     this._subscribers.forEach((subscriber) => subscriber(this._state));
   }

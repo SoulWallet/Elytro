@@ -95,6 +95,7 @@ export const AccountProvider = ({
   // TODO: check this logic
   const updateHistory = async () => {
     const res = await wallet.getLatestHistories();
+
     setHistory(res);
   };
 
@@ -104,6 +105,10 @@ export const AccountProvider = ({
     }
 
     RuntimeMessage.onMessage(EVENT_TYPES.HISTORY.ITEMS_UPDATED, updateHistory);
+
+    return () => {
+      RuntimeMessage.offMessage(updateHistory);
+    };
   }, []);
 
   useEffect(() => {

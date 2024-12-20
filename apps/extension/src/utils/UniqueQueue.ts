@@ -79,6 +79,14 @@ class UniqueQueue<T> {
   find(fn: (item: T) => boolean): T | undefined {
     return this._itemsInOrder.find(fn);
   }
+
+  /**
+   * Clear the queue.
+   */
+  clear() {
+    this._items.clear();
+    this._itemsInOrder = [];
+  }
 }
 
 export default UniqueQueue;

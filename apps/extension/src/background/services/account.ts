@@ -65,11 +65,7 @@ class AccountManager {
     );
   }
 
-  public async createAccount(
-    eoaAddress: string,
-    chainId: number,
-    setAsCurrent = false
-  ) {
+  public async createAccount(eoaAddress: string, chainId: number) {
     const account = this.getAccountByChainId(chainId);
 
     if (account) {
@@ -95,10 +91,6 @@ class AccountManager {
 
       // ! push method will not trigger state update, so we need to reset the array
       this._accounts = [...this._accounts, newAccount];
-
-      if (setAsCurrent) {
-        this._currentAccount = newAccount;
-      }
     } catch (error) {
       console.error(error);
     }

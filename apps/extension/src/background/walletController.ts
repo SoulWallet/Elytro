@@ -136,9 +136,6 @@ class WalletController {
     elytroSDK.resetSDK(chainConfig);
     walletClient.init(chainConfig);
 
-    sessionManager.broadcastMessage('accountsChanged', [
-      accountManager.currentAccount?.address as string,
-    ]);
     sessionManager.broadcastMessage('chainChanged', toHex(chainConfig.chainId));
   }
 
@@ -199,18 +196,14 @@ class WalletController {
       throw new Error('Elytro: No owner address. Try create owner first.');
     }
 
-    if (setAsCurrent) {
-      this.switchChain(chainId);
-    }
+    await accountManager.createAccount(keyring.owner.address, chainId);
 
-    await accountManager.createAccount(
-      keyring.owner.address,
-      chainId,
-      setAsCurrent
-    );
+    if (setAsCurrent) {
+      this.switchAccountByChain(chainId);
+    }
   }
 
-  public async switchChain(chainId: number) {
+  private async _switchChain(chainId: number) {
     if (chainId === chainService.currentChain?.chainId) {
       return;
     }
@@ -223,8 +216,14 @@ class WalletController {
   }
 
   public async switchAccountByChain(chainId: number) {
-    this.switchChain(chainId);
+    this._switchChain(chainId);
     accountManager.switchAccountByChainId(chainId);
+
+    historyManager.switchAccount(accountManager.currentAccount);
+
+    sessionManager.broadcastMessage('accountsChanged', [
+      accountManager.currentAccount?.address as string,
+    ]);
   }
 
   public async createDeployUserOp() {

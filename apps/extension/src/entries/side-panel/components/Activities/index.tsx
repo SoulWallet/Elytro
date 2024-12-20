@@ -86,11 +86,7 @@ const History = ({
 };
 
 export default function Activities() {
-  const { history, updateHistory } = useAccount();
-
-  useEffect(() => {
-    updateHistory();
-  }, []);
+  const { history } = useAccount();
 
   if (!history.length)
     return (
@@ -101,11 +97,9 @@ export default function Activities() {
 
   return (
     <div className="flex-1 overflow-auto px-4">
-      {/* {activities.map((item) => (
-        <DailyActivities key={item.date} dailyActivities={item} />
-      ))} */}
+      {/* TODO: now the history may be duplicated, need to fix it. use random key to avoid it. change the key to opHash after fix it. */}
       {history.map((item) => (
-        <History {...item} key={item.opHash} />
+        <History key={Math.random()} {...item} />
       ))}
     </div>
   );

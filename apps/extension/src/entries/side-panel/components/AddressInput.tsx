@@ -8,6 +8,7 @@ import ENSInfoComponent, { EnsAddress } from './ENSInfo';
 import { useWallet } from '@/contexts/wallet';
 import Spin from '@/components/Spin';
 import dayjs from 'dayjs';
+import { localStorage } from '@/utils/storage/local';
 
 const ELYTRO_RECENT_ADDRESS_STORE = 'ELYTRO_RECENT_ADDRESS_STORE';
 
@@ -129,15 +130,18 @@ export default function AddressInput({
     const isExist = recentAddress && recentAddress[data.address];
     if (!isExist) {
       const storedAddress = { ...recentAddress, [data.address]: data };
-      localStorage.setItem(
-        ELYTRO_RECENT_ADDRESS_STORE,
-        JSON.stringify(storedAddress)
-      );
+
+      localStorage.save({
+        [ELYTRO_RECENT_ADDRESS_STORE]: JSON.stringify(storedAddress),
+      });
     }
   };
 
-  const getRecentAddressStore = () => {
-    const addressStr = localStorage.getItem(ELYTRO_RECENT_ADDRESS_STORE);
+  const getRecentAddressStore = async () => {
+    const { [ELYTRO_RECENT_ADDRESS_STORE]: addressStr } =
+      (await localStorage.get([ELYTRO_RECENT_ADDRESS_STORE])) as {
+        [ELYTRO_RECENT_ADDRESS_STORE]: string;
+      };
     if (addressStr) {
       setRecentAddress(JSON.parse(addressStr));
     }
