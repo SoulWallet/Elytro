@@ -3,7 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { SUPPORTED_CHAIN_ICON_MAP } from '@/constants/chains';
+import { SUPPORTED_CHAINS } from '@/constants/chains';
 import { cn } from '@/utils/shadcn/utils';
 import { isAddress } from 'viem';
 
@@ -40,16 +40,11 @@ export default function FragmentedAddress({
   const prefix = address.slice(0, 6);
   const suffix = address.slice(-6);
   const { icon, text } = SIZE_MAP[size];
+  const chain = SUPPORTED_CHAINS.find((chain) => chain.id === chainId);
 
   return (
     <div className={cn('flex items-center gap-sm', className)}>
-      {chainId && (
-        <img
-          src={SUPPORTED_CHAIN_ICON_MAP[chainId]}
-          alt={chainId.toString()}
-          className={icon}
-        />
-      )}
+      {chain && <img src={chain.icon} alt={chain.name} className={icon} />}
       <div className={cn('flex items-center gap-sm', text)}>
         <span>{prefix}</span>
         <Tooltip>

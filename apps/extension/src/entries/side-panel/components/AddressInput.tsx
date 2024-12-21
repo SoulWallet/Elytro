@@ -110,7 +110,7 @@ export default function AddressInput({
         <div className="absolute bg-white">
           <FragmentedAddress
             address={displayLabel}
-            id={currentChain?.id as number}
+            chainId={currentChain?.id}
             size="md"
           />
         </div>
@@ -196,7 +196,7 @@ export default function AddressInput({
                       <FragmentedAddress
                         size="md"
                         address={item.address}
-                        id={currentChain?.id as number}
+                        chainId={currentChain?.id}
                       />
                     );
                   }

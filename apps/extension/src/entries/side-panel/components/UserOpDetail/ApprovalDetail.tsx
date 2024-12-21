@@ -38,7 +38,12 @@ export default function ActivationDetail({
 
             <InfoCardItem
               label="Contract"
-              content={<FragmentedAddress address={decodedUserOp?.to} />}
+              content={
+                <FragmentedAddress
+                  address={decodedUserOp?.to}
+                  chainId={decodedUserOp?.toInfo?.chainId}
+                />
+              }
             />
 
             <InfoCardItem
