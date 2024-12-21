@@ -11,7 +11,6 @@ import ActivateButton from './ActivateButton';
 import SendModal from './SendModal';
 import { useState } from 'react';
 import SettingModal from './SettingModal';
-import AccountsModal from './AccountsModal';
 import Account from './Account';
 import { useAccount } from '../contexts/account-context';
 import { useChain } from '../contexts/chain-context';
@@ -26,7 +25,6 @@ export default function BasicAccountInfo() {
   const { currentChain, chains, getCurrentChain } = useChain();
   const [openSendModal, setOpenSendModal] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
-  const [openAccounts, setOpenAccounts] = useState(false);
   const onClickMore = () => {
     setOpenSetting(true);
   };
@@ -137,10 +135,6 @@ export default function BasicAccountInfo() {
       <SettingModal
         open={openSetting}
         onOpenChange={() => setOpenSetting(false)}
-      />
-      <AccountsModal
-        open={openAccounts}
-        onOpenChange={() => setOpenAccounts(false)}
       />
     </div>
   );

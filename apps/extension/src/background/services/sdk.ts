@@ -1,16 +1,11 @@
-import { SUPPORTED_CHAIN_IDS } from '@/constants/chains';
+import { SUPPORTED_CHAIN_IDS, TChainItem } from '@/constants/chains';
 import {
   getDomainSeparator,
   getEncoded1271MessageHash,
   getEncodedSHA,
-  SDK_INIT_CONFIG_BY_CHAIN_MAP,
-  SDKInitConfig,
-} from '@/constants/sdk-config';
-import {
   DEFAULT_GUARDIAN_HASH,
   DEFAULT_GUARDIAN_SAFE_PERIOD,
-  TEMP_ENTRY_POINT,
-} from '@/constants/temp';
+} from '@/constants/sdk-config';
 import { formatHex, getHexString, paddingZero } from '@/utils/format';
 import { Bundler, SignkeyType, SoulWallet, Transaction } from '@soulwallet/sdk';
 import { DecodeUserOp } from '@soulwallet/decoder';
@@ -32,31 +27,27 @@ import { ethErrors } from 'eth-rpc-errors';
 class ElytroSDK {
   private _sdk!: SoulWallet;
   private _bundler!: Bundler;
-  private _config!: SDKInitConfig;
+  private _config!: TChainItem;
   private _pimlicoRpc: Nullable<PublicClient> = null;
 
   get bundler() {
     return this._bundler;
   }
 
-  public resetSDK(chainId: number) {
-    if (chainId === this._config?.onchainConfig?.chainId) {
+  public resetSDK(chainConfig: TChainItem) {
+    if (chainConfig.id === this._config?.id) {
       console.log('Elytro::SDK: chainId is the same, no need to reset.');
       return;
     }
 
-    if (!SUPPORTED_CHAIN_IDS.includes(chainId)) {
-      throw new Error(`Elytro: chain ${chainId} is not supported for now.`);
-    }
-
-    const config = SDK_INIT_CONFIG_BY_CHAIN_MAP[chainId];
-
-    if (!config) {
-      throw new Error(`Elytro: chain ${chainId} is not supported for now.`);
+    if (!SUPPORTED_CHAIN_IDS.includes(chainConfig.id)) {
+      throw new Error(
+        `Elytro: chain ${chainConfig.id} is not supported for now.`
+      );
     }
 
     const { factory, fallback, recovery, onchainConfig, bundler, endpoint } =
-      config;
+      chainConfig;
     this._sdk = new SoulWallet(
       endpoint,
       bundler,
@@ -67,7 +58,7 @@ class ElytroSDK {
     );
 
     this._bundler = new Bundler(bundler);
-    this._config = config;
+    this._config = chainConfig;
   }
 
   // TODO: temp, make sure it's unique later.
@@ -265,10 +256,9 @@ class ElytroSDK {
       return null;
     }
 
-    // todo: entrypoint should be dynamically changed with chainId?
     const res = await DecodeUserOp(
-      this._config.onchainConfig.chainId,
-      TEMP_ENTRY_POINT,
+      this._config.id,
+      this._config.onchainConfig.entryPoint,
       userOp
     );
 
@@ -282,8 +272,8 @@ class ElytroSDK {
   public async simulateUserOperation(userOp: ElytroUserOperation) {
     return await simulateSendUserOp(
       userOp,
-      TEMP_ENTRY_POINT,
-      this._config.onchainConfig.chainId
+      this._config.onchainConfig.entryPoint,
+      this._config.id
     );
   }
 
@@ -431,7 +421,7 @@ class ElytroSDK {
 
     const encode1271MessageHash = getEncoded1271MessageHash(rawMessage);
     const domainSeparator = getDomainSeparator(
-      toHex(this._config.onchainConfig.chainId),
+      toHex(this._config.id),
       saAddress
     );
     const encodedSHA = getEncodedSHA(domainSeparator, encode1271MessageHash);

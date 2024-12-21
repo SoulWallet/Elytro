@@ -194,7 +194,7 @@ export default function SendTx() {
             </div>
             <FragmentedAddress
               address={address}
-              chainId={currentChain?.chainId || 1}
+              chainId={currentChain?.id || 1}
             />
           </div>
           <div className="flex justify-between items-center">

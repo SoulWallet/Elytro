@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useWallet } from '@/contexts/wallet';
-import { TChainConfigItem } from '@/constants/chains';
+import { TChainItem } from '@/constants/chains';
 import { toast } from '@/hooks/use-toast';
 
 type IChainContext = {
-  chains: TChainConfigItem[];
-  currentChain: TChainConfigItem | null;
+  chains: TChainItem[];
+  currentChain: TChainItem | null;
   getCurrentChain: () => Promise<void>;
   getChains: () => Promise<void>;
 };
@@ -19,10 +19,8 @@ const ChainContext = createContext<IChainContext>({
 
 export const ChainProvider = ({ children }: { children: React.ReactNode }) => {
   const wallet = useWallet();
-  const [chains, setChains] = useState<TChainConfigItem[]>([]);
-  const [currentChain, setCurrentChain] = useState<TChainConfigItem | null>(
-    null
-  );
+  const [chains, setChains] = useState<TChainItem[]>([]);
+  const [currentChain, setCurrentChain] = useState<TChainItem | null>(null);
 
   const getChains = async () => {
     try {

@@ -15,16 +15,15 @@ import { UserOperationHistory } from '@/constants/operations';
 import { formatEther, Hex, toHex } from 'viem';
 import chainService from './services/chain';
 import accountManager from './services/account';
-import { TChainConfigItem } from '@/constants/chains';
 import type { Transaction } from '@soulwallet/sdk';
+import { TChainItem } from '@/constants/chains';
 
 // ! DO NOT use getter. They can not be proxied.
 // ! Please declare all methods async.
 class WalletController {
-  constructor() {
-    // walletClient.init();
-  }
-
+  /**
+   * Create a new owner for the wallet
+   */
   public async createNewOwner(password: string) {
     return await keyring.createNewOwner(password);
   }
@@ -34,14 +33,10 @@ class WalletController {
    */
   public async getLockStatus() {
     await keyring.tryUnlock();
-
-    // TODO: account restore
-
     return keyring.locked;
   }
 
   public async lock() {
-    // TODO: account reset?
     return await keyring.lock();
   }
 
@@ -135,11 +130,10 @@ class WalletController {
       throw new Error('Elytro: No current chain config');
     }
 
-    elytroSDK.resetSDK(chainConfig.chainId);
-
+    elytroSDK.resetSDK(chainConfig);
     walletClient.init(chainConfig);
 
-    sessionManager.broadcastMessage('chainChanged', toHex(chainConfig.chainId));
+    sessionManager.broadcastMessage('chainChanged', toHex(chainConfig.id));
   }
 
   public async getCurrentChain() {
@@ -150,18 +144,15 @@ class WalletController {
     return chainService.chains;
   }
 
-  public async updateChainConfig(
-    chainId: number,
-    config: Partial<TChainConfigItem>
-  ) {
+  public async updateChainConfig(chainId: number, config: Partial<TChainItem>) {
     chainService.updateChain(chainId, config);
 
-    if (chainId === chainService.currentChain?.chainId) {
+    if (chainId === chainService.currentChain?.id) {
       this._onChainConfigChanged();
     }
   }
 
-  public async addChain(chain: TChainConfigItem) {
+  public async addChain(chain: TChainItem) {
     chainService.addChain(chain);
   }
 
@@ -204,7 +195,7 @@ class WalletController {
   }
 
   private async _switchChain(chainId: number) {
-    if (chainId === chainService.currentChain?.chainId) {
+    if (chainId === chainService.currentChain?.id) {
       return;
     }
 

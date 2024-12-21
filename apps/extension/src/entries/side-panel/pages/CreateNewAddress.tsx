@@ -3,7 +3,7 @@ import { useChain } from '../contexts/chain-context';
 import SecondaryPageWrapper from '../components/SecondaryPageWrapper';
 import { useState } from 'react';
 import ChainItem from '@/components/ChainItem';
-import { TChainConfigItem } from '@/constants/chains';
+import { TChainItem } from '@/constants/chains';
 import { toast } from '@/hooks/use-toast';
 import PackingTip from '../components/PackingTip';
 import { useWallet } from '@/contexts/wallet';
@@ -16,13 +16,10 @@ export default function CreateNewAddress() {
   const { getAccounts, updateAccount, updateTokens } = useAccount();
   const wallet = useWallet();
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedChain, setSelectedChain] = useState<TChainConfigItem | null>(
-    null
-  );
+  const [selectedChain, setSelectedChain] = useState<TChainItem | null>(null);
   const handleChange = (value: string) => {
     setSelectedChain(
-      () =>
-        chains.find((chain) => chain.chainId.toString() === value) || chains[0]
+      () => chains.find((chain) => chain.id.toString() === value) || chains[0]
     );
   };
 
@@ -35,7 +32,7 @@ export default function CreateNewAddress() {
 
   const handleCreate = async () => {
     if (!selectedChain) return;
-    if (currentChain?.chainId === selectedChain.chainId) {
+    if (currentChain?.id === selectedChain.id) {
       toast({
         title: 'Create address failed',
         description: 'You are already on this network',
@@ -44,7 +41,7 @@ export default function CreateNewAddress() {
     }
     try {
       setIsLoading(true);
-      await wallet.createAccount(selectedChain.chainId);
+      await wallet.createAccount(selectedChain.id);
       await handleAfterCreating();
       setTimeout(() => {
         navigateTo('side-panel', SIDE_PANEL_ROUTE_PATHS.Dashboard);
@@ -88,10 +85,10 @@ export default function CreateNewAddress() {
             {chains.map((chain) => {
               return (
                 <ChainItem
-                  isSelected={selectedChain?.chainId === chain.chainId}
-                  key={chain.chainId}
+                  isSelected={selectedChain?.id === chain.id}
+                  key={chain.id}
                   chain={chain}
-                  onClick={() => handleChange(chain.chainId.toString())}
+                  onClick={() => handleChange(chain.id.toString())}
                 />
               );
             })}

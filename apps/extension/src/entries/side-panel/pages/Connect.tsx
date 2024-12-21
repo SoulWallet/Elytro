@@ -20,7 +20,7 @@ export default function Connect() {
 
   const handleConnect = async () => {
     try {
-      await wallet.connectWallet(dApp, currentChain?.chainId || 1);
+      await wallet.connectWallet(dApp, currentChain?.id || 1);
       resolve();
     } catch (error) {
       reject(error as Error);

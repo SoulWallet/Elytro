@@ -40,7 +40,7 @@ export default function TxConfirm() {
         <UserOpDetail
           opType={opType}
           calcResult={calcResult}
-          chainId={currentChain!.chainId}
+          chainId={currentChain!.id}
           decodedUserOp={decodedDetail}
           session={approval?.data?.dApp}
           from={userOp?.sender}

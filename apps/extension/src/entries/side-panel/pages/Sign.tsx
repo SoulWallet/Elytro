@@ -44,7 +44,7 @@ export default function Sign() {
           onConfirm={handleConfirm}
           onCancel={handleCancel}
           dapp={approval.data.dApp}
-          chainName={currentChain?.chainName as string}
+          chainName={currentChain?.name as string}
           signData={approval.data.sign}
         />
 

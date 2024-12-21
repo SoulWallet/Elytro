@@ -30,7 +30,7 @@ export default function SendTxModal() {
         <SendTxComponent
           txParams={txDetail}
           dapp={dapp}
-          chainName={currentChain?.chainName as string}
+          chainName={currentChain?.name as string}
           onConfirm={handleConfirm}
           onCancel={closeSendTxDialog}
         />

@@ -46,16 +46,14 @@ export default function Receive() {
         <div className="flex flex-row items-center justify-between w-full">
           <div className="flex flex-row items-center gap-2  ">
             <img
-              src={SUPPORTED_CHAIN_ICON_MAP[currentChain?.chainId]}
-              alt={currentChain?.chainName}
+              src={SUPPORTED_CHAIN_ICON_MAP[currentChain?.id]}
+              alt={currentChain?.name}
               className="size-8 rounded-full border border-gray-50"
             />
             <div className="flex flex-col">
-              <div className="elytro-text-bold-body">
-                {currentChain?.chainName}
-              </div>
+              <div className="elytro-text-bold-body">{currentChain?.name}</div>
               <div className="elytro-text-tiny-body text-gray-600">
-                This address only accepts {currentChain?.chainName} assets.
+                This address only accepts {currentChain?.name} assets.
               </div>
             </div>
           </div>
@@ -66,10 +64,7 @@ export default function Receive() {
           />
         </div>
 
-        <ReceiveAddressBadge
-          address={address!}
-          chainId={currentChain.chainId}
-        />
+        <ReceiveAddressBadge address={address!} chainId={currentChain.id} />
 
         <div className="flex flex-row items-center gap-2 w-full text-left">
           <CircleAlert className="elytro-clickable-icon size-3" />

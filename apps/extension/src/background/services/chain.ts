@@ -1,10 +1,10 @@
-import { DEFAULT_LOCAL_CHAINS, TChainConfigItem } from '@/constants/chains';
+import { SUPPORTED_CHAINS, TChainItem } from '@/constants/chains';
 import { localStorage } from '@/utils/storage/local';
 import { SubscribableStore } from '@/utils/store/subscribableStore';
 
 type TChainsState = {
-  chains: TChainConfigItem[];
-  currentChain: TChainConfigItem | null;
+  chains: TChainItem[];
+  currentChain: TChainItem | null;
 };
 
 const CHAINS_STORAGE_KEY = 'elytroChains';
@@ -16,7 +16,7 @@ class ChainService {
     return this._store.state.chains;
   }
 
-  private set _chains(chains: TChainConfigItem[]) {
+  private set _chains(chains: TChainItem[]) {
     this._store.setState({
       chains,
     });
@@ -26,7 +26,7 @@ class ChainService {
     return this._store.state.currentChain;
   }
 
-  private set _currentChain(currentChain: TChainConfigItem | null) {
+  private set _currentChain(currentChain: TChainItem | null) {
     this._store.setState({
       currentChain,
     });
@@ -62,14 +62,14 @@ class ChainService {
 
     if (!parsedState.chains?.length) {
       // default to local chains config if no previously set chains are found
-      parsedState.chains = DEFAULT_LOCAL_CHAINS;
+      parsedState.chains = SUPPORTED_CHAINS;
     }
 
     this._store.setState(parsedState);
   }
 
-  public addChain(chain: TChainConfigItem) {
-    if (this._chains.find((n) => n.chainId === chain.chainId)) {
+  public addChain(chain: TChainItem) {
+    if (this._chains.find((n) => n.id === chain.id)) {
       throw new Error('Elytro::ChainService::addChain: chain already exists');
     }
 
@@ -77,7 +77,7 @@ class ChainService {
   }
 
   private _findChainById(chainId: number) {
-    const targetChain = this._chains.find((n) => n.chainId === chainId);
+    const targetChain = this._chains.find((n) => n.id === chainId);
 
     if (!targetChain) {
       throw new Error('Elytro::ChainService::_findChainById: chain not found');
@@ -86,22 +86,22 @@ class ChainService {
     return targetChain;
   }
 
-  public updateChain(chainId: number, config: Partial<TChainConfigItem>) {
+  public updateChain(chainId: number, config: Partial<TChainItem>) {
     const targetChain = this._findChainById(chainId);
     const updatedChain = { ...targetChain, ...config };
 
     // ! reset the array reference to trigger a fully updated state
     this._chains = this._chains.map((n) =>
-      n.chainId === chainId ? updatedChain : n
+      n.id === chainId ? updatedChain : n
     );
 
-    if (this._currentChain?.chainId === chainId) {
+    if (this._currentChain?.id === chainId) {
       this._currentChain = updatedChain;
     }
   }
 
   public switchChain(chainId: number) {
-    if (this._currentChain?.chainId === chainId) {
+    if (this._currentChain?.id === chainId) {
       console.log('Elytro::ChainService::switchChains: no need to switch');
       return;
     }
@@ -112,13 +112,13 @@ class ChainService {
   }
 
   public deleteChain(chainId: number) {
-    if (this._currentChain?.chainId === chainId) {
+    if (this._currentChain?.id === chainId) {
       throw new Error(
         'Elytro::ChainService::deleteChains: cannot delete current chain'
       );
     }
 
-    this._chains = this._chains.filter((n) => n.chainId !== chainId);
+    this._chains = this._chains.filter((n) => n.id !== chainId);
   }
 }
 

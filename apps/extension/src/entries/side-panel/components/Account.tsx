@@ -1,4 +1,4 @@
-import { SUPPORTED_CHAIN_ICON_MAP, TChainConfigItem } from '@/constants/chains';
+import { TChainItem } from '@/constants/chains';
 import { ChevronDown, Copy, Trash } from 'lucide-react';
 import { safeClipboard } from '@/utils/clipboard';
 import { MouseEventHandler, useState } from 'react';
@@ -80,8 +80,8 @@ export const AccountItem = ({
 interface IAccountProps {
   currentAccount: TAccountInfo;
   accounts: TAccountInfo[];
-  chain: TChainConfigItem;
-  chains: TChainConfigItem[];
+  chain: TChainItem;
+  chains: TChainItem[];
   onClickAccount?: (account: TAccountInfo) => void;
   onDeleteAccount?: (address: string) => void;
 }
@@ -109,10 +109,7 @@ export default function Account({
     <DropdownMenu open={open}>
       <DropdownMenuTrigger onClick={() => setOpen(true)}>
         <div className="flex flex-row gap-2 items-center bg-white rounded-sm p-xs cursor-pointer hover:bg-gray-200">
-          <img
-            className="w-5 h-5"
-            src={SUPPORTED_CHAIN_ICON_MAP[chain!.chainId]}
-          />
+          <img className="size-5" src={chain.icon} />
           <div className="font-light font-base">
             <SplittedGrayAddress address={currentAccount.address} />
           </div>
@@ -132,20 +129,21 @@ export default function Account({
         </div>
         <div>
           <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
-            {chain?.chainName} {currentAccount?.isDeployed && '(Current)'}
+            {chain?.name} {currentAccount?.isDeployed && '(Current)'}
           </DropdownMenuLabel>
           <AccountItem
             isDeployed={currentAccount?.isDeployed}
             isCurrent
             address={currentAccount?.address}
             balance={currentAccount?.balance || '0'}
+            chainIcon={chain?.icon}
           />
         </div>
         {accounts
           .filter((ac) => ac.address !== currentAccount?.address)
           .map((account: TAccountInfo) => {
-            const chainName =
-              chains.find((c) => c.chainId === account.chainId)?.chainName ||
+            const name =
+              chains.find((c) => c.id === account.chainId)?.name ||
               'Unknown Chian';
             return (
               <div
@@ -153,7 +151,7 @@ export default function Account({
                 onClick={() => handleClickItem(account)}
               >
                 <DropdownMenuLabel className="font-medium px-5 py-1 text-gray-600">
-                  {chainName}{' '}
+                  {name}{' '}
                   {account.address === currentAccount?.address && '(Current)'}
                 </DropdownMenuLabel>
                 <AccountItem
@@ -161,6 +159,7 @@ export default function Account({
                   address={account.address}
                   balance={account.balance || '0'}
                   onDelete={onDeleteAccount}
+                  chainIcon={chains.find((c) => c.id == account.chainId)?.icon}
                 />
               </div>
             );

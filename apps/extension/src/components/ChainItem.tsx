@@ -1,10 +1,10 @@
-import { TChainConfigItem } from '@/constants/chains';
+import { TChainItem } from '@/constants/chains';
 import { cn } from '@/utils/shadcn/utils';
 
 interface IChainItemProps {
-  chain: TChainConfigItem;
+  chain: TChainItem;
   onClick?: () => void;
-  isSelected?: boolean;
+  isSelected?: boolean; // TODO: remove this
 }
 
 export default function ChainItem({
@@ -25,8 +25,8 @@ export default function ChainItem({
         onClick && 'cursor-pointer'
       )}
     >
-      <img src={chain?.icon} alt={chain?.chainName} className="size-8" />
-      <div className="elytro-text-small-bold">{chain?.chainName}</div>
+      <img src={chain?.icon} alt={chain?.name} className="size-8" />
+      <div className="elytro-text-small-bold">{chain?.name}</div>
     </div>
   );
 }

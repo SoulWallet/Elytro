@@ -41,14 +41,13 @@ class BuiltinProvider extends SafeEventEmitter {
   private async _request({ method, params }: RequestArguments) {
     switch (method) {
       case 'net_version':
-        return chainService.currentChain?.chainId?.toString() ?? '0';
+        return chainService.currentChain?.id?.toString() ?? '0';
       case 'eth_chainId':
-        return toHex(chainService.currentChain?.chainId ?? 0);
+        return toHex(chainService.currentChain?.id ?? 0);
       case 'eth_blockNumber':
         return await walletClient.getBlockNumber();
       case 'eth_accounts':
       case 'eth_requestAccounts':
-        // TODO: 替换为 account manager
         return accountManager.currentAccount?.address
           ? [accountManager.currentAccount?.address]
           : [];
@@ -79,7 +78,7 @@ class BuiltinProvider extends SafeEventEmitter {
   }
 
   public async request({ method, params }: RequestArguments) {
-    const chainId = chainService.currentChain?.chainId ?? 0;
+    const chainId = chainService.currentChain?.id ?? 0;
     const address = accountManager.currentAccount?.address ?? '0x';
 
     const cacheResult = rpcCacheManager.get(chainId, address, {

@@ -69,7 +69,7 @@ export default function ReviewStep({ onConfirm }: { onConfirm: () => void }) {
       <div className="space-y-2">
         <Label className="text-gray-400 font-normal">Network</Label>
         <div className="flex flex-row items-center font-medium text-lg space-x-2">
-          <div>{currentChain?.chainName}</div>
+          <div>{currentChain?.name}</div>
           <Tooltip>
             <TooltipTrigger>
               <img src={questionIcon} alt="question icon" />

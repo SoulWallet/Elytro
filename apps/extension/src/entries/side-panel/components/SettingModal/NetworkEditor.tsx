@@ -12,13 +12,13 @@ import {
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import TickCircle from '@/assets/icons/tickCircle.svg';
-import { TChainConfigItem } from '@/constants/chains';
+import { TChainItem } from '@/constants/chains';
 
 export default function NetworkEditor({
   network,
   onCancel,
 }: {
-  network: TChainConfigItem;
+  network: TChainItem;
   onCancel: () => void;
 }) {
   const { toast } = useToast();
@@ -38,7 +38,7 @@ export default function NetworkEditor({
       description: (
         <div className="flex">
           <img className="mr-2" src={TickCircle} />
-          {network.chainName} Network updated
+          {network.name} Network updated
         </div>
       ),
       className: 'bg-green-900 border-none text-green-50 text-2xl py-8',
@@ -54,7 +54,7 @@ export default function NetworkEditor({
           <Input
             className="text-lg"
             placeholder="Input address"
-            value={network.chainId}
+            value={network.id}
             disabled
           />
         </div>
@@ -65,7 +65,7 @@ export default function NetworkEditor({
           <Input
             className="text-lg"
             placeholder="Input address"
-            value={network.rpcUrl}
+            value={network.rpcUrls.default.http[0]}
           />
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function NetworkEditor({
           <Input
             className="text-lg"
             placeholder="Input address"
-            value={network.currencySymbol.symbol}
+            value={network.nativeCurrency.symbol}
             disabled
           />
         </div>

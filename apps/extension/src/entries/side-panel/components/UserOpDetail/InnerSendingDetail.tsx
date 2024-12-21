@@ -24,7 +24,7 @@ export default function InnerSendingDetail({
 
       <FragmentedAddress
         address={decodedUserOp?.to}
-        chainId={decodedUserOp?.toInfo?.chainId}
+        chainId={decodedUserOp?.toInfo?.id}
         className="bg-gray-150 px-lg py-md rounded-md"
       />
     </>

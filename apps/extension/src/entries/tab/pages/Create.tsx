@@ -7,7 +7,7 @@ import { TAB_ROUTE_PATHS } from '../routes';
 import { useKeyring } from '@/contexts/keyring';
 import { SIDE_PANEL_ROUTE_PATHS } from '@/entries/side-panel/routes';
 import { useWallet } from '@/contexts/wallet';
-import { TChainConfigItem } from '@/constants/chains';
+import { TChainItem } from '@/constants/chains';
 import { ArrowLeft } from 'lucide-react';
 import { useChain } from '@/entries/side-panel/contexts/chain-context';
 import ChainItem from '@/components/ChainItem';
@@ -54,9 +54,7 @@ const PasswordStep = ({ onNext }: { onNext: () => void }) => {
 const CreateAccountStep = ({ onNext }: { onNext: () => void }) => {
   const { chains, getChains } = useChain();
   const wallet = useWallet();
-  const [selectedChain, setSelectedChain] = useState<TChainConfigItem | null>(
-    null
-  );
+  const [selectedChain, setSelectedChain] = useState<TChainItem | null>(null);
 
   useEffect(() => {
     getChains();
@@ -72,7 +70,7 @@ const CreateAccountStep = ({ onNext }: { onNext: () => void }) => {
     }
 
     try {
-      await wallet.createAccount(selectedChain.chainId);
+      await wallet.createAccount(selectedChain.id);
 
       onNext();
     } catch (error) {
@@ -83,7 +81,7 @@ const CreateAccountStep = ({ onNext }: { onNext: () => void }) => {
     }
   };
 
-  const handleSelectChain = (chain: TChainConfigItem) => {
+  const handleSelectChain = (chain: TChainItem) => {
     setSelectedChain(chain);
   };
 
@@ -92,9 +90,9 @@ const CreateAccountStep = ({ onNext }: { onNext: () => void }) => {
       <div className="grid grid-cols-2 gap-lg">
         {chains.map((chain) => (
           <ChainItem
-            key={chain.chainId}
+            key={chain.id}
             chain={chain}
-            isSelected={selectedChain?.chainId === chain.chainId}
+            isSelected={selectedChain?.id === chain.id}
             onClick={() => handleSelectChain(chain)}
           />
         ))}

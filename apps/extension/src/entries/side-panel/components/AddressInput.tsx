@@ -1,4 +1,4 @@
-import { TChainConfigItem } from '@/constants/chains';
+import { TChainItem } from '@/constants/chains';
 import { Input } from '@/components/ui/input';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
@@ -17,7 +17,7 @@ export default function AddressInput({
   currentChain,
 }: PropsWithChildren<{
   field: FieldValues;
-  currentChain: TChainConfigItem | null;
+  currentChain: TChainItem | null;
 }>) {
   const wallet = useWallet();
   const [displayLabel, setDisplayLabel] = useState<string>('');
@@ -110,7 +110,7 @@ export default function AddressInput({
         <div className="absolute bg-white">
           <FragmentedAddress
             address={displayLabel}
-            chainId={currentChain?.chainId as number}
+            id={currentChain?.id as number}
             size="md"
           />
         </div>
@@ -196,7 +196,7 @@ export default function AddressInput({
                       <FragmentedAddress
                         size="md"
                         address={item.address}
-                        chainId={currentChain?.chainId as number}
+                        id={currentChain?.id as number}
                       />
                     );
                   }

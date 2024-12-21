@@ -1,4 +1,4 @@
-import { DEFAULT_CHAIN_CONFIG, TChainConfigItem } from '@/constants/chains';
+import { TChainItem } from '@/constants/chains';
 import {
   Address,
   BlockTag,
@@ -14,36 +14,48 @@ import { ethErrors } from 'eth-rpc-errors';
 import { formatBlockInfo, formatBlockParam } from '@/utils/format';
 import { normalize } from 'viem/ens';
 import { elytroSDK } from './sdk';
+import chainService from './chain';
 
 class ElytroWalletClient {
-  private _client!: PublicClient;
+  private _client: Nullable<PublicClient>;
 
-  constructor() {
-    // default to ETH Sepolia
-    this.init(DEFAULT_CHAIN_CONFIG);
+  get client() {
+    if (!this._client) {
+      // TODO: chainService should not be imported here. move this init to walletController or implemented by event
+      if (!chainService.currentChain) {
+        throw new Error('Elytro: Wallet client not initialized');
+      }
+      this.init(chainService.currentChain);
+    }
+
+    return this._client!;
   }
 
-  // TODO: check if it's safe to use rpc url instead of chain config.
-  public async init(chain: TChainConfigItem) {
-    if (chain.rpcUrl !== this._client?.transport?.url) {
+  set client(client: PublicClient) {
+    this._client = client;
+  }
+
+  public init(chain: TChainItem) {
+    if (chain.id && chain.id !== this._client?.chain?.id) {
       this._client = createPublicClient({
-        transport: http(chain.rpcUrl),
+        chain,
+        transport: http(chain.rpcUrls.default.http[0]), // if default is down, use endpoint as fallback
       });
     }
   }
 
   public async getBlockByNumber(params: GetBlockParameters) {
-    const res = await this._client.getBlock(params);
+    const res = await this.client.getBlock(params);
     return formatBlockInfo(res);
   }
 
   public async getBlockNumber() {
-    return toHex(await this._client.getBlockNumber());
+    return toHex(await this.client.getBlockNumber());
   }
 
   public async getCode(address: Address, block: BlockTag | bigint = 'latest') {
     try {
-      return await this._client.getCode({
+      return await this.client.getCode({
         address,
         ...formatBlockParam(block),
       });
@@ -55,12 +67,12 @@ class ElytroWalletClient {
   public async rpcRequest(method: ProviderMethodType, params: SafeAny) {
     // TODO: methods will be as same as viem's request method eventually
     // TODO: maybe change all 'from' to local account?
-    return await this._client.request({ method: method as SafeAny, params });
+    return await this.client.request({ method: method as SafeAny, params });
   }
 
   public async estimateGas(tx: SafeAny, block: BlockTag | bigint = 'latest') {
     return toHex(
-      await this._client.estimateGas({
+      await this.client.estimateGas({
         ...tx,
         ...formatBlockParam(block),
       })
@@ -68,25 +80,23 @@ class ElytroWalletClient {
   }
 
   public async readContract(param: ReadContractParameters) {
-    return await this._client.readContract(param);
+    return await this.client.readContract(param);
   }
 
   public async getTransaction(hash: Hex) {
-    return await this._client.getTransaction({ hash });
+    return await this.client.getTransaction({ hash });
   }
 
   public async getBalance(address: Address) {
-    return await this._client.getBalance({
+    return await this.client.getBalance({
       address,
     });
   }
 
   public async getENSAddressByName(name: string) {
     try {
-      const ensAddress = await this._client.getEnsAddress({
+      const ensAddress = await this.client.getEnsAddress({
         name: normalize(name),
-        universalResolverAddress:
-          DEFAULT_CHAIN_CONFIG.ensContractAddress as Address,
       });
       return ensAddress;
     } catch (error) {
@@ -95,11 +105,17 @@ class ElytroWalletClient {
   }
 
   public async getENSAvatarByName(name: string) {
+    const ensResolverAddress =
+      this?.client?.chain?.contracts?.ensUniversalResolver?.address;
+
+    if (!ensResolverAddress) {
+      throw new Error('Elytro: Chain does not support ENS');
+    }
+
     try {
-      const avatar = await this._client.getEnsAvatar({
+      const avatar = await this.client.getEnsAvatar({
         name: normalize(name),
-        universalResolverAddress:
-          DEFAULT_CHAIN_CONFIG.ensContractAddress as Address,
+        universalResolverAddress: ensResolverAddress,
       });
       return avatar;
     } catch (error) {

@@ -56,7 +56,12 @@ class AccountManager {
     ]);
 
     if (prevState) {
-      this._store.setState(JSON.parse(prevState as string));
+      const parsedState = JSON.parse(prevState as string);
+      if (!parsedState.currentAccount) {
+        parsedState.currentAccount = parsedState.accounts?.[0] ?? null;
+      }
+
+      this._store.setState(parsedState);
     }
   }
 
